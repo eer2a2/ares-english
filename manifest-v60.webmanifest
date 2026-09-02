@@ -1,0 +1,24 @@
+{
+  "name": "Erhan English — Ares Coach",
+  "short_name": "Erhan English",
+  "id": "/erhan-english-v60",
+  "start_url": "./index.html?v=60",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#EFEAE0",
+  "theme_color": "#1E2A38",
+  "icons": [
+    {
+      "src": "./erhan-english-v60-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./erhan-english-v60-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

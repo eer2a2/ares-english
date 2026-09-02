@@ -1,0 +1,219 @@
+﻿Ders,Tür,Eski İngilizce,Eski Türkçe,Yeni İngilizce,Yeni Türkçe
+1,sentence,I am student,ben öğrenciyim,I am a student,ben öğrenciyim
+1,sentence,You are student,sen öğrencisin,You are a student,sen öğrencisin
+1,sentence,Are you student?,sen öğrenci misin?,Are you a student?,sen öğrenci misin?
+1,sentence,My father is farmer,babam çiftçidir,My father is a farmer,babam çiftçidir
+1,sentence,Nurse is beautiful,hemşire güzeldir,The nurse is beautiful,hemşire güzeldir
+1,sentence,I am late,geciktim,I am late,geç kaldım
+1,sentence,You are late,geciktin,You are late,geç kaldın
+1,sentence,student is good,öğrenci iyidir,The student is good,öğrenci iyidir
+1,sentence,This is car,bu arabadır,This is a car,bu arabadır
+1,sentence,Apple is red,elma kırmızıdır,The apple is red,elma kırmızıdır
+1,sentence,Apple isn’t red,elma kırmızı değildir,The apple isn’t red,elma kırmızı değildir
+1,sentence,Mouse is small,fare küçüktür,The mouse is small,fare küçüktür
+1,sentence,İs mouse small?,fare küçük müdür?,Is the mouse small?,fare küçük müdür?
+1,sentence,Where is key?,anahtar nerede?,Where is the key?,anahtar nerede?
+1,sentence,Lamp is open,lamba açıktır,The lamp is on,lamba açıktır
+1,sentence,Lamp isn’t open,lamba açık değildir,The lamp isn’t on,lamba açık değildir
+1,sentence,Turkish are good people,Türkler iyi insanlardır,Turkish people are good people,Türkler iyi insanlardır
+1,word,woman - women (vimın),Kadın,woman - women (wimın),Kadın
+2,sentence,You are teacher,sen öğretmensin,You are a teacher,sen öğretmensin
+2,sentence,Are you teacher?,sen öğretmen misin?,Are you a teacher?,sen öğretmen misin?
+2,sentence,Dog is big,köpek büyüktür,The dog is big,köpek büyüktür
+2,sentence,Cat is small,kedi küçüktür,The cat is small,kedi küçüktür
+2,sentence,İs cat small?,kedi küçük müdür?,Is the cat small?,kedi küçük müdür?
+2,sentence,I am Turkish you are american,ben Türküm sen Amerikalısın,I am Turkish; you are American,ben Türküm sen Amerikalısın
+2,sentence,Are you american?,sen Amerikalı mısın?,Are you American?,sen Amerikalı mısın?
+2,sentence,Doctor is in the hospital,doktor hastanededir,The doctor is in the hospital,doktor hastanededir
+2,sentence,nurse is besautiful,hemşire güzeldir,The nurse is beautiful,hemşire güzeldir
+2,sentence,I am tired today,bugün yoruldum,I am tired today,bugün yorgunum
+2,sentence,Tarkan is famous singer,Tarkan ünlü şarkıcıdır,Tarkan is a famous singer,Tarkan ünlü şarkıcıdır
+2,sentence,Car is in the garage,araba garajdadır,The car is in the garage,araba garajdadır
+2,sentence,Planes are in the airport,uçaklar havalimanındadır,Planes are at the airport,uçaklar havalimanındadır
+2,sentence,Are you single?,yalnız mısın?,Are you single?,bekar mısın?
+2,sentence,why are you single?,neden yalnızsın?,why are you single?,neden bekarsın?
+2,sentence,egg is cheap,yumurta ucuzdur,An egg is cheap,yumurta ucuzdur
+2,sentence,where is egg?,yumurta nerede?,Where is the egg?,yumurta nerede?
+2,sentence,My hand is small,ellerim küçüktür,My hand is small,elim küçüktür
+2,sentence,My father is dentist,benim babam diş hekimidir,My father is a dentist,benim babam diş hekimidir
+2,sentence,Tomato is red,domates kırmızıdır,A tomato is red,domates kırmızıdır
+2,sentence,Mobile phone is expensive,cep telefonu pahalıdır,A mobile phone is expensive,cep telefonu pahalıdır
+2,sentence,English is interesting language,İngilizce ilginç bir dildir,English is an interesting language,İngilizce ilginç bir dildir
+2,sentence,Keys are on the door,anahtarlar kapının üzerindedir,The keys are in the door,anahtarlar kapının üzerindedir
+2,sentence,İs life beautiful?,hayat güzel midir?,Is life beautiful?,hayat güzel midir?
+2,sentence,bus is long,otobüs uzundur,The bus is long,otobüs uzundur
+2,sentence,I am good at computer game,ben bilgisayar oyunlarında iyiyim,I am good at computer games,ben bilgisayar oyunlarında iyiyim
+2,word,towel,kule,towel,havlu
+2,word,Woman - women (vimın),kadın - kadınlar,woman - women (wimın),kadın - kadınlar
+3,sentence,you are an important person,sen önemliş bir insansın,You are an important person,sen önemliş bir insansın
+3,sentence,in front of house,evin önünde,in front of the house,evin önünde
+3,sentence,oliveoil is healthy,zeytinyağı sağlıklıdır,Olive oil is healthy,zeytinyağı sağlıklıdır
+3,sentence,what color is car?,araba hangi renk?,What color is the car?,araba hangi renk?
+3,sentence,keys are on the door,anahtarlar kapının üzerinde,The keys are in the door,anahtarlar kapının üzerinde
+3,sentence,at airport,havalimanında,at the airport,havalimanında
+3,sentence,İs teacher handsome?,öğremen yakışıklı mı?,Is the teacher handsome?,öğremen yakışıklı mı?
+4,sentence,İstanbul’s population,İstanbul'un nüfusu,Istanbul’s population,İstanbul'un nüfusu
+4,sentence,İt is 8,bu 8 dir,It is 8,bu 8 dir
+4,sentence,İn the house,evin içinde,In the house,evin içinde
+4,sentence,There isn’t restroom in the house,evde dinlenme odası yok,There isn’t a restroom in the house,evde dinlenme odası yok
+4,word,günler,days,days,günler
+4,word,doğum günü,birthday,birthday,doğum günü
+4,word,herhangi bir şey,anything,anything,herhangi bir şey
+4,word,hiçbir şey,nothing,nothing,hiçbir şey
+4,word,bir çok,a lot of,a lot of,bir çok
+4,word,çok sayıda araba,a lot of cars,a lot of cars,çok sayıda araba
+5,sentence,İn the school,okulun içinde,In the school,okulun içinde
+5,sentence,İs box empty?,kutu boş mu?,Is the box empty?,kutu boş mu?
+5,sentence,There isn’t Cyprus on the map,haritada Kıbrıs yok,Cyprus isn’t on the map,haritada Kıbrıs yok
+5,sentence,İs car clean?,araba temiz midir?,Is the car clean?,araba temiz midir?
+5,sentence,They aren’t happy,biz mutlu değiliz,They aren’t happy,onlar mutlu değil
+5,sentence,İs winter cold?,kış soğuk mudur?,Is winter cold?,kış soğuk mudur?
+5,sentence,İs car dirty?,araba kirli midir?,Is the car dirty?,araba kirli midir?
+5,sentence,İzmir is in the west of turkiye,İzmir Türkiye'nin batısındadır,İzmir is in the west of Türkiye,İzmir Türkiye'nin batısındadır
+6,sentence,There isn’t ugly animal,çirkin hayvan yoktur,There isn’t an ugly animal,çirkin hayvan yoktur
+6,sentence,İs summer hot?,yaz sıcak mıdır?,Is summer hot?,yaz sıcak mıdır?
+6,sentence,İs he here?,o burada mı?,Is he here?,o burada mı?
+6,sentence,İn airport,havalimanında,At the airport,havalimanında
+7,sentence,I am student,ben öğrenciyim,I am a student,ben öğrenciyim
+7,sentence,Are you teacher?,sen öğrenci misin?,Are you a teacher?,sen öğretmen misin?
+7,sentence,My father is farmer,benim babam çiftçidir,My father is a farmer,benim babam çiftçidir
+7,sentence,Where is key?,anahtar nerede?,Where is the key?,anahtar nerede?
+7,sentence,I am late,geciktim,I am late,geç kaldım
+7,sentence,Tomato is red,domates kırmızıdır,A tomato is red,domates kırmızıdır
+7,sentence,İs tomato red?,domates kırmızı mıdır?,Is the tomato red?,domates kırmızı mıdır?
+7,sentence,There isn’t chocolate cake in the supermarket,süpermarkette çikolatalı kek yok,There isn’t a chocolate cake in the supermarket,süpermarkette çikolatalı kek yok
+7,word,woman - women (vimın),kadın,woman - women (wimın),kadın
+8,sentence,İn front of door,kapının önünde,In front of the door,kapının önünde
+8,sentence,There isn’t ugly baby,çirkin bebek yoktur,There isn’t an ugly baby,çirkin bebek yoktur
+8,sentence,I am good at computer game,bilgisayar oyununda iyiyim,I am good at computer games,bilgisayar oyununda iyiyim
+8,sentence,I am late,geciktim,I am late,geç kaldım
+9,sentence,İs knife sharp?,bıçak keskin midir?,Is the knife sharp?,bıçak keskin midir?
+9,sentence,There isn’t picture on the wall,duvarda resim yok,There isn’t a picture on the wall,duvarda resim yok
+9,sentence,The isn’t salt in the soup,çorbada tuz yok,There isn’t any salt in the soup,çorbada tuz yok
+9,sentence,There isn’t easy answer,kolay cevap yok,There isn’t an easy answer,kolay cevap yok
+9,sentence,There isn’t ugly baby,çirkin bebek yoktur,There isn’t an ugly baby,çirkin bebek yoktur
+10,sentence,I don’t arrive to ankara,Ankara'ya varmıyorum,I don’t arrive in Ankara,Ankara'ya varmıyorum
+11,sentence,I don’t remember your birthday,senin doğumgününü unutmam,I don’t forget your birthday,doğum gününü hatırlamıyorum
+11,sentence,I don’t buy carpet,halı satın almam,I don’t buy carpets,halı satın almam
+11,sentence,I don’t sleep in afternoon,öğleden sonra uyumam,I don’t sleep in the afternoon,öğleden sonra uyumam
+11,sentence,I don’t speak with you,seninle konuşmam,I don’t speak to you,seninle konuşmam
+11,sentence,I don’t eat cheese sandwich,peynirli sandviç yemem,I don’t eat cheese sandwiches,peynirli sandviç yemem
+11,sentence,Baby doesn’t eat honey,bebekler bal yemez,Babies don’t eat honey,bebekler bal yemez
+11,sentence,I don’t like to eat banana,muz yemeyi sevmem,I don’t like eating bananas,muz yemeyi sevmem
+12,sentence,İn my free time,Boş zamanımda,In my free time,Boş zamanımda
+12,sentence,I don’t ask question,Soru sormam,I don’t ask questions,Soru sormam
+12,sentence,I don’t have kite,Uçurtmam yok,I don’t have a kite,Uçurtmam yok
+12,sentence,Child doesn’t ride bike,Çocuk bisiklete binmez,A child doesn’t ride a bike,Çocuk bisiklete binmez
+12,sentence,İs there tree in the garden,Bahçede ağaç var mı,Is there a tree in the garden?,Bahçede ağaç var mı
+12,sentence,İt doesn’t rain,Yağmur yağmaz,It doesn’t rain,Yağmur yağmaz
+13,sentence,I don’t have summer house,Yazlığım yok,I don’t have a summer house,Yazlığım yok
+14,sentence,I don’t tell lie,Yalan söylemem,I don’t tell lies,Yalan söylemem
+14,sentence,İn the morning,Sabahleyin,In the morning,Sabahleyin
+14,sentence,İn the evening,Akşamleyin,In the evening,Akşamleyin
+14,sentence,İn twentyfirst century,Yirmi birinci yüzyılda,In the twenty-first century,Yirmi birinci yüzyılda
+14,sentence,Because ı am ill,Çünkü hastayım,Because I am ill,Çünkü hastayım
+15,sentence,I don’t ask question,Soru sormam,I don’t ask questions,Soru sormam
+15,sentence,Don’t touch to teapot,Çaydanlığa dokunma,Don’t touch the teapot,Çaydanlığa dokunma
+16,sentence,I don’t know solution,Çözümü bilmiyorum,I don’t know the solution,Çözümü bilmiyorum
+16,sentence,I can’t afford to buy car,Araba satın almaya gücüm yetmez,I can’t afford to buy a car,Araba satın almaya gücüm yetmez
+16,sentence,I can’t lift heavy box,Ağır kutuyu kaldıramam,I can’t lift the heavy box,Ağır kutuyu kaldıramam
+16,sentence,"I can’t repair car, because I am not repairman",Arabayı tamir edemem çünkü tamirci değilim,I can’t repair the car because I am not a repairman,Arabayı tamir edemem çünkü tamirci değilim
+16,sentence,Wether can’t be cold,Hava soğuk olamaz,The weather can’t be cold,Hava soğuk olamaz
+16,sentence,I can’t think you,Seni düşünemiyorum,I can’t think about you,Seni düşünemiyorum
+16,sentence,You can’t have shower because there is no water,Duş alamazsın çünkü su yok,You can’t have a shower because there is no water,Duş alamazsın çünkü su yok
+16,sentence,I can’t drive car,Araba süremem,I can’t drive a car,Araba süremem
+17,sentence,İs car expensive or cheap,Araba pahalı mı yoksa ucuz mu,Is the car expensive or cheap?,Araba pahalı mı yoksa ucuz mu
+20,sentence,I don’t know to ride horse,Ata binmeyi bilmiyorum,I don’t know how to ride a horse,Ata binmeyi bilmiyorum
+20,sentence,İs everybody here,herkes burada mı,Is everybody here?,herkes burada mı
+20,sentence,Keys are on the door,Anahtarlar kapının üstünde,The keys are in the door,Anahtarlar kapının üstünde
+21,sentence,İt is enjoyable to swim,Yüzmek keyiflidir,It is enjoyable to swim,Yüzmek keyiflidir
+21,sentence,İn a short time,Kısa süre içinde,In a short time,Kısa süre içinde
+21,sentence,İstanbul is a bridge between Europe and Asia,"İstanbul, Avrupa ve Asya arasında bir köprüdür",Istanbul is a bridge between Europe and Asia,"İstanbul, Avrupa ve Asya arasında bir köprüdür"
+21,sentence,İn front of window,Pencerenin önünde,In front of the window,Pencerenin önünde
+21,sentence,İt is hard to learn english,İngilizce öğrenmek zordur,It is hard to learn English,İngilizce öğrenmek zordur
+22,sentence,There isn’t ugly baby,Çirkin bebek yoktur,There isn’t an ugly baby,Çirkin bebek yoktur
+23,sentence,İs bed soft,yatak yumuşak mı,Is the bed soft?,yatak yumuşak mı
+24,sentence,I don’t wanna live in İstanbul anymore,Artık İstanbul'da yaşamak istemiyorum,I don’t wanna live in Istanbul anymore,Artık İstanbul'da yaşamak istemiyorum
+24,sentence,İs fish fresh,balık taze mi,Is fish fresh,balık taze mi
+26,sentence,İstanbul is a city with seven hills,İstanbul yedi tepeli bir şehirdir.,Istanbul is a city with seven hills,İstanbul yedi tepeli bir şehirdir.
+27,sentence,What can ı do for you,Sizin için ne yapabilirim?,What can I do for you,Sizin için ne yapabilirim?
+28,sentence,He hasn’t waken up yet,Henüz uyanmadı,He hasn’t woken up yet,Henüz uyanmadı
+29,sentence,İt is enjoyable to ride horse,Ata binmek keyiflidir.,It is enjoyable to ride a horse,Ata binmek keyiflidir.
+29,sentence,İs umbrella broken,Şemsiye kırık mı?,Is the umbrella broken?,Şemsiye kırık mı?
+30,sentence,İn front of window,Pencerenin önünde,In front of the window,Pencerenin önünde
+30,sentence,İt is dangerous to touch eletric,Elektriğe dokunmak tehlikelidir.,It is dangerous to touch electricity,Elektriğe dokunmak tehlikelidir.
+35,sentence,İs room empty or not,odası boş mu değil mi,Is the room empty or not?,odası boş mu değil mi
+35,sentence,İt is hard to learn english,İngilizce öğrenmek zordur,It is hard to learn English,İngilizce öğrenmek zordur
+35,sentence,İt takes time to give right decision,doğru karar vermek zaman alır,It takes time to make the right decision,doğru karar vermek zaman alır
+36,sentence,İs your room tidy,odan düzenli mi,Is your room tidy?,odan düzenli mi
+37,sentence,İs box empty or not,kutusu boş mu değil mi,Is the box empty or not?,kutusu boş mu değil mi
+38,sentence,How can ı make cheese better,Peyniri nasıl daha iyi hale getirebiliriz?,How can I make cheese better,Peyniri nasıl daha iyi hale getirebiliriz?
+38,word,İce age,buzul çağı,ice age,buzul çağı
+39,sentence,I haven’t red newspapers yet,Henüz kırmızı gazetem yok,I haven’t read the newspapers yet,Henüz gazeteleri okumadım
+39,sentence,He hasn’t waken up yet,Henüz uyanmadı,He hasn’t woken up yet,Henüz uyanmadı
+39,word,Keep…fiil…,devam et,keep + verb-ing,devam et
+40,sentence,Turkiye didn’t join to second world war,türkiye ikinci dünya savaşına katılmadı,Türkiye didn’t join the Second World War,türkiye ikinci dünya savaşına katılmadı
+40,sentence,Don’t laugh me,Bana gülme,Don’t laugh at me,Bana gülme
+40,sentence,Hay haven’t you laughed,Hey gülmedin mi,"Hey, haven’t you laughed?",Hey gülmedin mi
+40,sentence,Please smile ı am gonna take your photo,"Lütfen gülümseyin, fotoğrafınızı çekeceğim",Please smile; I’m going to take your photo,"Lütfen gülümseyin, fotoğrafınızı çekeceğim"
+40,sentence,Can ı borrow your bike,Bisikletini ödünç alabilir miyim,Can I borrow your bike?,Bisikletini ödünç alabilir miyim
+40,sentence,I eat light yoghurt because ı am on diet,Diyetteyim çünkü light yoğurt yiyorum,I eat low-fat yogurt because I am on a diet,Diyetteyim çünkü light yoğurt yiyorum
+40,sentence,Bill wasn’t paid yet,Fatura henüz ödenmedi,The bill hasn’t been paid yet,Fatura henüz ödenmedi
+41,sentence,İn my childhood,çocukluğumda,In my childhood,çocukluğumda
+41,sentence,There isn’t house for rent,Kiralık ev yok,There isn’t a house for rent,Kiralık ev yok
+41,sentence,I didn’t ride bike,bisiklete binmedim,I didn’t ride a bike,bisiklete binmedim
+41,sentence,İt is dangerous to swim in river,nehirde yüzmek tehlikelidir,It is dangerous to swim in a river,nehirde yüzmek tehlikelidir
+41,sentence,İt is snowing,kar yağıyor,It is snowing,kar yağıyor
+41,sentence,Don’t laugh me,Bana gülme,Don’t laugh at me,Bana gülme
+42,sentence,I haven’t gone to shcool,okula gitmedim,I haven’t gone to school,okula gitmedim
+43,sentence,We have grown up in İstanbul,Biz İstanbul'da büyüdük,We have grown up in Istanbul,Biz İstanbul'da büyüdük
+43,sentence,I haven’t known this,bunu bilmiyordum,I didn’t know this,bunu bilmiyordum
+43,sentence,I haven’t red this novel before,Bu romanı daha önce okumamıştım,I haven’t read this novel before,Bu romanı daha önce okumamıştım
+45,sentence,I don’t need eraser,Silgiye ihtiyacım yok,I don’t need an eraser,Silgiye ihtiyacım yok
+45,sentence,I don’t wear arrring,Arrring giymiyorum,I don’t wear earrings,Arrring giymiyorum
+45,sentence,ı am feeling good myelf,kendimi iyi hissediyorum,I feel good,kendimi iyi hissediyorum
+45,sentence,I can’t see in front of car in foggy weather,Sisli havada arabanın önünü göremiyorum,I can’t see in front of the car in foggy weather,Sisli havada arabanın önünü göremiyorum
+46,sentence,İs it possible to call me,beni aramak mümkün mü,Is it possible to call me?,beni aramak mümkün mü
+46,sentence,ıt is possible to win war,savaşı kazanmak mümkün,It is possible to win the war,savaşı kazanmak mümkün
+46,sentence,I f you don’t wanna lose your children,Eğer çocuklarını kaybetmek istemiyorsan,If you don’t want to lose your children,Eğer çocuklarını kaybetmek istemiyorsan
+46,sentence,Our relation doesn’t go well,ilişkimiz iyi gitmiyor,Our relationship isn’t going well,ilişkimiz iyi gitmiyor
+47,sentence,I couldn’tt sleep last night,dün gece uyuyamadım,I couldn’t sleep last night,dün gece uyuyamadım
+47,sentence,Officer salary isn’t enough for a family,Memur maaşı aileye yetmiyor,An officer’s salary isn’t enough for a family,Memur maaşı aileye yetmiyor
+47,sentence,Obey the rıules,Kurallara uyun,Obey the rules,Kurallara uyun
+47,sentence,İn summer sunshine can be dangerous,Yazın güneş ışığı tehlikeli olabilir,"In summer, sunshine can be dangerous",Yazın güneş ışığı tehlikeli olabilir
+47,sentence,There is a small problem in my shoulder that’s why I am gonna go to doctor,Omzumda küçük bir sorun var o yüzden doktora gideceğim,"There is a small problem with my shoulder, so I’m going to see a doctor",Omzumda küçük bir sorun var o yüzden doktora gideceğim
+48,sentence,Plesase don’t shout your children,Lütfen çocuklarınıza bağırmayın,Please don’t shout at your children,Lütfen çocuklarınıza bağırmayın
+48,sentence,Ben evlatlığım I am adopted,Ben evlatlık edindim,I am adopted,Ben evlatlığım
+48,sentence,I wanna buy car but I don’t afford it,Araba almak istiyorum ama param yok,"I want to buy a car, but I can’t afford it",Araba almak istiyorum ama param yok
+49,sentence,You didn’t eat meal which I cooked,sen yemedin yemeği ki benim pişirdiğim,You didn’t eat the meal that I cooked,sen yemedin yemeği ki benim pişirdiğim
+49,sentence,I don’t understand the people who read book,kitap okuyan insanları anlamıyorum (ben anlamıyorum insanları ki onlar kitap okurlar),I don’t understand people who read books,kitap okuyan insanları anlamıyorum (ben anlamıyorum insanları ki onlar kitap okurlar)
+50,sentence,I don’t afford to buy furniture,Mobilya almaya param yetmez,I can’t afford to buy furniture,Mobilya almaya param yetmez
+50,sentence,Your advices weren’t accepted,Tavsiyeleriniz kabul edilmedi,Your advice wasn’t accepted,Tavsiyeleriniz kabul edilmedi
+51,sentence,İs it possible to learn details,detayları öğrenmek mümkün müdür,Is it possible to learn the details?,detayları öğrenmek mümkün müdür
+51,sentence,"İn fact, actually I am free today, but I should work",aslında bugün boşum ama çalışmalıyım,"In fact, I am free today, but I should work",aslında bugün boşum ama çalışmalıyım
+51,word,…ness,"-lık, -lik",-ness,"-lık, -lik"
+52,sentence,"Please do not insist me, because I don’t wanna do that",Lütfen bana ısrar etme çünkü bunu yapmak istemiyorum,"Please don’t insist, because I don’t want to do that",Lütfen bana ısrar etme çünkü bunu yapmak istemiyorum
+53,sentence,Don’t injured in accident,Kazada yaralanmayın,Don’t get injured in an accident,Kazada yaralanmayın
+53,sentence,"The people who make gossip, share everybody’s secret",Dedikodu yapanlar herkesin sırrını paylaşırlar,People who gossip share everybody’s secrets,Dedikodu yapanlar herkesin sırrını paylaşırlar
+53,sentence,What does it mean? Bunun anlamı ne,Bu ne anlama geliyor?,What does it mean?,Bu ne anlama geliyor?
+53,sentence,İt means bu …demektir,bu demek oluyor ki,It means ...,bu demek oluyor ki
+53,sentence,What do you mean by hıyar,Hayyar derken ne demek istiyorsun?,What do you mean by “hıyar”?,Hayyar derken ne demek istiyorsun?
+53,sentence,Don’t touch socket there is electric,Sokete dokunmayın elektrik var,Don’t touch the socket; there is electricity,Sokete dokunmayın elektrik var
+53,sentence,İs it possible pace journey,hızlı yolculuk mümkün mü,Is a fast journey possible?,hızlı yolculuk mümkün mü
+53,sentence,Don’t stare on me,Bana bakma,Don’t stare at me,Bana bakma
+54,sentence,I don’t have any idea how can I solve this problem,bu problemi nasıl çözebilirim hiçbir fikrim yok,I have no idea how I can solve this problem,bu problemi nasıl çözebilirim hiçbir fikrim yok
+54,sentence,According to board of directors’s decisions,yönetim kurulu kararlarına göre,According to the board of directors’ decisions,yönetim kurulu kararlarına göre
+55,sentence,Atatürk is the founder of Turkish Republic,Atatürk Türkiye Cumhuriyeti'nin kurucusudur,Atatürk is the founder of the Republic of Türkiye,Atatürk Türkiye Cumhuriyeti'nin kurucusudur
+55,sentence,İt depends on traffic,trafiğe bağlı,It depends on traffic,trafiğe bağlı
+55,sentence,İt depends on you,sana bağlı,It depends on you,sana bağlı
+55,sentence,İt depends on time,zamana bağlı,It depends on time,zamana bağlı
+55,sentence,What is the distance between Ankara and İstanbul,Ankara ile İstanbul arasındaki mesafe ne kadar?,What is the distance between Ankara and Istanbul,Ankara ile İstanbul arasındaki mesafe ne kadar?
+55,word,İt is up to you,sana bağlı - sen karar ver - sen bilirsin,It is up to you,sana bağlı - sen karar ver - sen bilirsin
+56,sentence,İşbank I one of the oldest establishments,İşbank en eski kuruluşlardan biridir,İşbank is one of the oldest institutions,İşbank en eski kuruluşlardan biridir
+58,sentence,Turkish sportspeople couldn’t attend to tournament,Türk sporcular turnuvaya katılamıyor,Turkish athletes couldn’t attend the tournament,Türk sporcular turnuvaya katılamıyor
+59,word,schedule (skeçıl),takvim,schedule,program / takvim
+60,sentence,I can’t breath,nefes alamıyorum,I can’t breathe,nefes alamıyorum
+60,sentence,You souldn’t wake up early,erken kalkmamalısın,You shouldn’t wake up early,erken kalkmamalısın
+60,sentence,"Not, don’t aint","Hayır, değil",No / not / don’t / ain’t,"Hayır, değil"
+60,sentence,I din’t hear what you say,Ne dediğini duymuyorum,I didn’t hear what you said,Ne dediğini duymadım
+60,sentence,I didn’t see what you eat,ne yediğini göremedim,I didn’t see what you ate,Ne yediğini görmedim

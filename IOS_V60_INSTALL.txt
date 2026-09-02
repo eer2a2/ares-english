@@ -1,0 +1,16 @@
+v6.0 — iOS Manifest-Only Icon Test
+
+Bu sürümde:
+- apple-touch-icon bağlantıları TAMAMEN kaldırıldı.
+- apple-touch-icon dosyaları paketten TAMAMEN çıkarıldı.
+- iOS için yalnızca Web App Manifest içindeki avatar PNG ikonları bırakıldı.
+- Manifest/app id ve ikon dosya adları yeniden sürümlendi.
+
+Kurulum:
+1. Bu klasörün TAMAMINI Netlify'a deploy et.
+2. iPhone ana ekranındaki eski Erhan English uygulamasını kaldır.
+3. Safari'de Netlify adresini aç.
+4. Safari > Paylaş > Ana Ekrana Ekle.
+5. Önizlemede avatar görünüyorsa Ekle.
+
+Not: Bu sürüm programın eğitim/AI/voice özelliklerini değiştirmez; yalnızca PWA ikon metadata'sını değiştirir.

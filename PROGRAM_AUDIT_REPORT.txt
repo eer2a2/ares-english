@@ -1,0 +1,20 @@
+MALTA HABIT v5.4 — FULL PROGRAM AUDIT
+
+Static integrity checks
+- Lessons: 60
+- Sentence pairs: 5336
+- Word pairs: 4908
+- Inline onclick actions checked: 238
+- Unique top-level onclick functions: 142
+- Missing onclick functions after repair: 0
+- Duplicate named function declarations: 0
+
+Repairs
+1. CRITICAL: Ares "Bugünkü Konuşmayı Başlat" referenced a missing startAICoachSession(). Implemented.
+2. Remaining visible "AI Speaking Coach" labels standardized to "Ares — English Coach".
+3. Stale Gemini 3.7/3.6/3.5 preference list removed; automatic model discovery remains, with 2.5 Flash variants preferred.
+4. Voice compatibility note corrected to reflect browser/network dependence.
+5. PWA cache version bumped so the repaired build replaces the prior cached version.
+
+Scope note
+This audit checks the complete single-file application's static menu/action wiring, duplicate function declarations, lesson-data integrity, AI/voice/offline integration code, and PWA cache setup. Hardware/browser/API runtime behavior still needs real-device testing.
