@@ -1,0 +1,95 @@
+<!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#1E2A38"><title>Ares Speaking</title>
+<style>
+:root{--paper:#EFEAE0;--paper2:#E4DDCC;--ink:#1E2A38;--soft:#4B5A6B;--accent:#B4432B;--leaf:#5B7361;--card:#FBF8F1;--line:#C9C0AC}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;background-image:linear-gradient(var(--paper2) 1px,transparent 1px);background-size:100% 32px}.app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}.side{background:#1E2A38;color:white;padding:22px 14px}.brand{padding:0 10px 18px;border-bottom:1px solid #ffffff22}.brand h1{font-family:Georgia,serif;margin:0;font-size:24px}.brand p{margin:5px 0 0;color:#9fb0bf;font-size:12px}.nav{margin-top:14px}.nav a{display:block;color:#dce4ea;text-decoration:none;padding:11px 12px;border-radius:10px;margin:2px 0}.nav a:hover,.nav a:focus{background:var(--accent);color:white}.legacy{display:block;margin:18px 10px 0;color:#b8c6d0;font-size:12px}.main{padding:28px 34px 70px;max-width:1150px;width:100%;margin:0 auto}.view{display:none}.view:first-child,.view:target{display:block}.main:has(.view:target) .view:first-child:not(:target){display:none}.top{margin-bottom:20px}.top h2{font-family:Georgia,serif;font-size:32px;margin:0}.sub,.tiny{color:var(--soft);font-size:13px}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:16px;box-shadow:0 5px 20px rgba(30,42,56,.10)}.card h3{margin-top:0;font-family:Georgia,serif}.prompt{font-family:Georgia,serif;font-size:24px;line-height:1.45;margin:14px 0}.row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}.pill{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:9px 14px;color:var(--ink)}button.pill{cursor:pointer}.primary{background:var(--accent);color:white;border-color:var(--accent)}.good{background:var(--leaf);color:white;border-color:var(--leaf)}textarea{width:100%;min-height:95px;border:1px solid var(--line);border-radius:12px;padding:12px;font:inherit;background:white}.chat{height:300px;overflow:auto;border:1px solid var(--line);border-radius:12px;padding:12px;background:white}.msg{padding:10px 12px;border-radius:13px;margin:8px 0;line-height:1.45;white-space:pre-wrap}.ai{background:#edf0f2}.me{background:#f5dfd7;margin-left:auto;max-width:84%}.scenario{border:1px dashed #B8892B;border-radius:12px;padding:15px;background:#fffaf0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}.stat{padding:16px;background:white;border:1px solid var(--line);border-radius:12px}.stat b{display:block;font-size:28px;color:var(--accent)}select{padding:10px;border:1px solid var(--line);border-radius:10px;background:white}.feedback{margin-top:12px;padding:12px;border-left:4px solid var(--leaf);background:#eef3ef;border-radius:8px;white-space:pre-wrap}.mission-step{padding:12px;border:1px solid var(--line);border-radius:12px;background:#fffaf3;margin:8px 0}
+@media(max-width:820px){.app{grid-template-columns:1fr}.side{height:auto}.nav{display:flex;overflow:auto;gap:5px}.nav a{min-width:max-content}.main{padding:20px 14px 70px}.top h2{font-size:27px}.prompt{font-size:21px}}
+
+.topicgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:9px;margin:12px 0}
+.topiccard{border:1px solid #d8d0bd;border-radius:14px;padding:12px;background:#fffdf7}
+.topiccard summary{font-weight:800;cursor:pointer}
+.topiccard .prompt{margin-top:10px}
+.topiccard .tiny{margin-top:7px}
+
+.topicpick{border:1px solid #d8d0bd;border-radius:14px;padding:13px;background:#fffdf7;text-align:left;color:var(--ink);font:inherit;cursor:pointer;min-height:74px}
+.topicpick b{display:block;font-size:15px;margin-bottom:4px}
+.topicpick span{display:block;color:var(--soft);font-size:12px;line-height:1.35}
+.topicpick.active{border:2px solid var(--accent);background:#fff6f1}
+.active-scenario{margin-top:14px}
+</style></head><body><div class="app"><aside class="side"><div class="brand"><h1>🐾 Ares Speaking</h1><p>Study less. Speak more.</p></div><nav class="nav"><a href="#mission">🎯 Today's Mission</a><a href="#coach">🎤 Speaking Coach</a><a href="#quick">⚡ Quick Response</a><a href="#role">🎭 Role Play</a><a href="#abroad">🌍 Abroad Simulation</a><a href="#surprise">🎲 Surprise Me</a><a href="#mistakes">🧠 My Mistakes</a><a href="#progress">📈 Speaking Progress</a></nav><a class="legacy" href="./index.html">← Eski çalışma defterini aç</a></aside><main class="main">
+<section class="view" id="mission"><div class="top"><div class="sub">ARES SPEAKING</div><h2>Today's Mission</h2><div class="sub">15 dakikada konuşma kasını çalıştır</div></div><div class="card"><h3>Bugünün kalıbı</h3><div class="prompt" id="dailyChunk">Let me think…</div><div class="sub">Bugün bu kalıbı en az 3 kez kullan.</div></div><div class="card"><div class="mission-step"><b>1 · Warm-up</b><br>Bugünün nasıl geçtiğini 2 dakika anlat.</div><div class="mission-step"><b>2 · Today's Chunk</b><br>Kalıpla 3 farklı cümle kur.</div><div class="mission-step"><b>3 · Conversation</b><br>Speaking Coach ile 5 dakika konuş.</div><div class="mission-step"><b>4 · Quick Response</b><br>5–10 saniyede cevap ver.</div><div class="mission-step"><b>5 · Abroad Simulation</b><br>Bir gerçek hayat senaryosunu çöz.</div></div></section>
+<section class="view" id="coach"><div class="top"><div class="sub">ARES SPEAKING</div><h2>Speaking Coach</h2><div class="sub">Akıcılık önce; sadece önemli hatalar düzeltilir.</div></div><div class="card"><div id="coachChat" class="chat"><div class="msg ai">Hi Erhan! Tell me something about your day.</div></div><textarea id="coachText" placeholder="Speak or type in English..."></textarea><div class="row" style="margin-top:9px"><button class="pill" data-voice="coachText">🎤 Konuş</button><button class="pill primary" id="coachSend">Gönder</button><button class="pill" id="apiBtn">🔑 API</button></div><div id="coachFeedback"></div></div></section>
+<section class="view" id="quick"><div class="top"><div class="sub">ARES SPEAKING</div><h2>Quick Response</h2><div class="sub">Hedef: önce hız, sonra doğruluk.</div></div><div class="card"><div class="tiny">Soru</div><div class="prompt" id="quickQ">What did you do after work yesterday?</div><textarea id="quickText" placeholder="Cevabını söyle veya yaz..."></textarea><div class="row" style="margin-top:9px"><button class="pill" data-voice="quickText">🎤 Konuş</button><button class="pill" id="quickNew">🔀 Yeni soru</button><button class="pill primary" id="quickEval">Değerlendir</button></div><div id="quickFeedback"></div></div></section>
+<section class="view" id="role">
+<div class="top"><div class="sub">ARES SPEAKING</div><h2>Role Play</h2><div class="sub">Konu seç → senaryoyu çöz → Ares ile devam et.</div></div>
+<div class="card">
+<h3>🎭 Konu seç</h3>
+<div class="topicgrid" id="roleTopics">
+<button class="topicpick active" data-role-topic="hotel">🏨 <b>Hotel</b><span>check-in · room · complaint</span></button>
+<button class="topicpick" data-role-topic="restaurant">🍽️ <b>Restaurant</b><span>order · wrong meal · bill</span></button>
+<button class="topicpick" data-role-topic="cafe">☕ <b>Café</b><span>order · takeaway · payment</span></button>
+<button class="topicpick" data-role-topic="passport">🛂 <b>Passport</b><span>purpose · stay · accommodation</span></button>
+<button class="topicpick" data-role-topic="taxi">🚕 <b>Taxi</b><span>destination · time · price</span></button>
+<button class="topicpick" data-role-topic="train">🚆 <b>Train</b><span>ticket · delay · connection</span></button>
+<button class="topicpick" data-role-topic="shopping">🛍️ <b>Shopping</b><span>size · colour · return</span></button>
+<button class="topicpick" data-role-topic="smalltalk">💬 <b>Small Talk</b><span>meet people · keep talking</span></button>
+</div>
+
+<div class="scenario active-scenario" id="roleScenario">
+<div class="tiny" id="rolePlace">Rome · Receptionist</div>
+<div class="prompt" id="rolePrompt">“I’m sorry, but I can’t find a reservation under your name.”</div>
+<div class="tiny" id="roleTask">Görev: Rezervasyon yaptığını açıkla ve çözüm iste.</div>
+</div>
+
+<div class="row" style="margin:10px 0 12px">
+<button class="pill" id="roleNew">🔀 Yeni senaryo</button>
+</div>
+
+<textarea id="roleText" placeholder="Cevabını İngilizce söyle veya yaz..."></textarea>
+<div class="row" style="margin-top:9px">
+<button class="pill" data-voice="roleText">🎤 Konuş</button>
+<button class="pill primary" id="roleSend">Gönder</button>
+<button class="pill good" id="roleEval">Değerlendir</button>
+</div>
+<div id="roleFeedback"></div>
+<div class="tiny" style="margin-top:10px">Amaç: 5–15 saniye içinde anlaşılır ve doğal bir cevap üretmek.</div>
+</div>
+</section>
+<section class="view" id="abroad">
+<div class="top"><div class="sub">ARES SPEAKING</div><h2>Abroad Simulation</h2><div class="sub">Yurtdışında gerçek hayatta çıkabilecek durumları çöz.</div></div>
+<div class="card">
+<h3>🌍 Konu seç</h3>
+<div class="topicgrid" id="abroadTopics">
+<button class="topicpick active" data-abroad-topic="passport">🛂 <b>Airport & Passport</b><span>immigration · flight · baggage</span></button>
+<button class="topicpick" data-abroad-topic="hotel">🏨 <b>Hotel</b><span>booking · check-in · room</span></button>
+<button class="topicpick" data-abroad-topic="restaurant">🍽️ <b>Restaurant</b><span>order · problem · bill</span></button>
+<button class="topicpick" data-abroad-topic="train">🚆 <b>Train</b><span>ticket · platform · delay</span></button>
+<button class="topicpick" data-abroad-topic="directions">🗺️ <b>Directions</b><span>ask locals · get around</span></button>
+<button class="topicpick" data-abroad-topic="shopping">🛍️ <b>Shopping</b><span>price · size · return</span></button>
+<button class="topicpick" data-abroad-topic="cafe">☕ <b>Café</b><span>order · payment · small talk</span></button>
+<button class="topicpick" data-abroad-topic="problem">🆘 <b>Problem Solving</b><span>lost item · police · pharmacy</span></button>
+<button class="topicpick" data-abroad-topic="social">💬 <b>Socialising</b><span>classmates · travellers · locals</span></button>
+</div>
+
+<div class="scenario active-scenario" id="abroadScenario">
+<div class="tiny" id="abroadPlace">London · Immigration officer</div>
+<div class="prompt" id="abroadPrompt">“What is the purpose of your visit and how long will you stay?”</div>
+<div class="tiny" id="abroadTask">Görev: Seyahat amacını ve kalış süreni açıkla.</div>
+</div>
+
+<div class="row" style="margin:10px 0 12px">
+<button class="pill" id="abroadNew">🔀 Yeni senaryo</button>
+</div>
+
+<textarea id="abroadText" placeholder="Cevabını İngilizce söyle veya yaz..."></textarea>
+<div class="row" style="margin-top:9px">
+<button class="pill" data-voice="abroadText">🎤 Konuş</button>
+<button class="pill primary" id="abroadSend">Gönder</button>
+<button class="pill good" id="abroadEval">Değerlendir</button>
+</div>
+<div id="abroadFeedback"></div>
+<div class="tiny" style="margin-top:10px">Gönder = karşı taraf rolüne devam eder. Değerlendir = cevabına kısa geri bildirim verir.</div>
+</div>
+</section>
+<section class="view" id="surprise"><div class="top"><div class="sub">ARES SPEAKING</div><h2>Surprise Me</h2><div class="sub">Hazırlıksız konuşma.</div></div><div class="card"><div class="prompt" id="surpriseQ">A waiter brings the wrong meal. Explain the problem politely.</div><textarea id="surpriseText"></textarea><div class="row" style="margin-top:9px"><button class="pill" data-voice="surpriseText">🎤 Konuş</button><button class="pill" id="surpriseNew">🎲 Başka sürpriz</button><button class="pill primary" id="surpriseEval">Değerlendir</button></div><div id="surpriseFeedback"></div></div></section>
+<section class="view" id="mistakes"><div class="top"><div class="sub">ARES SPEAKING</div><h2>My Mistakes</h2></div><div class="card" id="mistakeList">Henüz önemli bir hata kaydedilmedi.</div></section>
+<section class="view" id="progress"><div class="top"><div class="sub">ARES SPEAKING</div><h2>Speaking Progress</h2></div><div class="grid"><div class="stat"><b id="pTurns">0</b>Konuşma turu</div><div class="stat"><b id="pMinutes">0</b>Yaklaşık dakika</div><div class="stat"><b id="pStreak">0</b>Günlük seri</div><div class="stat"><b id="pMistakes">0</b>Önemli düzeltme</div></div></section>
+</main></div><script src="./speaking.js?v=5" defer></script></body></html>
