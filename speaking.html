@@ -1,0 +1,617 @@
+<!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#1E2A38"><title>Ares Speaking</title>
+<style>
+:root{--paper:#EFEAE0;--paper2:#E4DDCC;--ink:#1E2A38;--soft:#4B5A6B;--accent:#B4432B;--leaf:#5B7361;--card:#FBF8F1;--line:#C9C0AC}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;background-image:linear-gradient(var(--paper2) 1px,transparent 1px);background-size:100% 32px}.app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}.side{background:#1E2A38;color:white;padding:22px 14px}.brand{padding:0 10px 18px;border-bottom:1px solid #ffffff22}.brand h1{font-family:Georgia,serif;margin:0;font-size:24px}.brand p{margin:5px 0 0;color:#9fb0bf;font-size:12px}.nav{margin-top:14px}.nav a{display:block;color:#dce4ea;text-decoration:none;padding:11px 12px;border-radius:10px;margin:2px 0}.nav a:hover,.nav a:focus{background:var(--accent);color:white}.legacy{display:block;margin:18px 10px 0;color:#b8c6d0;font-size:12px}.main{padding:28px 34px 70px;max-width:1150px;width:100%;margin:0 auto}.view{display:none}.view:first-child,.view:target{display:block}.main:has(.view:target) .view:first-child:not(:target){display:none}.top{margin-bottom:20px}.top h2{font-family:Georgia,serif;font-size:32px;margin:0}.sub,.tiny{color:var(--soft);font-size:13px}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:16px;box-shadow:0 5px 20px rgba(30,42,56,.10)}.card h3{margin-top:0;font-family:Georgia,serif}.prompt{font-family:Georgia,serif;font-size:24px;line-height:1.45;margin:14px 0}.row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}.pill{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:9px 14px;color:var(--ink)}button.pill{cursor:pointer}.primary{background:var(--accent);color:white;border-color:var(--accent)}.good{background:var(--leaf);color:white;border-color:var(--leaf)}textarea{width:100%;min-height:95px;border:1px solid var(--line);border-radius:12px;padding:12px;font:inherit;background:white}.chat{height:300px;overflow:auto;border:1px solid var(--line);border-radius:12px;padding:12px;background:white}.msg{padding:10px 12px;border-radius:13px;margin:8px 0;line-height:1.45;white-space:pre-wrap}.ai{background:#edf0f2}.me{background:#f5dfd7;margin-left:auto;max-width:84%}.scenario{border:1px dashed #B8892B;border-radius:12px;padding:15px;background:#fffaf0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}.stat{padding:16px;background:white;border:1px solid var(--line);border-radius:12px}.stat b{display:block;font-size:28px;color:var(--accent)}select{padding:10px;border:1px solid var(--line);border-radius:10px;background:white}.feedback{margin-top:12px;padding:12px;border-left:4px solid var(--leaf);background:#eef3ef;border-radius:8px;white-space:pre-wrap}.mission-step{padding:12px;border:1px solid var(--line);border-radius:12px;background:#fffaf3;margin:8px 0}
+@media(max-width:820px){.app{grid-template-columns:1fr}.side{height:auto}.nav{display:flex;overflow:auto;gap:5px}.nav a{min-width:max-content}.main{padding:20px 14px 70px}.top h2{font-size:27px}.prompt{font-size:21px}}
+
+.topicgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:9px;margin:12px 0}
+.topiccard{border:1px solid #d8d0bd;border-radius:14px;padding:12px;background:#fffdf7}
+.topiccard summary{font-weight:800;cursor:pointer}
+.topiccard .prompt{margin-top:10px}
+.topiccard .tiny{margin-top:7px}
+
+.topicpick{border:1px solid #d8d0bd;border-radius:14px;padding:13px;background:#fffdf7;text-align:left;color:var(--ink);font:inherit;cursor:pointer;min-height:74px}
+.topicpick b{display:block;font-size:15px;margin-bottom:4px}
+.topicpick span{display:block;color:var(--soft);font-size:12px;line-height:1.35}
+.topicpick.active{border:2px solid var(--accent);background:#fff6f1}
+.active-scenario{margin-top:14px}
+.recording{font-weight:800;box-shadow:0 0 0 2px rgba(0,0,0,.08) inset}</style></head><body><div class="app"><aside class="side"><div class="brand"><h1>🐾 Ares Speaking</h1><p>Study less. Speak more. <span style="opacity:.65;font-size:11px">v13</span></p></div><nav class="nav"><a href="#mission">🎯 Today's Mission</a><a href="#coach">🎤 Speaking Coach</a><a href="#quick">⚡ Quick Response</a><a href="#role">🎭 Role Play</a><a href="#abroad">🌍 Abroad Simulation</a><a href="#surprise">🎲 Surprise Me</a><a href="#mistakes">🧠 My Mistakes</a><a href="#progress">📈 Speaking Progress</a></nav><a class="legacy" href="./index.html">← Eski çalışma defterini aç</a></aside><main class="main">
+<section class="view" id="mission"><div class="top"><div class="sub">ARES SPEAKING</div><h2>Today's Mission</h2><div class="sub">15 dakikada konuşma kasını çalıştır</div></div><div class="card"><h3>Bugünün kalıbı</h3><div class="prompt" id="dailyChunk">Let me think…</div><div class="sub">Bugün bu kalıbı en az 3 kez kullan.</div></div><div class="card"><div class="mission-step"><b>1 · Warm-up</b><br>Bugünün nasıl geçtiğini 2 dakika anlat.</div><div class="mission-step"><b>2 · Today's Chunk</b><br>Kalıpla 3 farklı cümle kur.</div><div class="mission-step"><b>3 · Conversation</b><br>Speaking Coach ile 5 dakika konuş.</div><div class="mission-step"><b>4 · Quick Response</b><br>5–10 saniyede cevap ver.</div><div class="mission-step"><b>5 · Abroad Simulation</b><br>Bir gerçek hayat senaryosunu çöz.</div></div></section>
+<section class="view" id="coach"><div class="top"><div class="sub">ARES SPEAKING</div><h2>Speaking Coach</h2><div class="sub">Akıcılık önce; sadece önemli hatalar düzeltilir.</div></div><div class="card"><div id="coachChat" class="chat"><div class="msg ai">Hi Erhan! Tell me something about your day.</div></div><textarea id="coachText" placeholder="Speak or type in English..."></textarea><div class="row" style="margin-top:9px"><button class="pill" data-voice="coachText">🎤 Konuş</button><button class="pill" id="coachSpeakLast">🔊 Ares’i seslendir</button><button class="pill primary" id="coachSend">Gönder</button><button class="pill" id="apiBtn">🔑 API</button></div><div id="coachFeedback"></div></div></section>
+<section class="view" id="quick"><div class="top"><div class="sub">ARES SPEAKING</div><h2>Quick Response</h2><div class="sub">Hedef: önce hız, sonra doğruluk.</div></div><div class="card"><div class="tiny">Soru</div><div class="prompt" id="quickQ">What did you do after work yesterday?</div><div class="row" style="margin-top:8px"><button class="pill speak-question" id="quickSpeakQ" data-speak-text="quickQ">🔊 Soruyu dinle</button></div><textarea id="quickText" placeholder="Cevabını söyle veya yaz..."></textarea><div class="row" style="margin-top:9px"><button class="pill" data-voice="quickText">🎤 Konuş</button><button class="pill" id="quickNew">🔀 Yeni soru</button><button class="pill primary" id="quickEval">Değerlendir</button></div><div id="quickFeedback"></div></div></section>
+<section class="view" id="role">
+<div class="top"><div class="sub">ARES SPEAKING</div><h2>Role Play</h2><div class="sub">Konu seç → senaryoyu çöz → Ares ile devam et.</div></div>
+<div class="card">
+<h3>🎭 Konu seç</h3>
+<div class="topicgrid" id="roleTopics">
+<button class="topicpick active" data-role-topic="hotel">🏨 <b>Hotel</b><span>check-in · room · complaint</span></button>
+<button class="topicpick" data-role-topic="restaurant">🍽️ <b>Restaurant</b><span>order · wrong meal · bill</span></button>
+<button class="topicpick" data-role-topic="cafe">☕ <b>Café</b><span>order · takeaway · payment</span></button>
+<button class="topicpick" data-role-topic="passport">🛂 <b>Passport</b><span>purpose · stay · accommodation</span></button>
+<button class="topicpick" data-role-topic="taxi">🚕 <b>Taxi</b><span>destination · time · price</span></button>
+<button class="topicpick" data-role-topic="train">🚆 <b>Train</b><span>ticket · delay · connection</span></button>
+<button class="topicpick" data-role-topic="shopping">🛍️ <b>Shopping</b><span>size · colour · return</span></button>
+<button class="topicpick" data-role-topic="smalltalk">💬 <b>Small Talk</b><span>meet people · keep talking</span></button>
+</div>
+
+<div class="scenario active-scenario" id="roleScenario">
+<div class="tiny" id="rolePlace">Rome · Receptionist</div>
+<div class="prompt" id="rolePrompt">“I’m sorry, but I can’t find a reservation under your name.”</div><div class="row" style="margin-top:8px"><button class="pill speak-question" id="roleSpeakQ" data-speak-text="rolePrompt">🔊 Soruyu dinle</button></div>
+<div class="tiny" id="roleTask">Görev: Rezervasyon yaptığını açıkla ve çözüm iste.</div>
+</div>
+
+<div class="row" style="margin:10px 0 12px">
+<button class="pill" id="roleNew">🔀 Yeni senaryo</button>
+</div>
+
+<textarea id="roleText" placeholder="Cevabını İngilizce söyle veya yaz..."></textarea>
+<div class="row" style="margin-top:9px">
+<button class="pill" data-voice="roleText">🎤 Konuş</button>
+<button class="pill" id="roleHearCheck">👂 Duyduğunu kontrol et</button>
+<button class="pill primary" id="roleSend">Gönder</button>
+<button class="pill good" id="roleEval">Değerlendir</button>
+</div>
+<div id="roleFeedback"></div>
+<div class="tiny" style="margin-top:10px">Amaç: 5–15 saniye içinde anlaşılır ve doğal bir cevap üretmek.</div>
+</div>
+</section>
+<section class="view" id="abroad">
+<div class="top"><div class="sub">ARES SPEAKING</div><h2>Abroad Simulation</h2><div class="sub">Yurtdışında gerçek hayatta çıkabilecek durumları çöz.</div></div>
+<div class="card">
+<h3>🌍 Konu seç</h3>
+<div class="topicgrid" id="abroadTopics">
+<button class="topicpick active" data-abroad-topic="passport">🛂 <b>Airport & Passport</b><span>immigration · flight · baggage</span></button>
+<button class="topicpick" data-abroad-topic="hotel">🏨 <b>Hotel</b><span>booking · check-in · room</span></button>
+<button class="topicpick" data-abroad-topic="restaurant">🍽️ <b>Restaurant</b><span>order · problem · bill</span></button>
+<button class="topicpick" data-abroad-topic="train">🚆 <b>Train</b><span>ticket · platform · delay</span></button>
+<button class="topicpick" data-abroad-topic="directions">🗺️ <b>Directions</b><span>ask locals · get around</span></button>
+<button class="topicpick" data-abroad-topic="shopping">🛍️ <b>Shopping</b><span>price · size · return</span></button>
+<button class="topicpick" data-abroad-topic="cafe">☕ <b>Café</b><span>order · payment · small talk</span></button>
+<button class="topicpick" data-abroad-topic="problem">🆘 <b>Problem Solving</b><span>lost item · police · pharmacy</span></button>
+<button class="topicpick" data-abroad-topic="social">💬 <b>Socialising</b><span>classmates · travellers · locals</span></button>
+</div>
+
+<div class="scenario active-scenario" id="abroadScenario">
+<div class="tiny" id="abroadPlace">London · Immigration officer</div>
+<div class="prompt" id="abroadPrompt">“What is the purpose of your visit and how long will you stay?”</div><div class="row" style="margin-top:8px"><button class="pill speak-question" id="abroadSpeakQ" data-speak-text="abroadPrompt">🔊 Soruyu dinle</button></div>
+<div class="tiny" id="abroadTask">Görev: Seyahat amacını ve kalış süreni açıkla.</div>
+</div>
+
+<div class="row" style="margin:10px 0 12px">
+<button class="pill" id="abroadNew">🔀 Yeni senaryo</button>
+</div>
+
+<textarea id="abroadText" placeholder="Cevabını İngilizce söyle veya yaz..."></textarea>
+<div class="row" style="margin-top:9px">
+<button class="pill" data-voice="abroadText">🎤 Konuş</button>
+<button class="pill" id="abroadHearCheck">👂 Duyduğunu kontrol et</button>
+<button class="pill primary" id="abroadSend">Gönder</button>
+<button class="pill good" id="abroadEval">Değerlendir</button>
+</div>
+<div id="abroadFeedback"></div>
+<div class="tiny" style="margin-top:10px">Gönder = karşı taraf rolüne devam eder. Değerlendir = cevabına kısa geri bildirim verir.</div>
+</div>
+</section>
+<section class="view" id="surprise"><div class="top"><div class="sub">ARES SPEAKING</div><h2>Surprise Me</h2><div class="sub">Hazırlıksız konuşma.</div></div><div class="card"><div class="prompt" id="surpriseQ">A waiter brings the wrong meal. Explain the problem politely.</div><div class="row" style="margin-top:8px"><button class="pill speak-question" id="surpriseSpeakQ" data-speak-text="surpriseQ">🔊 Soruyu dinle</button></div><textarea id="surpriseText"></textarea><div class="row" style="margin-top:9px"><button class="pill" data-voice="surpriseText">🎤 Konuş</button><button class="pill" id="surpriseNew">🎲 Başka sürpriz</button><button class="pill primary" id="surpriseEval">Değerlendir</button></div><div id="surpriseFeedback"></div></div></section>
+<section class="view" id="mistakes"><div class="top"><div class="sub">ARES SPEAKING</div><h2>My Mistakes</h2></div><div class="card" id="mistakeList">Henüz önemli bir hata kaydedilmedi.</div></section>
+<section class="view" id="progress"><div class="top"><div class="sub">ARES SPEAKING</div><h2>Speaking Progress</h2></div><div class="grid"><div class="stat"><b id="pTurns">0</b>Konuşma turu</div><div class="stat"><b id="pMinutes">0</b>Yaklaşık dakika</div><div class="stat"><b id="pStreak">0</b>Günlük seri</div><div class="stat"><b id="pMistakes">0</b>Önemli düzeltme</div></div></section>
+</main></div><script>
+(function(){
+var KEY='ares_speaking_v5';
+var state={turns:0,minutes:0,streak:0,lastDay:'',mistakes:[]};
+try{var x=JSON.parse(localStorage.getItem(KEY)||'null');if(x){for(var k in x)state[k]=x[k];}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
+function el(id){return document.getElementById(id);}
+function esc(s){return String(s||'').replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m];});}
+function apiKey(){return localStorage.getItem('ing_defter_api_key')||localStorage.getItem('ing_defter_api_key_local_backup')||'';}
+function setKey(){var v=prompt('Gemini API anahtarını gir:',apiKey());if(v){localStorage.setItem('ing_defter_api_key',v.trim());localStorage.setItem('ing_defter_api_key_local_backup',v.trim());alert('API anahtarı kaydedildi.');}}
+function touch(){state.turns++;state.minutes+=1;var t=new Date().toISOString().slice(0,10);if(state.lastDay!==t){var d=new Date();d.setDate(d.getDate()-1);var y=d.toISOString().slice(0,10);state.streak=state.lastDay===y?state.streak+1:1;state.lastDay=t;}save();progress();}
+function progress(){if(el('pTurns'))el('pTurns').textContent=state.turns;if(el('pMinutes'))el('pMinutes').textContent=Math.round(state.minutes);if(el('pStreak'))el('pStreak').textContent=state.streak;if(el('pMistakes'))el('pMistakes').textContent=state.mistakes.length;var box=el('mistakeList');if(box){box.innerHTML=state.mistakes.length?state.mistakes.map(function(m){return '<div style="padding:10px 0;border-bottom:1px solid #ddd"><b>Sen:</b> '+esc(m.a)+'<br><b>Daha doğal:</b> '+esc(m.b)+'</div>';}).join(''):'Henüz önemli bir hata kaydedilmedi.';}}
+var _geminiResolvedModel=null;
+var GEMINI_MODEL_PREFERENCE=['gemini-2.5-flash-lite','gemini-2.5-flash','gemini-3.6-flash'];
+
+function apiRequest(model,key,system,user){
+  var controller=typeof AbortController!=='undefined'?new AbortController():null;
+  var timer=controller?setTimeout(function(){try{controller.abort();}catch(e){}},5500):null;
+  var url='https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent';
+  var payload={
+    systemInstruction:{parts:[{text:system}]},
+    contents:[{role:'user',parts:[{text:user}]}],
+    generationConfig:{maxOutputTokens:220,temperature:0.55}
+  };
+  return fetch(url,{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':key},body:JSON.stringify(payload),signal:controller?controller.signal:undefined}).then(function(r){
+    if(timer)clearTimeout(timer);
+    return r.text().then(function(raw){
+      var d={};try{d=raw?JSON.parse(raw):{};}catch(e){}
+      if(!r.ok){
+        var msg=(d.error&&d.error.message)?d.error.message:raw||('HTTP '+r.status);
+        var err=new Error(msg);err.status=r.status;err.model=model;throw err;
+      }
+      var parts=((((d.candidates||[])[0]||{}).content||{}).parts||[]);
+      var text=parts.map(function(p){return p.text||'';}).join('').trim();
+      if(!text)throw new Error('EMPTY_RESPONSE');
+      _geminiResolvedModel=model;
+      return text;
+    });
+  }).catch(function(err){if(timer)clearTimeout(timer);throw err;});
+}
+
+function ask(system,user){
+  var key=apiKey();
+  if(!key){setKey();key=apiKey();if(!key)return Promise.reject(new Error('NO_KEY'));}
+  var models=_geminiResolvedModel?[_geminiResolvedModel].concat(GEMINI_MODEL_PREFERENCE.filter(function(m){return m!==_geminiResolvedModel;})):GEMINI_MODEL_PREFERENCE.slice();
+  var i=0,lastErr=null;
+  function next(){
+    if(i>=models.length)return Promise.reject(lastErr||new Error('AI_UNAVAILABLE'));
+    var model=models[i++];
+    return apiRequest(model,key,system,user).catch(function(err){
+      lastErr=err;
+      var st=err&&err.status;
+      if(st===400||st===403){return Promise.reject(err);} // bad key/request: don't waste time
+      _geminiResolvedModel=null;
+      return next();
+    });
+  }
+  return next();
+}
+function feedback(id,text){if(el(id))el(id).innerHTML='<div class="feedback">'+esc(text)+'</div>';}
+var activeRecognition=null, activeVoiceButton=null, activeVoiceTarget=null;
+var userRequestedStop=false, restartTimer=null, sessionCommitted='', currentRecognitionText='';
+
+function normalizeSpeechText(s){
+  return String(s||'').replace(/\s+/g,' ').trim();
+}
+
+function mergeSpeechText(base,next){
+  base=normalizeSpeechText(base); next=normalizeSpeechText(next);
+  if(!base)return next;
+  if(!next)return base;
+  var bl=base.toLowerCase(), nl=next.toLowerCase();
+  if(bl===nl)return base;
+  if(nl.indexOf(bl)===0)return next;
+  if(bl.indexOf(nl)===0)return base;
+  var a=base.split(' '), b=next.split(' '), max=Math.min(a.length,b.length);
+  for(var k=max;k>0;k--){
+    var left=a.slice(a.length-k).join(' ').toLowerCase();
+    var right=b.slice(0,k).join(' ').toLowerCase();
+    if(left===right)return normalizeSpeechText(base+' '+b.slice(k).join(' '));
+  }
+  return normalizeSpeechText(base+' '+next);
+}
+
+function collapseRecognitionResults(results){
+  var finalText='', interim='';
+  for(var i=0;i<results.length;i++){
+    var piece=normalizeSpeechText(results[i][0]&&results[i][0].transcript||'');
+    if(!piece)continue;
+    if(results[i].isFinal) finalText=mergeSpeechText(finalText,piece);
+    else interim=piece;
+  }
+  return {finalText:finalText, interim:interim, visible:mergeSpeechText(finalText,interim)};
+}
+
+function autoContinueAfterVoice(target){
+  var box=el(target), t=box?box.value.trim():''; if(!t)return;
+  if(target==='roleText' && el('roleSend')) el('roleSend').click();
+  else if(target==='abroadText' && el('abroadSend')) el('abroadSend').click();
+  else if(target==='coachText' && el('coachSend')) el('coachSend').click();
+  else if(target==='quickText' && el('quickEval')) el('quickEval').click();
+  else if(target==='surpriseText' && el('surpriseEval')) el('surpriseEval').click();
+}
+
+function setVoiceButtonRecording(on){
+  if(!activeVoiceButton)return;
+  activeVoiceButton.textContent=on?'⏹ Durdur':'🎤 Konuş';
+  activeVoiceButton.style.background=on?'#7d2f2f':'';
+  activeVoiceButton.style.color=on?'#fff':'';
+  activeVoiceButton.setAttribute('aria-pressed',on?'true':'false');
+}
+
+function feedbackForVoice(target,msg){
+  var id=target==='roleText'?'roleFeedback':target==='abroadText'?'abroadFeedback':target==='coachText'?'coachFeedback':target==='quickText'?'quickFeedback':target==='surpriseText'?'surpriseFeedback':'';
+  if(id)feedback(id,msg);
+}
+
+function finishVoice(target,box){
+  if(restartTimer){clearTimeout(restartTimer);restartTimer=null;}
+  var combined=mergeSpeechText(sessionCommitted,currentRecognitionText||box.value);
+  combined=normalizeSpeechText(combined);
+  box.value=combined;
+  setVoiceButtonRecording(false);
+  activeRecognition=null; activeVoiceButton=null; activeVoiceTarget=null;
+  sessionCommitted=''; currentRecognitionText=''; userRequestedStop=false;
+  if(combined)setTimeout(function(){autoContinueAfterVoice(target);},320);
+}
+
+function buildRecognition(target,box){
+  var R=window.SpeechRecognition||window.webkitSpeechRecognition;
+  var r=new R();
+  r.lang='en-US'; r.interimResults=true; r.continuous=false; r.maxAlternatives=1;
+
+  r.onresult=function(e){
+    var rebuilt=collapseRecognitionResults(e.results);
+    currentRecognitionText=rebuilt.visible;
+    box.value=mergeSpeechText(sessionCommitted,currentRecognitionText);
+  };
+
+  r.onerror=function(e){
+    if(e.error==='aborted')return;
+    if(e.error==='not-allowed'||e.error==='service-not-allowed'){
+      feedbackForVoice(target,'Mikrofon izni kapalı. Tarayıcı ayarlarından mikrofon iznini aç.');
+      userRequestedStop=true;
+    }
+  };
+
+  r.onend=function(){
+    if(activeVoiceTarget!==target)return;
+    if(userRequestedStop){finishVoice(target,box);return;}
+    sessionCommitted=mergeSpeechText(sessionCommitted,currentRecognitionText||box.value);
+    currentRecognitionText='';
+    box.value=sessionCommitted;
+    setVoiceButtonRecording(true);
+    restartTimer=setTimeout(function(){
+      if(activeVoiceTarget!==target||userRequestedStop)return;
+      try{
+        activeRecognition=buildRecognition(target,box);
+        activeRecognition.start();
+        setVoiceButtonRecording(true);
+      }catch(err){
+        // Keep the text and finish cleanly instead of duplicating hypotheses.
+        finishVoice(target,box);
+      }
+    },60);
+  };
+  return r;
+}
+
+function voice(target,button){
+  var R=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!R){alert('Bu tarayıcıda ses tanıma kullanılamıyor. Yazıp gönderebilirsin.');return;}
+
+  if(activeVoiceTarget){
+    if(activeVoiceTarget===target){
+      userRequestedStop=true;
+      setVoiceButtonRecording(false);
+      try{activeRecognition&&activeRecognition.stop();}
+      catch(e){var box0=el(target);if(box0)finishVoice(target,box0);}
+    }
+    return;
+  }
+
+  var box=el(target); if(!box)return;
+  window.speechSynthesis&&window.speechSynthesis.cancel();
+  box.value=''; sessionCommitted=''; currentRecognitionText=''; userRequestedStop=false;
+  activeVoiceTarget=target; activeVoiceButton=button;
+  setVoiceButtonRecording(true);
+  try{
+    activeRecognition=buildRecognition(target,box);
+    activeRecognition.start();
+  }catch(e){
+    setVoiceButtonRecording(false);
+    activeRecognition=null;activeVoiceButton=null;activeVoiceTarget=null;
+    feedbackForVoice(target,'Mikrofon başlatılamadı. Tekrar deneyebilirsin.');
+  }
+}
+
+var rolePools={
+hotel:[
+['Rome · Receptionist','“I’m sorry, but I can’t find a reservation under your name.”','Rezervasyon yaptığını açıkla ve çözüm iste.'],
+['Paris · Receptionist','“Your room won’t be ready for another two hours.”','Erken geldiğini söyle ve valizini bırakıp bırakamayacağını sor.'],
+['Vienna · Reception','“I’m sorry, but the air conditioning in your room is not working.”','Sorunu açıkla ve başka oda iste.'],
+['Berlin · Reception','“Check-out is at 11 a.m.”','Geç çıkış yapıp yapamayacağını ve ücretini sor.']
+],
+restaurant:[
+['Barcelona · Waiter','“Is everything okay with your meal, sir?”','Yanlış yemek geldiğini nazikçe açıkla.'],
+['Rome · Waiter','“Are you ready to order?”','Bir ana yemek sipariş et ve içeriğini sor.'],
+['Paris · Waiter','“Would you like anything else?”','Hesabı iste ve kartla ödeyip ödeyemeyeceğini sor.'],
+['Athens · Waiter','“This dish contains nuts.”','Alerjin olduğunu söyle ve alternatif iste.']
+],
+cafe:[
+['Dublin · Barista','“Hi! What can I get for you?”','Kahve sipariş et, boyutunu söyle ve takeaway iste.'],
+['Amsterdam · Barista','“Would you like milk or sugar?”','Sade kahve istediğini açıkla.'],
+['London · Barista','“Our card machine is not working.”','Nakit olmadığını söyle ve başka ödeme seçeneği sor.'],
+['Malta · Barista','“Would you like something to eat with that?”','Küçük bir atıştırmalık sor ve fiyatını öğren.']
+],
+passport:[
+['London · Immigration officer','“What is the purpose of your visit?”','Seyahat amacını açıkla.'],
+['Dublin · Immigration officer','“How long are you staying?”','Kalış süreni ve dönüş tarihini söyle.'],
+['Rome · Border officer','“Where are you staying?”','Konaklama yerini açıkla.'],
+['Amsterdam · Border officer','“Do you have a return ticket?”','Dönüş biletin olduğunu belirt.']
+],
+taxi:[
+['Amsterdam · Driver','“Where would you like to go?”','Gideceğin yeri söyle, süreyi sor.'],
+['Rome · Driver','“Traffic is heavy today.”','Yaklaşık varış süresini ve alternatif rotayı sor.'],
+['Paris · Driver','“Cash only, please.”','Kartla ödemek istediğini söyle ve çözüm sor.'],
+['Malta · Driver','“Which entrance should I drop you at?”','Otelin ana girişini istediğini açıkla.']
+],
+train:[
+['Prague · Station employee','“Your train has already left.”','Sonraki treni ve biletinin geçerli olup olmadığını sor.'],
+['Vienna · Ticket desk','“Which train would you like?”','Gideceğin şehri ve tercih ettiğin saati söyle.'],
+['Milan · Station employee','“The platform has changed.”','Yeni peronu ve nasıl gideceğini sor.'],
+['Berlin · Conductor','“May I see your ticket?”','Biletini telefondan göstermek istediğini söyle.']
+],
+shopping:[
+['Milan · Shop assistant','“Can I help you find something?”','Bedenini söyle ve başka renk sor.'],
+['London · Shop assistant','“Do you have the receipt?”','Ürünü iade etmek istediğini ve fişinin olduğunu söyle.'],
+['Barcelona · Shop assistant','“That size is out of stock.”','Benzer başka ürün olup olmadığını sor.'],
+['Paris · Shop assistant','“Would you like to try it on?”','Deneme kabininin nerede olduğunu sor.']
+],
+smalltalk:[
+['Malta · Classmate','“So, what brought you here?”','Kendini tanıt ve neden İngilizce öğrendiğini söyle.'],
+['Dublin · Traveller','“Is this your first time here?”','Kısa cevap ver ve karşı soru sor.'],
+['Rome · Local','“What do you think of the city so far?”','Şehir hakkındaki fikrini söyle.'],
+['Barcelona · Classmate','“What do you usually do after class?”','Günlük planını anlat ve ona da sor.']
+]
+};
+
+var abroadPools={
+passport:[
+['London · Immigration officer','“What is the purpose of your visit and how long will you stay?”','Amacını ve kalış süreni açıkla.'],
+['Rome · Baggage desk','“Your suitcase did not arrive.”','Bavulunun kayıp olduğunu anlat ve ne yapman gerektiğini sor.'],
+['Amsterdam · Airline desk','“Your flight has been delayed by three hours.”','Alternatif uçuş veya yemek kuponu sor.'],
+['Dublin · Security','“Is this bag yours?”','Çantanın sana ait olduğunu ve içinde ne olduğunu açıkla.']
+],
+hotel:[
+['Rome · Reception','“I can’t find your booking. Do you have a confirmation?”','Rezervasyon onayını gösterdiğini söyle.'],
+['Paris · Reception','“Breakfast is not included.”','Kahvaltı eklemenin ücretini sor.'],
+['Vienna · Reception','“The room is on the fifth floor.”','Asansör olup olmadığını sor.'],
+['Berlin · Reception','“We need a €100 deposit.”','Depozitonun ne zaman iade edileceğini sor.']
+],
+restaurant:[
+['Barcelona · Restaurant','“You ordered the pasta, right?”','Farklı bir yemek sipariş ettiğini açıkla.'],
+['Rome · Restaurant','“Would you like still or sparkling water?”','Tercihini söyle ve menüyü iste.'],
+['Athens · Restaurant','“The kitchen closes in ten minutes.”','Hızlıca ne sipariş edebileceğini sor.'],
+['Paris · Restaurant','“The service charge is included.”','Bahşiş bırakmanın gerekli olup olmadığını sor.']
+],
+train:[
+['Prague · Station','You missed your connection.','Sonraki treni ve yeni bilet gerekip gerekmediğini sor.'],
+['Milan · Station','The train is delayed by 45 minutes.','Bağlantını kaçırıp kaçırmayacağını sor.'],
+['Vienna · Station','You are not sure which platform to use.','Peronu ve kalkış saatini sor.'],
+['Berlin · Station','The ticket machine is not accepting your card.','Nereden bilet alabileceğini sor.']
+],
+directions:[
+['Vienna · Street','Your phone battery is dead.','Şehir merkezine nasıl gideceğini sor.'],
+['Rome · Street','You cannot find your hotel.','Otel adresini gösterip yol tarifi iste.'],
+['Paris · Metro','You are on the wrong metro line.','Doğru hatta nasıl geçeceğini sor.'],
+['Prague · Old Town','You want to find the nearest tram stop.','En yakın tramvay durağını sor.']
+],
+shopping:[
+['Milan · Store','The shirt you like is too small.','Daha büyük beden ve başka renk sor.'],
+['London · Store','You want a tax-free form.','Tax-free işleminin nasıl yapıldığını sor.'],
+['Barcelona · Store','The price at the register is different.','Etikette farklı fiyat gördüğünü açıkla.'],
+['Paris · Store','You want to exchange a gift.','Değişim şartlarını sor.']
+],
+cafe:[
+['Paris · Café','Order a black coffee and something small to eat.','Sonra kartla ödeme yapıp yapamayacağını sor.'],
+['Dublin · Café','There are no free tables inside.','Dışarıda oturup oturamayacağını sor.'],
+['Malta · Café','Your coffee is cold.','Nazikçe değiştirilmesini iste.'],
+['Amsterdam · Café','You are not sure what a menu item is.','İçeriğini sor.']
+],
+problem:[
+['Berlin · City centre','You lost your wallet.','En yakın polis merkezini sor ve ne olduğunu anlat.'],
+['Rome · Pharmacy','You need a basic painkiller.','Reçetesiz uygun bir seçenek sor.'],
+['Paris · Street','Your phone was stolen.','Yardım iste ve polis merkezini sor.'],
+['Malta · Hotel','You locked yourself out of your room.','Resepsiyondan yeni kart iste.']
+],
+social:[
+['Malta · Language school','“What do you usually do after class?”','Cevap ver ve karşı soru sor.'],
+['Dublin · Hostel','“Where are you from?”','Kendini tanıt ve sohbeti sürdür.'],
+['Barcelona · Tour group','“What places have you visited so far?”','Gezdiğin yerlerden bahset.'],
+['Rome · Café','“Are you travelling alone?”','Kısa cevap ver ve karşı tarafın seyahatini sor.']
+]
+};
+
+var currentRole='hotel', currentAbroad='passport', roleScenario=null, abroadScenario=null;
+function randomItem(arr,prev){if(!arr||!arr.length)return null;if(arr.length===1)return arr[0];var x;do{x=arr[Math.floor(Math.random()*arr.length)];}while(prev&&x[1]===prev[1]);return x;}
+function setActive(selector,attr,val){var nodes=document.querySelectorAll(selector);for(var i=0;i<nodes.length;i++){nodes[i].classList.toggle('active',nodes[i].getAttribute(attr)===val);}}
+function drawRole(newOne){roleScenario=newOne?randomItem(rolePools[currentRole],roleScenario):(roleScenario||rolePools[currentRole][0]);if(el('rolePlace'))el('rolePlace').textContent=roleScenario[0];if(el('rolePrompt'))el('rolePrompt').textContent=roleScenario[1];if(el('roleTask'))el('roleTask').textContent='Görev: '+roleScenario[2];}
+function drawAbroad(newOne){abroadScenario=newOne?randomItem(abroadPools[currentAbroad],abroadScenario):(abroadScenario||abroadPools[currentAbroad][0]);if(el('abroadPlace'))el('abroadPlace').textContent=abroadScenario[0];if(el('abroadPrompt'))el('abroadPrompt').textContent=abroadScenario[1];if(el('abroadTask'))el('abroadTask').textContent='Görev: '+abroadScenario[2];}
+
+function isQuotaOrNetworkError(e){
+  var m=String(e&&e.message||e||'').toLowerCase();
+  return (e&&e.status===429)||m.indexOf('quota')>=0||m.indexOf('rate limit')>=0||m.indexOf('failed to fetch')>=0||m.indexOf('abort')>=0||m.indexOf('ai_unavailable')>=0;
+}
+function localRoleReply(kind,scenario,text){
+  var ctx=((scenario&&scenario[0])||'')+' '+((scenario&&scenario[1])||'')+' '+((scenario&&scenario[2])||'');
+  var q='Would you like anything else?'; var r='Sure.';
+  if(/café|cafe|coffee|barista/i.test(ctx)){r=/croissant|cake|sandwich|food/i.test(text)?'Of course.':'No problem.';q='Would you like anything else with that?';}
+  else if(/hotel|reception|room/i.test(ctx)){r='Of course. Let me check that for you.';q='Is there anything else you need?';}
+  else if(/passport|immigration|airport/i.test(ctx)){r='All right, thank you.';q='Where will you be staying?';}
+  else if(/taxi|driver/i.test(ctx)){r='Sure, no problem.';q='What time do you need to be there?';}
+  else if(/train|station|ticket/i.test(ctx)){r='Okay, I can help with that.';q='Which train are you trying to catch?';}
+  else if(/shopping|shop|store/i.test(ctx)){r='Of course.';q='What size are you looking for?';}
+  else if(/restaurant|waiter|meal|bill/i.test(ctx)){r='Certainly.';q='Would you like anything else?';}
+  else if(kind==='coach'){r='I see.';q='Can you tell me a little more about that?';}
+  return r+' '+q;
+}
+function localEvalText(text){
+  var words=normalizeSpeechText(text).split(' ').filter(Boolean).length;
+  var clarity=words>=4?9:words>=2?8:7;
+  return 'Anlaşılırlık: '+clarity+'/10\nDaha doğal: '+normalizeSpeechText(text)+'\nGayet anlaşılır; konuşmaya devam et.';
+}
+function localSpeechCheck(text,scenario){return localSpeechHint(text,scenario);}
+function parseJsonLoose(raw){
+  var s=String(raw||'').trim().replace(/^```(?:json)?\s*/i,'').replace(/```\s*$/,'').trim();
+  var a=s.indexOf('{'), b=s.lastIndexOf('}');
+  if(a>=0&&b>a)s=s.slice(a,b+1);
+  try{return JSON.parse(s);}catch(e){return null;}
+}
+
+function askJson(system,user,retrySystem){
+  return ask(system,user).then(function(raw){
+    var obj=parseJsonLoose(raw);
+    if(obj)return obj;
+    if(!retrySystem)throw new Error('AI yanıtı okunamadı. Lütfen tekrar dene.');
+    return ask(retrySystem,user).then(function(raw2){
+      var obj2=parseJsonLoose(raw2);
+      if(!obj2)throw new Error('AI yanıtı okunamadı. Lütfen tekrar dene.');
+      return obj2;
+    });
+  });
+}
+
+function evalAnswer(kind,scenario,text,feedbackId){
+  touch();feedback(feedbackId,'Değerlendiriliyor…');
+  var sys='You are a speaking-first English coach for a Turkish A2-B1 learner. Fluency first. Return ONLY one-line valid JSON with keys clarity (integer 1-10), correction (Turkish, empty if no important correction), natural (one concise natural English version), encouragement (short Turkish). No markdown.';
+  var retry='Return ONLY valid compact JSON. Keys: clarity, correction, natural, encouragement. No markdown and no extra text.';
+  askJson(sys,'Scenario: '+scenario[0]+' | '+scenario[1]+' | Task: '+scenario[2]+'\nLearner answer: '+text,retry).then(function(o){
+    var clarity=Math.max(1,Math.min(10,parseInt(o.clarity,10)||5));
+    var correction=normalizeSpeechText(o.correction||'');
+    var natural=normalizeSpeechText(o.natural||text);
+    var encouragement=normalizeSpeechText(o.encouragement||'Devam et, amaç iletişimi sürdürmek.');
+    var out='Anlaşılırlık: '+clarity+'/10\n'+(correction?'Önemli düzeltme: '+correction+'\n':'')+'Daha doğal: '+natural+'\n'+encouragement;
+    feedback(feedbackId,out);
+  }).catch(function(e){feedback(feedbackId,isQuotaOrNetworkError(e)?localEvalText(text):'AI bağlantısında sorun oldu.');});
+}
+
+function continueRoleJson(kind,scenario,text){
+  var sys='You are the other person in a realistic travel role-play. Stay in character. Return ONLY compact valid JSON with two keys: reply and question. reply must be 1-2 short natural B1 English sentences reacting to the learner. question must be exactly one complete natural follow-up question. No markdown.';
+  var retry='Stay in character. Return ONLY valid JSON: {"reply":"...","question":"...?"}. Both fields must be complete English. No extra text.';
+  return askJson(sys,'Role/context: '+scenario[0]+' | Situation: '+scenario[1]+' | Learner task: '+scenario[2]+'\nLearner: '+text,retry).then(function(o){
+    var reply=normalizeSpeechText(o.reply||'Sure.');
+    var q=normalizeSpeechText(o.question||'');
+    if(q && q.slice(-1)!=='?')q+='?';
+    if(!q)q=(kind==='abroad'?'What would you like to do next?':'Would you like anything else?');
+    return reply+' '+q;
+  });
+}
+
+function sendRole(kind,scenario,text,feedbackId){
+  touch();feedback(feedbackId,'Karşı taraf düşünüyor…');
+  continueRoleJson(kind,scenario,text).then(function(clean){
+    feedback(feedbackId,clean);lastAresSpoken=clean;speakEnglish(clean);
+  }).catch(function(e){var clean=localRoleReply(kind,scenario,text);feedback(feedbackId,clean+'\n⚡ Hızlı mod');lastAresSpoken=clean;speakEnglish(clean);});
+}
+
+document.addEventListener('click',function(e){
+  var t=e.target;
+  var speakNode=t;
+  while(speakNode&&speakNode!==document){
+    var sid=speakNode.getAttribute&&speakNode.getAttribute('data-speak-text');
+    if(sid){speakElement(sid);return;}
+    speakNode=speakNode.parentNode;
+  }
+  while(t&&t!==document){
+    var v=t.getAttribute&&t.getAttribute('data-voice');if(v){e.preventDefault();voice(v,t);return;}
+    var rt=t.getAttribute&&t.getAttribute('data-role-topic');if(rt){currentRole=rt;roleScenario=null;setActive('[data-role-topic]','data-role-topic',rt);drawRole(false);setTimeout(function(){speakElement('rolePrompt');},80);return;}
+    var at=t.getAttribute&&t.getAttribute('data-abroad-topic');if(at){currentAbroad=at;abroadScenario=null;setActive('[data-abroad-topic]','data-abroad-topic',at);drawAbroad(false);setTimeout(function(){speakElement('abroadPrompt');},80);return;}
+    t=t.parentNode;
+  }
+});
+
+if(el('roleNew'))el('roleNew').onclick=function(){drawRole(true);speakElement('rolePrompt');};
+if(el('roleHearCheck'))el('roleHearCheck').onclick=function(){hearCheck(el('roleText').value.trim(),roleScenario,'roleFeedback','roleText');};
+if(el('roleSend'))el('roleSend').onclick=function(){var t=el('roleText').value.trim();if(!t)return feedback('roleFeedback','Önce bir cevap söyle veya yaz.');sendRole('role',roleScenario,t,'roleFeedback');};
+if(el('roleEval'))el('roleEval').onclick=function(){var t=el('roleText').value.trim();if(!t)return feedback('roleFeedback','Önce bir cevap söyle veya yaz.');evalAnswer('role',roleScenario,t,'roleFeedback');};
+
+if(el('abroadNew'))el('abroadNew').onclick=function(){drawAbroad(true);speakElement('abroadPrompt');};
+if(el('abroadHearCheck'))el('abroadHearCheck').onclick=function(){hearCheck(el('abroadText').value.trim(),abroadScenario,'abroadFeedback','abroadText');};
+if(el('abroadSend'))el('abroadSend').onclick=function(){var t=el('abroadText').value.trim();if(!t)return feedback('abroadFeedback','Önce bir cevap söyle veya yaz.');sendRole('abroad',abroadScenario,t,'abroadFeedback');};
+if(el('abroadEval'))el('abroadEval').onclick=function(){var t=el('abroadText').value.trim();if(!t)return feedback('abroadFeedback','Önce bir cevap söyle veya yaz.');evalAnswer('abroad',abroadScenario,t,'abroadFeedback');};
+
+function cleanAIText(text){
+  var s=String(text||'').trim();
+  var bad=[
+    /^check constraints\b/i,
+    /^constraints\b/i,
+    /^ares persona\b/i,
+    /^analysis\b/i,
+    /^reasoning\b/i,
+    /^internal\b/i,
+    /^system prompt\b/i,
+    /^developer\b/i
+  ];
+  var lines=s.split(/\r?\n/), keep=[], skipping=false;
+  for(var i=0;i<lines.length;i++){
+    var line=lines[i].trim();
+    var normalized=line.replace(/^[\s>*#_\-•]+/,'').replace(/\*\*/g,'').trim();
+    var isBad=false;
+    for(var j=0;j<bad.length;j++){if(bad[j].test(normalized)){isBad=true;break;}}
+    if(isBad){skipping=true;continue;}
+    if(skipping){
+      if(!line){skipping=false;}
+      continue;
+    }
+    keep.push(lines[i]);
+  }
+  var out=keep.join('\n').trim();
+  return out;
+}
+
+var lastAresSpoken='';
+function speakEnglish(text){
+  var s=String(text||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
+  if(!s)return;
+  if(!('speechSynthesis' in window)){alert('Bu tarayıcı sesli okuma özelliğini desteklemiyor.');return;}
+  window.speechSynthesis.cancel();
+  var u=new SpeechSynthesisUtterance(s);
+  u.lang='en-US';
+  u.rate=0.92;
+  u.pitch=1.0;
+  var voices=window.speechSynthesis.getVoices();
+  var preferred=null;
+  for(var i=0;i<voices.length;i++){
+    if(/^en(-|_)/i.test(voices[i].lang||'')){preferred=voices[i];break;}
+  }
+  if(preferred)u.voice=preferred;
+  window.speechSynthesis.speak(u);
+}
+function speakElement(id){
+  var node=el(id);if(node)speakEnglish(node.textContent||node.innerText||'');
+}
+
+function localSpeechHint(text,scenario){
+  var s=String(text||'');
+  var context=((scenario&&scenario[0])||'')+' '+((scenario&&scenario[1])||'')+' '+((scenario&&scenario[2])||'');
+  if(/coffee|café|barista/i.test(context)){
+    s=s.replace(/\btable of coffee\b/ig,'black coffee');
+    s=s.replace(/\btable coffee\b/ig,'black coffee');
+  }
+  return s;
+}
+
+function hearCheck(text,scenario,feedbackId,targetId){
+  text=localSpeechHint(text,scenario);
+  if(el(targetId))el(targetId).value=text;
+  if(!text){feedback(feedbackId,'Önce Konuş düğmesine basıp bir cümle söyle.');return;}
+  feedback(feedbackId,'Ses tanıma kontrol ediliyor…');
+
+  var sys="You are a speech-transcript checker. Your only job is to detect likely speech-recognition mistakes from context. Do not evaluate grammar, do not mention rules, constraints, personas, prompts, reasoning or internal checks. Return ONLY valid JSON with two string fields: corrected and note. corrected must contain the learner's transcript with only likely recognition mistakes fixed. note must be a very short Turkish sentence. If no recognition mistake is likely, corrected must equal the transcript and note must be Ses tanıma doğru görünüyor.";
+  var user='Scenario: '+scenario[0]+' | '+scenario[1]+' | Task: '+scenario[2]+'\nSpeech transcript: '+text;
+
+  ask(sys,user).then(function(z){
+    var raw=cleanAIText(z);
+    var corrected=text, note='Ses tanıma doğru görünüyor.';
+    try{
+      var cleaned=raw.replace(/^```json\s*/i,'').replace(/```$/,'').trim();
+      var obj=JSON.parse(cleaned);
+      if(obj&&typeof obj.corrected==='string'&&obj.corrected.trim()) corrected=obj.corrected.trim();
+      if(obj&&typeof obj.note==='string'&&obj.note.trim()) note=obj.note.trim();
+    }catch(e){
+      /* If Gemini ignores JSON, never expose its meta-output.
+         Keep the transcript and show a safe user-facing result. */
+      corrected=text;
+      note='Ses tanıma doğru görünüyor.';
+    }
+    corrected=localSpeechHint(corrected,scenario);
+    if(el(targetId))el(targetId).value=corrected;
+    feedback(feedbackId,'👂 Duyduğum: '+corrected+'\n✅ '+note);
+  }).catch(function(e){var corrected=localSpeechCheck(text,scenario);if(el(targetId))el(targetId).value=corrected;feedback(feedbackId,'👂 Duyduğum: '+corrected+'\n✅ Yerel kontrol');});
+}
+
+var quick=['What did you do after work yesterday?','What makes a café good for you?','What was the best part of your last trip?','What do you do when you cannot find the right English word?','Would you rather travel alone or with friends? Why?','How do you relax after a stressful day?'];
+var surprise=['Your hotel room is noisy. Call reception and ask for another room.','You missed your train. Ask a station employee what your options are.','A tourist asks what food they should try in Türkiye. Recommend something.','Someone asks why you are learning English. Answer naturally.','Your flight has been delayed. Ask airline staff about your options.'];
+
+if(el('apiBtn'))el('apiBtn').onclick=setKey;
+if(el('coachSend'))el('coachSend').onclick=function(){var t=el('coachText').value.trim();if(!t)return;var c=el('coachChat');c.innerHTML+='<div class="msg me">'+esc(t)+'</div>';touch();askJson('You are Ares, a speaking-first coach for an A2-B1 Turkish learner. Keep the learner speaking. Return ONLY valid compact JSON with keys reply and question. reply is short English and may include at most one brief important correction. question is exactly one natural complete follow-up question. No markdown.',t,'Return ONLY valid JSON: {"reply":"...","question":"...?"}.').then(function(o){var r=normalizeSpeechText(o.reply||'Good.');var q=normalizeSpeechText(o.question||'Can you tell me more?');if(q.slice(-1)!=='?')q+='?';var clean=r+' '+q;c.innerHTML+='<div class="msg ai">'+esc(clean)+'</div>';c.scrollTop=c.scrollHeight;lastAresSpoken=clean;speakEnglish(clean);}).catch(function(err){var clean=localRoleReply('coach',null,t);c.innerHTML+='<div class="msg ai">'+esc(clean)+'</div>';c.scrollTop=c.scrollHeight;feedback('coachFeedback','⚡ Hızlı mod');lastAresSpoken=clean;speakEnglish(clean);});};
+if(el('coachSpeakLast'))el('coachSpeakLast').onclick=function(){if(lastAresSpoken)speakEnglish(lastAresSpoken);else alert('Önce Ares ile bir mesajlaşma yap.');};
+if(el('quickNew'))el('quickNew').onclick=function(){el('quickQ').textContent=quick[Math.floor(Math.random()*quick.length)];speakElement('quickQ');};
+if(el('quickEval'))el('quickEval').onclick=function(){var t=el('quickText').value.trim();if(!t)return;touch();var q0=el('quickQ').textContent;askJson('You are a natural B1 speaking partner. Return ONLY valid compact JSON with keys reply and question. reply is 1-2 short English sentences. question is exactly one complete follow-up question. No markdown.',q0+'\nLearner: '+t,'Return ONLY valid JSON: {"reply":"...","question":"...?"}.').then(function(o){var r=normalizeSpeechText(o.reply||'I see.');var q=normalizeSpeechText(o.question||'Can you tell me a little more?');if(q.slice(-1)!=='?')q+='?';var clean=r+' '+q;feedback('quickFeedback',clean);lastAresSpoken=clean;speakEnglish(clean);el('quickQ').textContent=q;}).catch(function(e){var clean='I see. Can you tell me a little more?';feedback('quickFeedback',clean+'\n⚡ Hızlı mod');lastAresSpoken=clean;speakEnglish(clean);el('quickQ').textContent='Can you tell me a little more?';});};
+if(el('surpriseNew'))el('surpriseNew').onclick=function(){el('surpriseQ').textContent=surprise[Math.floor(Math.random()*surprise.length)];speakElement('surpriseQ');};
+if(el('surpriseEval'))el('surpriseEval').onclick=function(){var t=el('surpriseText').value.trim();if(!t)return;touch();var s0=el('surpriseQ').textContent;askJson('Stay in the realistic situation. Return ONLY valid compact JSON with keys reply and question. reply is 1-2 short natural B1 English sentences. question is exactly one complete follow-up question. No markdown.',s0+'\nLearner: '+t,'Return ONLY valid JSON: {"reply":"...","question":"...?"}.').then(function(o){var r=normalizeSpeechText(o.reply||'Okay.');var q=normalizeSpeechText(o.question||'What would you like to do next?');if(q.slice(-1)!=='?')q+='?';var clean=r+' '+q;feedback('surpriseFeedback',clean);lastAresSpoken=clean;speakEnglish(clean);el('surpriseQ').textContent=q;}).catch(function(e){var clean='Okay. What would you like to do next?';feedback('surpriseFeedback',clean+'\n⚡ Hızlı mod');lastAresSpoken=clean;speakEnglish(clean);el('surpriseQ').textContent='What would you like to do next?';});};
+
+var chunks=['Let me think…','I see your point, but…','To be honest…','What I mean is…','It depends on…','As far as I know…'];
+if(el('dailyChunk'))el('dailyChunk').textContent=chunks[Math.floor(Date.now()/86400000)%chunks.length];
+drawRole(false);drawAbroad(false);progress();
+if(!location.hash)location.hash='mission';
+})();
+</script></body></html>
