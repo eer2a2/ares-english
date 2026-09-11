@@ -361,7 +361,7 @@
   <nav id="sidebar">
     <div class="brand">
       <h1>İngilizce Defterim</h1>
-      <div class="sub">Kişisel çalışma günlüğü · 60 ders</div>
+      <div class="sub">Kişisel çalışma günlüğü · 42 çekirdek ders</div>
       <div class="sub" style="margin-top:2px; font-weight:600; opacity:0.85;">Erhan E.</div>
     </div>
     <input id="search-mini" placeholder="Kelime / cümle ara…" oninput="handleGlobalSearchInput(this.value)">
@@ -379,57 +379,37 @@
         <span class="dot" style="background:#fff;"></span> 🎯 Seviye Tespit Sınavı
       </div>
       <div class="navitem" id="lessons-toggle" onclick="toggleLessons()">
-        <span style="display:flex;align-items:center;gap:10px;"><span class="dot"></span> Dersler (1–60)</span>
+        <span style="display:flex;align-items:center;gap:10px;"><span class="dot"></span> Dersler · 42 Çekirdek</span>
         <span class="chev">›</span>
       </div>
       <div id="lesson-list"></div>
     </div>
     <div class="navgroup">
-      <div class="navgroup-title">Konuşma Odaklı</div>
-      <div class="navitem" onclick="window.location.href='./speaking.html?v=19x1'" style="background:var(--accent); color:#fff; font-weight:700; margin-bottom:6px;">
-        <span class="dot" style="background:#fff;"></span> 🎤 Ares Speaking
-      </div>
-      <div style="font-size:11px;color:#9db0c0;padding:0 12px 4px;line-height:1.4;">Speaking Coach · Role Play · Abroad Simulation</div>
-    </div>
-    <div class="navgroup">
-      <div class="navgroup-title">Malta Hazırlığı</div>
-      <div class="navitem" data-view="maltaenglish" onclick="navigate('maltaenglish')"><span class="dot"></span> Malta Survival English</div>
-      <div class="navitem" data-view="speaking" onclick="navigate('speaking')"><span class="dot"></span> Konuşma Challenge</div>
-      <div class="navitem" data-view="shadowing" onclick="navigate('shadowing')"><span class="dot"></span> Shadowing (Dinle-Tekrarla)</div>
-    </div>
-    <div class="navgroup">
-      <div class="navgroup-title">Akıcılık Pratiği</div>
-      <div class="navitem" data-view="freetalk" onclick="navigate('freetalk')"><span class="dot"></span> ⏱️ Serbest Konuşma (Rastgele Konu)</div>
-      <div class="navitem" data-view="chunks" onclick="navigate('chunks')"><span class="dot"></span> 🧩 Kalıp Cümle Bankası</div>
+      <div class="navgroup-title">Konuşma & İngilizce</div>
+      <div class="navitem" onclick="window.location.href='./speaking.html?v=49'" style="background:var(--accent); color:#fff; font-weight:700; margin-bottom:6px;"><span class="dot" style="background:#fff;"></span> 🎤 Ares Speaking</div>
+      <div class="navitem" data-view="chunks" onclick="navigate('chunks')"><span class="dot"></span> 🧩 Kalıp Cümleler</div>
+      <div class="navitem" data-view="collocations" onclick="navigate('collocations')"><span class="dot"></span> 🎯 Collocations</div>
+      <div class="navitem" data-view="phrasalhome" onclick="navigate('phrasalhome')"><span class="dot"></span> 🔗 Phrasal Verbs</div>
+      <div class="navitem" data-view="shadowing" onclick="navigate('shadowing')"><span class="dot"></span> 🎧 Shadowing</div>
     </div>
     <div class="navgroup">
       <div class="navgroup-title">Gramer</div>
-      <div class="navitem" data-view="tenses" onclick="navigate('tenses')"><span class="dot"></span> Tenses (Zamanlar)</div>
-      <div class="navitem" data-view="prefixsuffix" onclick="navigate('prefixsuffix')"><span class="dot"></span> Prefix / Suffix</div>
-      <div class="navitem" data-view="aciklamalar" onclick="navigate('aciklamalar')"><span class="dot"></span> Açıklamalar</div>
-      <div class="navitem" data-view="irregular" onclick="navigate('irregular')"><span class="dot"></span> Irregular Verbs</div>
-      <div class="navitem" data-view="phrasalhome" onclick="navigate('phrasalhome')"><span class="dot"></span> Phrasal Verbs</div>
+      <div class="navitem" data-view="tenses" onclick="navigate('tenses')"><span class="dot"></span> ⏱️ Tenses</div>
+      <div class="navitem" data-view="irregular" onclick="navigate('irregular')"><span class="dot"></span> 🔄 Irregular Verbs</div>
+      <div class="navitem" data-view="aciklamalar" onclick="navigate('aciklamalar')"><span class="dot"></span> 📖 Açıklamalar</div>
     </div>
     <div class="navgroup">
-      <div class="navgroup-title">Kelime Defteri</div>
-      <div class="navitem" data-view="yenikelimeler" onclick="navigate('yenikelimeler')"><span class="dot"></span> Yeni Kelimeler</div>
-      <div class="navitem" data-view="kelimelerim" onclick="navigate('kelimelerim')"><span class="dot"></span> Kelimelerim</div>
-      <div class="navitem" data-view="zorcumleler" onclick="navigate('zorcumleler')"><span class="dot"></span> Zor Cümleler</div>
-      <div class="navitem" data-view="collocations" onclick="navigate('collocations')"><span class="dot"></span> Kelime Kalıpları (Collocations)</div>
-      <div class="navitem with-badge" data-view="mistakes" onclick="navigate('mistakes')"><span style="display:flex;align-items:center;gap:10px;"><span class="dot"></span> Yanlışlarım</span><span class="badge-count" id="mistake-badge">0</span></div>
-      <div class="navitem" data-view="favorites" onclick="navigate('favorites')"><span class="dot"></span> Favori Derslerim</div>
+      <div class="navgroup-title">Kelime & Tekrar</div>
+      <div class="navitem" data-view="wordbook" onclick="navigate('wordbook')"><span class="dot"></span> 📚 Kelime Defterim</div>
+      <div class="navitem with-badge" data-view="repeatcenter" onclick="navigate('repeatcenter')"><span style="display:flex;align-items:center;gap:10px;"><span class="dot"></span> 🔁 Tekrar Merkezi</span><span class="badge-count" id="due-badge">0</span></div>
+      <div class="navitem" data-view="flashcards" onclick="navigate('flashcards')"><span class="dot"></span> 🃏 Kelime Kartları</div>
     </div>
     <div class="navgroup">
       <div class="navgroup-title">Pratik</div>
-      <div class="navitem" data-view="flashcards" onclick="navigate('flashcards')"><span class="dot"></span> Kelime Kartları</div>
-      <div class="navitem with-badge" data-view="review" onclick="navigate('review')"><span style="display:flex;align-items:center;gap:10px;"><span class="dot"></span> Bugün Tekrar Et</span><span class="badge-count" id="due-badge">0</span></div>
-      <div class="navitem" data-view="quiz" onclick="navigate('quiz')"><span class="dot"></span> Quiz</div>
-      <div class="navitem" data-view="dictation" onclick="navigate('dictation')"><span class="dot"></span> Dikte</div>
-      <div class="navitem" data-view="builder" onclick="navigate('builder')"><span class="dot"></span> Cümle Kur</div>
-      <div class="navitem" data-view="journal" onclick="navigate('journal')"><span class="dot"></span> Yazma Günlüğü</div>
-      <div class="navitem" data-view="tensequiz" onclick="navigate('tensequiz')"><span class="dot"></span> Zaman Testi (Tenses)</div>
-      <div class="navitem" data-view="aichat" onclick="navigate('aichat')"><span class="dot"></span> 🐾 Ares — English Coach</div>
-      <div class="navitem" data-view="phrasalmc" onclick="navigatePhrasalMixedMC()"><span class="dot"></span> 🔀 Karışık Phrasal Verb Testi</div>
+      <div class="navitem" data-view="quizcenter" onclick="navigate('quizcenter')"><span class="dot"></span> 🧠 Quizler</div>
+      <div class="navitem" data-view="dictation" onclick="navigate('dictation')"><span class="dot"></span> 🎧 Dikte</div>
+      <div class="navitem" data-view="builder" onclick="navigate('builder')"><span class="dot"></span> 🧱 Cümle Kur</div>
+      <div class="navitem" data-view="journal" onclick="navigate('journal')"><span class="dot"></span> ✍️ Yazma Günlüğü</div>
     </div>
     <div class="navgroup">
       <div class="navgroup-title">Kendi Başlıklarım</div>
@@ -709,6 +689,97 @@ function applyCustomLessonSentences(){
   });
 }
 applyCustomLessonSentences();
+
+// v49: 60 eski dersi 42 daha yoğun çekirdek modüle dönüştürür.
+// İlk 10 modül ayrıca konuşma odaklı kalite filtresinden geçirilir; belirlenen hatalı/eski İngilizce örnekleri düzeltilir.
+const V49_CORE_GROUPS = [
+  [1,2,3,4],[5,6,7],[8,9,10],
+  [11,12],[13,14],[15,16],[17],[18],[19],[20],
+  [21,22],[23,24],[25,26],[27,28],[29,30],[31,32],[33,34],[35,36],
+  [37],[38],[39],[40],[41],[42],[43],[44],[45],[46],
+  [47],[48],[49],[50],[51],[52],[53],[54],[55],[56],[57],[58],[59],[60]
+];
+const V49_SENTENCE_FIXES = new Map(Object.entries({
+  'I open tv':'I turn on the TV',
+  'You should push the blue button to open tv':'You should press the blue button to turn on the TV',
+  'Please push the green button to open tv':'Please press the green button to turn on the TV',
+  'I respect to people who quit smoking':'I respect people who quit smoking',
+  'I avoid from the people who smoke':'I avoid people who smoke',
+  'I avoid from bad people':'I avoid bad people',
+  'The people who avoid from smoking are healthy':'People who avoid smoking are healthier',
+  'We need new evidences':'We need new evidence',
+  'Everybody complains something':'Everybody complains about something',
+  'I have high level english':'I have a high level of English',
+  'I have high level English':'I have a high level of English',
+  'How much have you spend':'How much have you spent?',
+  'I red book':'I read a book',
+  'Beard man':'A bearded man',
+  'Women don’t like beard man':'Women don’t like bearded men',
+  'I will absolutely get married with her':'I will definitely marry her',
+  'My aunt is married with my uncle':'My aunt is married to my uncle',
+  'There are people in bank':'There are people in the bank',
+  'I work in bank':'I work in a bank',
+  'I am working in bank':'I am working in a bank',
+  'I will work in bank':'I will work in a bank',
+  'I am gonna work in bank':'I am going to work in a bank',
+  'I can work in bank':'I can work in a bank',
+  'I worked in bank':'I worked in a bank',
+  'She works in bank':'She works in a bank',
+  'She worked in bank':'She worked in a bank',
+  'How much money is there in bank':'How much money is there in the bank?',
+  'I have worked in bank for a long time':'I have worked in a bank for a long time',
+  'I have been working in bank for 5 years':'I have been working in a bank for five years',
+  'There are beautiful nurses in hospital':'There are nurses in the hospital',
+  'He works in hospital':'He works in a hospital',
+  'Nurse doesn’t work in hospital':'The nurse doesn’t work in a hospital',
+  'Doctor worked in hospital':'The doctor worked in a hospital',
+  'Doctor has worked in hospital':'The doctor has worked in a hospital',
+  'doctor works in hospital':'The doctor works in a hospital',
+  'You can see a lot of foreign people in airport':'You can see a lot of foreign people at the airport'
+}));
+const V49_LOW_VALUE = new Set([
+  'i am a student','you are a student','my father is a farmer','the nurse is beautiful','this is a table','i am a tv star',
+  'i am rich','you are rich','we are poor','they are poor','the student is good','students are good','this is a car',
+  'the apple is red','the mouse is small','women are beautiful','you are a teacher','you are beautiful','my mother is beautiful',
+  'the dog is big','the cat is small','ali koç is rich','this is a pencil','horse is strong','a tomato is red','coke is black',
+  'flowers are beautiful','water is clean','bread is cheap','my hat is red','she is poor','beautiful woman','girls and boys',
+  'long road','bad boy','dirty clothes','colorful eyes','interesting book'
+]);
+function v49NormalizePair(pair){
+  const en=String(pair?.[0]||'').trim(); const tr=String(pair?.[1]||'').trim();
+  return [V49_SENTENCE_FIXES.get(en)||en,tr];
+}
+function dedupePairs(pairs){
+  const seen=new Set(); return pairs.filter(pair=>{ const k=String(pair[0]||'').trim().toLowerCase()+'|'+String(pair[1]||'').trim().toLowerCase(); if(!k||seen.has(k)) return false; seen.add(k); return true; });
+}
+function evenlyLimit(arr,max){ if(arr.length<=max)return arr; const out=[]; for(let i=0;i<max;i++) out.push(arr[Math.floor(i*(arr.length-1)/(max-1))]); return out; }
+function v49UsefulFoundation(pair){
+  const en=String(pair[0]||'').trim(); const low=en.toLowerCase();
+  if(V49_LOW_VALUE.has(low)) return false;
+  if(en.split(/\s+/).length<3 && !/[?]/.test(en)) return false;
+  return true;
+}
+const V49_SOURCE_LESSONS = DATA.lessons.map(l=>({no:l.no,sentences:l.sentences.map(v49NormalizePair),words:l.words.map(x=>x.slice())}));
+DATA.lessons = V49_CORE_GROUPS.map((nums,idx)=>{
+  const src=nums.map(n=>V49_SOURCE_LESSONS.find(l=>l.no===n)).filter(Boolean);
+  let sentences=dedupePairs(src.flatMap(l=>l.sentences));
+  if(idx<3) sentences=sentences.filter(v49UsefulFoundation);
+  const sentenceCap=idx<3?48:(idx<10?65:80);
+  sentences=evenlyLimit(sentences,sentenceCap);
+  const words=evenlyLimit(dedupePairs(src.flatMap(l=>l.words)),idx<3?45:70);
+  return {no:idx+1, sourceNos:nums.slice(), sentences, words};
+});
+// Eski 1–60 ilerlemesini yalnızca bir kez yeni 42 modüle aktar.
+if(!progress.v49CurriculumMigrated){
+  const oldDone=new Set(progress.lessonsDone||[]);
+  // v48 daha önce çalıştıysa mevcut 1–42 kayıtlarını koru; aksi halde eski 1–60 kaynak numaralarından taşı.
+  const looksLikeV48=progress.v48CurriculumMigrated===true;
+  progress.lessonsDone=looksLikeV48 ? [...oldDone].filter(n=>n>=1&&n<=42) : DATA.lessons.filter(l=>l.sourceNos.every(n=>oldDone.has(n))).map(l=>l.no);
+  const oldDates=progress.lessonDoneDates||{}; const newDates={};
+  if(looksLikeV48){ Object.keys(oldDates).forEach(k=>{const n=Number(k); if(n>=1&&n<=42)newDates[n]=oldDates[k];}); }
+  else DATA.lessons.forEach(l=>{ const ds=l.sourceNos.map(n=>oldDates[n]).filter(Boolean).sort(); if(ds.length===l.sourceNos.length) newDates[l.no]=ds[ds.length-1]; });
+  progress.lessonDoneDates=newDates; progress.v49CurriculumMigrated=true; saveProgress(progress);
+}
 function addLessonSentence(lessonNo){
   const l = DATA.lessons.find(x=>x.no===lessonNo);
   if(!l) return;
@@ -964,7 +1035,7 @@ function setApiKey(){
   else{saveApiKeyPersistent(val); alert('API anahtarı kalıcı olarak kaydedildi.');}
 }
 // ---------- Gemini API (2026 uyumlu, otomatik model seçimi) ----------
-const GEMINI_MODEL_PREFERENCE = ['gemini-2.5-flash','gemini-2.5-flash-lite'];
+const GEMINI_MODEL_PREFERENCE = ['gemini-3.6-flash','gemini-3.5-flash-lite'];
 let _geminiResolvedModel = null;
 function geminiHeaders(apiKey){ return {'Content-Type':'application/json','x-goog-api-key':apiKey,'x-goog-api-client':'malta-habit-speaking-coach/1.1'}; }
 async function resolveGeminiModel(apiKey){
@@ -1015,8 +1086,10 @@ async function callClaudeAPIChat(system, messages, maxTokens){
     let s=0;
     if(n.includes('flash')) s+=100;
     if(n.includes('lite')) s+=25;
-    if(n.includes('2.5')) s+=40;
-    if(n.includes('3.')) s+=30;
+    if(n.includes('3.6')) s+=60;
+    else if(n.includes('3.5')) s+=50;
+    else if(n.includes('3.')) s+=35;
+    if(n.includes('2.5')) s+=10;
     if(n.includes('preview') || n.includes('experimental') || n.includes('exp')) s-=80;
     if(n.includes('thinking')) s-=20;
     return s;
@@ -1522,7 +1595,7 @@ function renderLessonList(){
   wrap.innerHTML = DATA.lessons.map(l=>{
     const done = isDone(l.no);
     return `<div class="navitem lesson-item ${done?'done':''}" data-n="${l.no}" onclick="navigate('lesson', ${l.no})">
-      <span class="dot"></span> ${l.no}. Ders
+      <span class="dot"></span> ${l.no}. Ders <span style="opacity:.55;font-size:10px">${l.sourceNos?.length>1?'('+l.sourceNos[0]+'–'+l.sourceNos[l.sourceNos.length-1]+')':''}</span>
     </div>`;
   }).join('');
 }
@@ -2319,10 +2392,24 @@ function handleVoiceCommand(said){
 }
 
 // ---------- views ----------
+
+function viewWordBook(){
+  return `<div class="card"><h3 class="section-title">📚 Kelime Defterim</h3><p class="hint">Yeni kelimelerin ve kendi kelime listen tek yerde.</p><div class="row"><button class="pill primary" onclick="navigate('yenikelimeler')">Yeni Kelimeler</button><button class="pill" onclick="navigate('kelimelerim')">Kelimelerim</button></div></div>`;
+}
+function viewRepeatCenter(){
+  const due=getDueWords().length, mistakes=(progress.mistakes||[]).length, hard=(progress.customZor||[]).length;
+  return `<div class="card"><h3 class="section-title">🔁 Tekrar Merkezi</h3><p class="hint">Tekrar, önemli hatalar ve zor cümleler tek merkezde.</p><div class="grid"><div class="stat" onclick="navigate('review')" style="cursor:pointer"><div class="num">${due}</div><div class="label">Bugün Tekrar Et</div></div><div class="stat" onclick="navigate('mistakes')" style="cursor:pointer"><div class="num">${mistakes}</div><div class="label">Hatalarım</div></div><div class="stat" onclick="navigate('zorcumleler')" style="cursor:pointer"><div class="num">${hard}</div><div class="label">Zor Cümleler</div></div></div></div>`;
+}
+function viewQuizCenter(){
+  return `<div class="card"><h3 class="section-title">🧠 Quizler</h3><p class="hint">Testleri ayrı menüler yerine buradan seç.</p><div class="row"><button class="pill primary" onclick="navigate('quiz')">Genel Quiz</button><button class="pill" onclick="navigate('tensequiz')">Tenses</button><button class="pill" onclick="navigate('irregular')">Irregular Verbs</button><button class="pill" onclick="navigatePhrasalMixedMC()">Phrasal Verbs</button></div></div>`;
+}
 function render(){
   const c = document.getElementById('content');
   const titleEl = document.getElementById('page-title');
   const crumbEl = document.getElementById('crumb');
+  if(currentView==='wordbook'){ crumbEl.textContent='Kelime & Tekrar'; titleEl.textContent='Kelime Defterim'; c.innerHTML=viewWordBook(); return; }
+  if(currentView==='repeatcenter'){ crumbEl.textContent='Kelime & Tekrar'; titleEl.textContent='Tekrar Merkezi'; c.innerHTML=viewRepeatCenter(); return; }
+  if(currentView==='quizcenter'){ crumbEl.textContent='Pratik'; titleEl.textContent='Quizler'; c.innerHTML=viewQuizCenter(); return; }
   updateDueBadge();
   updateMistakeBadge();
   if(currentView==='dashboard'){ crumbEl.textContent='Genel Bakış'; titleEl.textContent='Ana Sayfa'; c.innerHTML = viewDashboard(); }
@@ -2388,7 +2475,7 @@ function viewDashboard(){
     <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px;">
       <div>
         <h3 class="section-title" style="margin:0 0 6px 0; border:none; padding:0;">▶️ Bugünkü Çalışmam</h3>
-        <p class="hint" style="margin:0;">Bugün ne çalışmalıyım? Bas, gerisini sistem sırayla açsın: önceki ders tekrarı → bugünkü ders → 5 kelime → 5 pratik soru → Konuşma Challenge → günün hataları → 2 dk review.</p>
+        <p class="hint" style="margin:0;">Bugün ne çalışmalıyım? Bas, gerisini sistem sırayla açsın: önceki ders tekrarı → bugünkü ders → 5 kelime → 5 pratik soru → Ares Speaking → günün hataları → kısa tekrar.</p>
       </div>
       <button class="pill primary" style="white-space:nowrap; font-size:15px; padding:12px 20px;" onclick="startDailyPlan()">▶️ Başla</button>
     </div>
@@ -5096,11 +5183,11 @@ function buildPlacementQuestions(){
 // Puana göre önerilen ders ve seviye etiketi.
 const PLACEMENT_LEVELS = [
   { min:0,  max:3,  label:'Başlangıç',      lesson:1 },
-  { min:4,  max:6,  label:'Temel',          lesson:8 },
-  { min:7,  max:9,  label:'Alt-Orta',       lesson:15 },
-  { min:10, max:12, label:'Orta',           lesson:24 },
-  { min:13, max:15, label:'Orta-Üst',       lesson:34 },
-  { min:16, max:18, label:'İleri',          lesson:45 }
+  { min:4,  max:6,  label:'Temel',          lesson:6 },
+  { min:7,  max:9,  label:'Alt-Orta',       lesson:11 },
+  { min:10, max:12, label:'Orta',           lesson:18 },
+  { min:13, max:15, label:'Orta-Üst',       lesson:27 },
+  { min:16, max:18, label:'İleri',          lesson:36 }
 ];
 let placementState = null;
 function startPlacementTest(){
@@ -5683,8 +5770,6 @@ const DP_ACTIVITY_POOL = [
   { view:'flashcards',   label:'Kelime Kartları' },
   { view:'tensequiz',    label:'Zaman Testi (Tenses)' },
   { view:'shadowing',    label:'Shadowing (Dinle-Tekrarla)' },
-  { view:'speaking',     label:'Konuşma Challenge' },
-  { view:'freetalk',     label:'Serbest Konuşma' },
   { view:'chunks',       label:'Kalıp Cümle Bankası' },
   { view:'collocations', label:'Collocations' },
   { view:'irregular',    label:'Irregular Verbs' }
@@ -5741,7 +5826,7 @@ function dpSetStep(n){
 function dpNext(){ dpSetStep((progress.dailyPlan.step||0)+1); }
 function dpStepLabels(){
   const meta = dpActivityMeta((progress.dailyPlan && progress.dailyPlan.activity) || 'lesson');
-  return ['Başla','Önceki Ders Tekrarı','Bugünkü Odak: '+meta.label,'5 Kelime','5 Pratik Soru','Konuşma Challenge','Günün Hataları','Kısa Tekrar'];
+  return ['Başla','Önceki Ders Tekrarı','Bugünkü Odak: '+meta.label,'5 Kelime','5 Pratik Soru','Ares Speaking','Günün Hataları','Kısa Tekrar'];
 }
 function viewDailyPlan(){
   dpEnsureState();
@@ -5773,7 +5858,7 @@ function dpStepIntro(){
       <li>Bugünkü odak: ${esc(meta.label)}</li>
       <li>5 kelime</li>
       <li>5 pratik soru</li>
-      <li>Konuşma Challenge</li>
+      <li>Ares Speaking · 10 dk gerçek konuşma</li>
       <li>Günün hataları</li>
       <li>2 dakikalık review</li>
     </ol>
@@ -5961,7 +6046,7 @@ function dpStepSpeaking(){
     <p class="hint">60 saniye boyunca aşağıdaki soruyu İngilizce olarak yanıtla (isteğe bağlı olarak tam ekranda mikrofonla kaydedebilirsin).</p>
     <p style="font-family:var(--serif); font-size:20px; color:var(--accent);">${spk(q)}${esc(q)}</p>
     <div class="btns" style="display:flex; gap:8px; flex-wrap:wrap;">
-      <button class="pill" onclick="navigate('speaking')">Tam Konuşma Ekranını Aç</button>
+      <button class="pill" onclick="window.location.href='./speaking.html?v=49'">Tam Konuşma Ekranını Aç</button>
       <button class="pill primary" onclick="logSpeakingAttempt(false); dpNext();">✅ Konuştum, Devam Et</button>
     </div>
   </div>`;

@@ -1,8 +1,8 @@
 {
-  "name": "Erhan English — Ares Coach",
-  "short_name": "Erhan English",
+  "name": "Ares English — Speaking & Study",
+  "short_name": "Ares English",
   "id": "/erhan-english-v60",
-  "start_url": "./index.html?v=60",
+  "start_url": "./index.html?v=47",
   "scope": "./",
   "display": "standalone",
   "background_color": "#EFEAE0",
