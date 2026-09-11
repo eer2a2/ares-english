@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#1E2A38"><link rel="manifest" href="./manifest-v60.webmanifest"><title>Ares Speaking v48</title>
+<style>
+:root{--paper:#efeae0;--paper2:#e4ddcc;--ink:#1e2a38;--soft:#4b5a6b;--accent:#b4432b;--leaf:#5b7361;--gold:#b8892b;--card:#fbf8f1;--line:#c9c0ac;--dark:#1e2a38}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:Arial,sans-serif;background-image:linear-gradient(var(--paper2) 1px,transparent 1px);background-size:100% 32px}button,input,select,textarea{font:inherit}button{cursor:pointer}.app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}.side{background:var(--dark);color:#fff;padding:22px 14px;position:sticky;top:0;height:100vh}.brand{padding:0 10px 18px;border-bottom:1px solid #ffffff22}.brand h1{font:700 25px Georgia;margin:0}.brand p{margin:5px 0 0;color:#9fb0bf;font-size:12px}.nav{margin-top:14px}.nav button{width:100%;border:0;background:transparent;color:#dce4ea;text-align:left;padding:11px 12px;border-radius:10px;margin:2px 0}.nav button.active{background:var(--accent);color:#fff}.legacy{display:block;margin:18px 10px;color:#b8c6d0;font-size:12px}.main{padding:28px 34px 70px;max-width:1150px;width:100%;margin:0 auto}.view{display:none}.view.active{display:block}.top{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}.top h1{font:700 32px Georgia;margin:0}.sub,.tiny{color:var(--soft);font-size:13px}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:19px;margin:15px 0;box-shadow:0 5px 20px #1e2a3812}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.stat{padding:16px;border-radius:12px;background:white;border:1px solid var(--line)}.stat b{display:block;font:700 28px Georgia;color:var(--accent)}.pill{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 14px}.pill.primary{background:var(--accent);color:#fff;border-color:var(--accent)}.pill.good{background:var(--leaf);color:#fff;border-color:var(--leaf)}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.modebar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.modebar button.active{background:var(--dark);color:#fff}.prompt{font:700 23px/1.4 Georgia;margin:13px 0}.answerbox{width:100%;min-height:90px;border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff}.chat{height:300px;overflow:auto;border:1px solid var(--line);border-radius:12px;padding:11px;background:#fff}.msg{max-width:85%;padding:10px 12px;border-radius:13px;margin:8px 0;line-height:1.4}.msg.ai{background:#edf0f2}.msg.me{background:#f5dfd7;margin-left:auto}.feedback{margin-top:10px;padding:11px;border-left:4px solid var(--leaf);background:#eef3ef;border-radius:8px;white-space:pre-wrap}.scenario{border:1px dashed var(--gold);border-radius:12px;padding:14px;background:#fffaf0}.topicgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}.topic{border:1px solid var(--line);background:#fff;border-radius:11px;padding:11px;text-align:left}.topic.active{outline:2px solid var(--accent)}.timer{font:700 38px Georgia;color:var(--accent)}.progressbar{height:10px;background:var(--paper2);border-radius:999px;overflow:hidden}.progressbar span{display:block;height:100%;background:var(--leaf)}.partner-stage{height:360px;border-radius:18px;background:linear-gradient(135deg,#2b3a4d,#726254);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}.partner-photo{width:250px;height:310px;object-fit:cover;border-radius:125px 125px 34px 34px;border:4px solid #ffffff44;box-shadow:0 14px 32px #0005}.partner-emoji{font-size:180px}.partner-silhouette{width:190px;height:250px;position:relative}.partner-silhouette:before{content:"";position:absolute;width:105px;height:125px;border-radius:50%;background:#d6aa8b;left:42px;top:0;box-shadow:0 -10px 0 10px #2b2424}.partner-silhouette:after{content:"";position:absolute;width:190px;height:145px;border-radius:48% 48% 12px 12px;background:#efe9df;left:0;bottom:0}.caption,.goal{position:absolute;left:15px;right:15px;background:#101318df;color:white;border-radius:12px;padding:12px 14px}.caption{top:15px;font-size:19px}.goal{bottom:15px;font-size:13px}.speaking{animation:talk .55s ease-in-out infinite alternate}@keyframes talk{to{transform:translateY(-4px) scale(1.01)}}.emoji-grid{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.emoji-grid button{font-size:25px;width:46px;height:46px;border:1px solid var(--line);border-radius:10px;background:#fff}.mission-step{display:flex;gap:12px;align-items:center;padding:13px;border:1px solid var(--line);border-radius:12px;background:#fffaf3;margin:9px 0}.stepno{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--dark);color:#fff;font-weight:bold}.scenario-status{margin-top:7px;font-size:12px;color:var(--soft)}.report-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}.report-item{padding:12px;border:1px solid var(--line);background:#fff;border-radius:10px}.report-item b{display:block;font-size:20px;color:var(--accent);margin-bottom:3px}
+@media(max-width:820px){.app{grid-template-columns:1fr}.side{position:relative;height:auto}.nav{display:flex;overflow:auto;gap:5px}.nav button{min-width:max-content;width:auto}.main{padding:18px 14px 60px}.top h1{font-size:27px}.chat{height:280px}.partner-stage{height:320px}.partner-photo{width:215px;height:270px}}
+
+.role-category-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-top:10px}
+.role-category-card{border:1px solid var(--line);background:linear-gradient(180deg,#fff,#faf6ee);border-radius:16px;padding:15px;text-align:left;box-shadow:0 4px 12px #1e2a380d;transition:.15s}
+.role-category-card:hover{transform:translateY(-2px);border-color:var(--accent)}
+.role-category-card.active{outline:2px solid var(--accent);background:#fff4ef}
+.role-category-icon{font-size:27px;margin-bottom:8px}.role-category-title{font-weight:700;font-size:16px;margin-bottom:4px}.role-category-desc{font-size:12px;color:var(--soft);line-height:1.35}
+.speechbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}.speech-status{font-size:12px;color:var(--soft);min-height:16px}.mic-live{background:#7d2f2f!important;color:#fff!important;border-color:#7d2f2f!important}
+
+
+.abroad-category-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-top:10px}
+.abroad-category-card{border:1px solid var(--line);background:linear-gradient(180deg,#fff,#f7f9fb);border-radius:16px;padding:15px;text-align:left;box-shadow:0 4px 12px #1e2a380d;transition:.15s}
+.abroad-category-card:hover{transform:translateY(-2px);border-color:#56728f}
+.abroad-category-card.active{outline:2px solid #56728f;background:#f1f6fb}
+.abroad-category-icon{font-size:27px;margin-bottom:8px}.abroad-category-title{font-weight:700;font-size:16px;margin-bottom:4px}.abroad-category-desc{font-size:12px;color:var(--soft);line-height:1.35}
+
+</style></head><body>
+<div class="app"><aside class="side"><div class="brand"><h1>🐾 Ares Speaking</h1><p>Study less. Speak more. · v53 NATURAL ENGLISH AUDIT</p></div><div class="nav" id="nav">
+<button class="active" data-view="mission">🎯 Today's Mission</button><button data-view="coach">🎤 Speaking Coach</button><button data-view="quick">⚡ Quick Response</button><button data-view="role">🎭 Role Play</button><button data-view="abroad">🌍 Abroad Simulation</button><button data-view="surprise">🎲 Surprise Me</button><button data-view="mistakes">🧠 My Mistakes</button><button data-view="progress">📈 Speaking Progress</button></div><a class="legacy" href="./index.html">← Eski çalışma defterini aç</a></aside>
+<main class="main">
+
+<section class="view active" id="mission"><div class="top"><div><h1>Today's Mission</h1><div class="sub">15 dakikalık yoğun konuşma antrenmanı</div></div><button class="pill" onclick="setKey()">🔑 API</button></div>
+<div class="grid"><div class="card"><div class="tiny">TODAY'S FOCUS</div><div class="prompt" id="dailyChunk">Let me think…</div><div class="sub" id="dailyFocusHint">Bu kalıbı bugün en az 3 farklı cevapta kullan.</div></div><div class="stat"><b id="todayTurns">0</b>Bugünkü konuşma turu</div><div class="stat"><b id="todayMinutes">0</b>Yaklaşık dakika</div></div>
+<div class="card"><div class="mission-step"><div class="stepno">1</div><div><b>Speaking Coach</b><div class="sub">3 kısa cevapla ısın.</div></div></div><div class="mission-step"><div class="stepno">2</div><div><b>Quick Response</b><div class="sub">Hızlı cevap verme pratiği.</div></div></div><div class="mission-step"><div class="stepno">3</div><div><b>Role Play</b><div class="sub">Gerçek hayat diyaloğu.</div></div></div><div class="mission-step"><div class="stepno">4</div><div><b>Abroad Simulation</b><div class="sub">Yurtdışı senaryosu.</div></div></div></div></section>
+
+<section class="view" id="coach"><div class="top"><div><h1>🎤 Speaking Coach</h1><div class="sub">Akıcılık önce; önemli hata varsa tek düzeltme.</div></div><button class="pill" onclick="setKey()">🔑 API</button></div>
+<div class="modebar"><button class="pill active" data-mode="guided">Guided</button><button class="pill" data-mode="real">Real Life</button><button class="pill" data-mode="pressure">Pressure</button></div>
+<div class="card"><div class="chat" id="coachChat"><div class="msg ai">Ares: Hi Erhan! How has your day been?</div></div><textarea class="answerbox" id="coachText" placeholder="İngilizce konuş veya yaz..."></textarea><div class="speechbar"><button class="pill" onclick="speak(document.getElementById('coachChat').querySelector('.msg.ai:last-child')?.textContent.replace(/^Ares:\\s*/,'') || '')">🔊 Sesli Dinle</button><button class="pill" id="coachMicBtn" onclick="startVoice('coachText','coachMicBtn','coachSpeechStatus')">🎤 Konuş</button><button class="pill" onclick="stopVoice('coachMicBtn','coachSpeechStatus')">⏹️ Durdur</button><button class="pill primary" onclick="sendCoach()">Gönder</button><button class="pill" onclick="newCoach()">🔀 Konu değiştir</button></div><div class="speech-status" id="coachSpeechStatus"></div><div id="coachFeedback" class="feedback" style="display:none"></div></div></section>
+
+<section class="view" id="quick"><div class="top"><div><h1>⚡ Quick Response</h1><div class="sub">Uzun düşünmeden cevap ver.</div></div><div class="timer" id="quickTimer">10</div></div>
+<div class="card"><div class="prompt" id="quickQ">What did you do after work yesterday?</div><div class="row"><button class="pill" onclick="speak(document.getElementById('quickQ').textContent)">🔊 Dinle</button><button class="pill" onclick="newQuick()">🔀 Yeni soru</button><button class="pill" onclick="startTimer(5)">⏱️ 5 sn</button><button class="pill" onclick="startTimer(10)">10 sn</button><button class="pill" onclick="startTimer(20)">20 sn</button></div><textarea class="answerbox" id="quickText"></textarea><div class="speechbar"><button class="pill" id="quickMicBtn" onclick="startVoice('quickText','quickMicBtn','quickSpeechStatus')">🎤 Konuş</button><button class="pill" onclick="stopVoice('quickMicBtn','quickSpeechStatus')">⏹️ Durdur</button><button class="pill primary" onclick="evalQuick()">Değerlendir</button></div><div class="speech-status" id="quickSpeechStatus"></div><div id="quickFeedback" class="feedback" style="display:none"></div></div></section>
+
+<section class="view" id="role"><div class="top"><div><h1>🎭 Role Play</h1><div class="sub">Konu seç, Ares karşıdaki kişi olsun.</div></div></div>
+<div class="card"><div class="tiny">ROLE PLAY CATEGORIES</div><div class="role-category-grid" id="roleTopics"></div><div class="row" style="margin-top:12px"><button class="pill" onclick="newRole()">🎲 Rastgele senaryo</button><button class="pill" onclick="resetRole()">↺ Baştan</button><button class="pill" onclick="clearScenarioChat('role')">🧹 Sohbet geçmişini temizle</button><button class="pill" onclick="showSampleDialogue('role')">📖 Örnek Sohbet</button></div><div id="roleSample" style="display:none"></div></div>
+<div class="card"><div class="scenario"><div class="tiny" id="roleMeta"></div><div class="prompt" id="roleSituation"></div><div class="sub" id="roleRole"></div></div>
+<div class="partner-stage" style="margin-top:12px"><div class="caption" id="roleCaption"></div><div id="roleAvatar"></div><div class="goal" id="roleGoal"></div></div><div class="row" style="margin-top:10px"><button class="pill" onclick="setPartner('silhouette')">👤 Silüet</button><button class="pill" onclick="setPartner('emoji')">🙂 Emoji</button><button class="pill" onclick="document.getElementById('photoInput').click()">📷 Fotoğraf</button></div><div class="emoji-grid" id="emojiGrid"></div><input id="photoInput" type="file" accept="image/*" style="display:none" onchange="loadPhoto(this.files[0])">
+<div class="chat" id="roleChat" style="margin-top:12px"></div><textarea class="answerbox" id="roleText" placeholder="Cevabını söyle..."></textarea><div class="speechbar"><button class="pill" onclick="speak(document.getElementById('roleCaption').textContent)">🔊 Sesli Dinle</button><button class="pill" id="roleMicBtn" onclick="startVoice('roleText','roleMicBtn','roleSpeechStatus')">🎤 Konuş</button><button class="pill" onclick="stopVoice('roleMicBtn','roleSpeechStatus')">⏹️ Durdur</button><button class="pill primary" onclick="sendScenario('role')">Gönder</button><button class="pill good" onclick="finishScenario('role')">📊 Değerlendir</button></div><div class="speech-status" id="roleSpeechStatus"></div><div id="roleFeedback" class="feedback" style="display:none"></div></div></section>
+
+<section class="view" id="abroad"><div class="top"><div><h1>🌍 Abroad Simulation</h1><div class="sub">Havaalanı, otel, restoran, tren, kafe ve daha fazlası.</div></div></div>
+<div class="card"><div class="tiny">ABROAD SIMULATION CATEGORIES</div><div class="abroad-category-grid" id="abroadTopics"></div><div class="row" style="margin-top:12px"><button class="pill" onclick="newAbroad()">🎲 Rastgele senaryo</button><button class="pill" onclick="resetAbroad()">↺ Baştan</button><button class="pill" onclick="clearScenarioChat('abroad')">🧹 Sohbet geçmişini temizle</button><button class="pill" onclick="showSampleDialogue('abroad')">📖 Örnek Sohbet</button></div><div id="abroadSample" style="display:none"></div></div>
+<div class="card"><div class="scenario"><div class="tiny" id="abroadMeta"></div><div class="prompt" id="abroadSituation"></div><div class="sub" id="abroadRole"></div></div><div class="chat" id="abroadChat" style="margin-top:12px"></div><textarea class="answerbox" id="abroadText"></textarea><div class="speechbar"><button class="pill" onclick="speak((state.abroadChat.slice().reverse().find(x=>x.r==='ai')||{t:state.abroad.starter}).t)">🔊 Sesli Dinle</button><button class="pill" id="abroadMicBtn" onclick="startVoice('abroadText','abroadMicBtn','abroadSpeechStatus')">🎤 Konuş</button><button class="pill" onclick="stopVoice('abroadMicBtn','abroadSpeechStatus')">⏹️ Durdur</button><button class="pill primary" onclick="sendScenario('abroad')">Gönder</button><button class="pill good" onclick="finishScenario('abroad')">📊 Değerlendir</button></div><div class="speech-status" id="abroadSpeechStatus"></div><div id="abroadFeedback" class="feedback" style="display:none"></div></div></section>
+
+<section class="view" id="surprise"><div class="top"><div><h1>🎲 Surprise Me</h1><div class="sub">Hazırlıksız konuşma refleksi.</div></div><button class="pill" onclick="newSurprise()">🎲 Yeni sürpriz</button></div><div class="card"><div class="prompt" id="surprisePrompt"></div><textarea class="answerbox" id="surpriseText"></textarea><div class="row"><button class="pill" onclick="startVoice('surpriseText')">🎤 Konuş</button><button class="pill primary" onclick="evalSurprise()">Değerlendir</button></div><div id="surpriseFeedback" class="feedback" style="display:none"></div></div></section>
+
+<section class="view" id="mistakes"><div class="top"><div><h1>🧠 My Mistakes</h1><div class="sub">Sadece konuşmayı gerçekten etkileyen düzeltmeler.</div></div><button class="pill" onclick="clearMistakes()">🧹 Temizle</button></div><div class="card" id="mistakeList"></div></section>
+<section class="view" id="progress"><div class="top"><div><h1>📈 Speaking Progress</h1><div class="sub">Düzenli İngilizce üretimini takip et.</div></div></div><div class="grid"><div class="stat"><b id="pTurns">0</b>Toplam tur</div><div class="stat"><b id="pMinutes">0</b>Yaklaşık dakika</div><div class="stat"><b id="pMistakes">0</b>Önemli düzeltme</div></div><div class="card"><h3>Haftalık hedef</h3><div class="progressbar"><span id="weekBar" style="width:0"></span></div><div class="tiny" id="weekText"></div></div><div class="card"><h3>📋 Bugünün Oturum Raporu</h3><div id="sessionReport"></div></div></section>
+</main></div>
+<script>
+(()=>{'use strict';const $=id=>document.getElementById(id);const KEY='ares_v36';let rec=null,listening=false,timerId=null;
+let state={turns:0,minutes:0,mistakes:[],partner:'silhouette',emoji:'🙂',photo:'',mode:'guided',role:null,abroad:null,roleChat:[],abroadChat:[],dailyStats:{},scenarioStats:{role:{},abroad:{}},lastReports:{},lastEvalSignature:{}};try{Object.assign(state,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){}
+state.dailyStats=state.dailyStats||{};state.scenarioStats=state.scenarioStats||{role:{},abroad:{}};state.scenarioStats.role=state.scenarioStats.role||{};state.scenarioStats.abroad=state.scenarioStats.abroad||{};state.lastReports=state.lastReports||{};state.lastEvalSignature=state.lastEvalSignature||{};state.mistakes=(state.mistakes||[]).filter(m=>m&&typeof m==='object'&&m.a&&m.b);
+const roles=[{"cat":"Restaurant","place":"Barcelona","role":"waiter","p":"You ordered grilled fish but received pasta.","starter":"Is everything okay with your meal?"},{"cat":"Restaurant","place":"Rome","role":"waiter","p":"You want a recommendation for a local dish.","starter":"Would you like some help choosing from the menu?"},{"cat":"Restaurant","place":"Athens","role":"waiter","p":"Your food is taking too long and you want to ask politely.","starter":"Is there anything I can help you with?"},{"cat":"Restaurant","place":"Lisbon","role":"waiter","p":"You want a table outside but only indoor tables are available.","starter":"Good evening. A table for one?"},{"cat":"Restaurant","place":"Palermo","role":"waiter","p":"You need to ask whether a dish contains nuts.","starter":"Are you ready to order?"},{"cat":"Restaurant","place":"Vienna","role":"waiter","p":"You want to split the bill with your friend.","starter":"Would you like the bill together or separately?"},{"cat":"Restaurant","place":"Madrid","role":"waiter","p":"You received cold food and want it replaced.","starter":"How is everything with your meal?"},{"cat":"Restaurant","place":"Prague","role":"waiter","p":"You want to order dessert but are not sure what to choose.","starter":"Would you like to see the dessert menu?"},{"cat":"Hotel","place":"Rome","role":"receptionist","p":"The receptionist cannot find your reservation.","starter":"I'm sorry, but I can't find a reservation under your name."},{"cat":"Hotel","place":"Paris","role":"receptionist","p":"Your room is too noisy at night.","starter":"Good evening. Reception. How can I help?"},{"cat":"Hotel","place":"Vienna","role":"receptionist","p":"You want a late checkout tomorrow.","starter":"Of course. What time would you like to check out?"},{"cat":"Hotel","place":"Berlin","role":"receptionist","p":"The air conditioning in your room is not working.","starter":"Hello, reception. What seems to be the problem?"},{"cat":"Hotel","place":"Brussels","role":"receptionist","p":"You want to leave your luggage after checkout.","starter":"Good morning. How can I help you?"},{"cat":"Hotel","place":"Amsterdam","role":"receptionist","p":"You were given a twin room but booked a double room.","starter":"Is everything all right with your room?"},{"cat":"Hotel","place":"Budapest","role":"receptionist","p":"You need an extra towel and another pillow.","starter":"Reception. What can I bring to your room?"},{"cat":"Hotel","place":"Florence","role":"receptionist","p":"You want to ask what time breakfast starts.","starter":"Good evening. Do you need anything?"},{"cat":"Café","place":"Paris","role":"barista","p":"Your coffee order is wrong.","starter":"Here's your latte. Anything else?"},{"cat":"Café","place":"Dublin","role":"barista","p":"You want a black coffee and something small to eat.","starter":"Hi! What can I get for you?"},{"cat":"Café","place":"Vienna","role":"barista","p":"You want to know if there is free Wi-Fi.","starter":"Hello. What would you like today?"},{"cat":"Café","place":"Prague","role":"barista","p":"You want your coffee to take away.","starter":"For here or to go?"},{"cat":"Café","place":"Amsterdam","role":"barista","p":"You want to know which cake is most popular.","starter":"Would you like something sweet with your coffee?"},{"cat":"Café","place":"Rome","role":"barista","p":"You want a stronger coffee than the one you ordered.","starter":"Is your coffee okay?"},{"cat":"Café","place":"Brussels","role":"barista","p":"You want to pay by card but the card machine is not working.","starter":"I'm sorry, our card machine is temporarily down."},{"cat":"Café","place":"Malta","role":"barista","p":"You want to sit outside but the tables are full.","starter":"Hi! Are you looking for a table?"},{"cat":"Shopping","place":"Milan","role":"shop assistant","p":"You want to return a shirt because it is the wrong size.","starter":"Hello. How can I help you today?"},{"cat":"Shopping","place":"London","role":"shop assistant","p":"You want to try on a jacket in a larger size.","starter":"Can I help you find something?"},{"cat":"Shopping","place":"Madrid","role":"shop assistant","p":"You want to know whether an item is on sale.","starter":"Hi! Let me know if you need any help."},{"cat":"Shopping","place":"Berlin","role":"shop assistant","p":"You bought something yesterday and want a refund.","starter":"Do you have the receipt with you?"},{"cat":"Shopping","place":"Athens","role":"shop assistant","p":"You want a cheaper alternative to a bag you like.","starter":"That bag is one of our most popular models."},{"cat":"Shopping","place":"Paris","role":"shop assistant","p":"You want to ask if the shop can deliver to your hotel.","starter":"Would you like to take it with you today?"},{"cat":"Shopping","place":"Brussels","role":"shop assistant","p":"You are looking for a gift for a friend.","starter":"Are you shopping for yourself or for someone else?"},{"cat":"Shopping","place":"Prague","role":"shop assistant","p":"You want to exchange shoes because they are uncomfortable.","starter":"What seems to be the problem with the shoes?"},{"cat":"Socialising","place":"Dublin","role":"traveller","p":"You meet someone at breakfast and start a conversation.","starter":"Hi! Are you travelling alone?"},{"cat":"Socialising","place":"Malta","role":"classmate","p":"You meet a classmate before class and want to get to know them.","starter":"Hi, is this your first week here?"},{"cat":"Socialising","place":"Barcelona","role":"traveller","p":"You meet someone on a walking tour.","starter":"Have you been to Barcelona before?"},{"cat":"Socialising","place":"Berlin","role":"local person","p":"You start a conversation while waiting for a train.","starter":"This train is always a little late, isn't it?"},{"cat":"Socialising","place":"Rome","role":"traveller","p":"You sit next to someone in a café and start chatting.","starter":"Is that your first coffee today?"},{"cat":"Socialising","place":"Amsterdam","role":"traveller","p":"You meet someone at your hotel lounge.","starter":"How long are you staying here?"},{"cat":"Socialising","place":"Prague","role":"tourist","p":"Someone asks where you are from and what brought you here.","starter":"Where are you visiting from?"},{"cat":"Socialising","place":"Vienna","role":"traveller","p":"You meet someone after a concert and talk about music.","starter":"Did you enjoy the concert?"},{"cat":"Pharmacy","place":"Malta","role":"pharmacist","p":"You need something for a headache and want advice.","starter":"Hello. What can I help you with?"},{"cat":"Pharmacy","place":"Rome","role":"pharmacist","p":"You have a sore throat and want something mild.","starter":"What symptoms do you have?"},{"cat":"Pharmacy","place":"Paris","role":"pharmacist","p":"You need sunscreen for sensitive skin.","starter":"Are you looking for a particular type of sunscreen?"},{"cat":"Pharmacy","place":"Berlin","role":"pharmacist","p":"You need a small bandage and antiseptic.","starter":"Hello. What do you need today?"},{"cat":"Pharmacy","place":"Athens","role":"pharmacist","p":"You want something for an upset stomach.","starter":"How long have you had the problem?"},{"cat":"Pharmacy","place":"Madrid","role":"pharmacist","p":"You want to ask how often to use an over-the-counter cream.","starter":"Have you used this kind of cream before?"},{"cat":"Pharmacy","place":"Vienna","role":"pharmacist","p":"You need allergy tablets and want to know if they cause drowsiness.","starter":"What kind of allergy symptoms do you have?"},{"cat":"Pharmacy","place":"Prague","role":"pharmacist","p":"You want to buy a thermometer.","starter":"Of course. Digital or standard?"}];
+const abroad=[
+{cat:'Airport & Passport',place:'London',role:'immigration officer',p:'Explain your visit purpose and how long you will stay.',starter:'Good afternoon. May I see your passport? What is the purpose of your visit?'},
+{cat:'Airport & Passport',place:'Dublin',role:'immigration officer',p:'Explain where you will stay and show that you have a return ticket.',starter:'Where will you be staying during your visit?'},
+{cat:'Airport & Passport',place:'Malta',role:'border officer',p:'Explain that you are coming for an English course.',starter:'What brings you to Malta?'},
+{cat:'Airport & Passport',place:'Rome',role:'immigration officer',p:'Answer questions about how much money you have for the trip.',starter:'How are you planning to support yourself during your stay?'},
+{cat:'Airport & Passport',place:'Barcelona',role:'border officer',p:'Explain that you are travelling for tourism and name places you want to visit.',starter:'What are you planning to do while you are here?'},
+{cat:'Airport & Passport',place:'Amsterdam',role:'immigration officer',p:'Explain that this is a short holiday and when you will leave.',starter:'How long are you staying, and when are you leaving?'},
+{cat:'Airport & Passport',place:'Vienna',role:'border officer',p:'Answer a question about travelling alone or with friends.',starter:'Are you travelling alone?'},
+{cat:'Airport & Passport',place:'Paris',role:'immigration officer',p:'Explain your accommodation when asked for the hotel address.',starter:'Where are you staying tonight?'},
+{cat:'Airport',place:'Rome',role:'airline employee',p:'Your checked bag did not arrive.',starter:'Hello. How can I help you?'},
+{cat:'Airport',place:'London',role:'gate agent',p:'Your gate has changed and you need to find the new gate.',starter:'Can I help you find your flight?'},
+{cat:'Airport',place:'Berlin',role:'airline employee',p:'Your flight is delayed and you want to know your options.',starter:'I am sorry, your flight has been delayed.'},
+{cat:'Airport',place:'Madrid',role:'check-in agent',p:'Your suitcase is over the weight limit.',starter:'Your bag is a little over the weight limit.'},
+{cat:'Airport',place:'Athens',role:'airport staff',p:'You cannot find the security checkpoint.',starter:'You look a little lost. Can I help?'},
+{cat:'Airport',place:'Malta',role:'airline employee',p:'You want to change your seat to an aisle seat.',starter:'Hello. What can I do for you?'},
+{cat:'Airport',place:'Paris',role:'gate agent',p:'You are worried you will miss your connecting flight.',starter:'What seems to be the problem?'},
+{cat:'Airport',place:'Amsterdam',role:'check-in agent',p:'You want to confirm whether your cabin bag is allowed.',starter:'Good morning. Are you checking in any bags today?'},
+{cat:'Hotel',place:'Paris',role:'receptionist',p:'Your room is too noisy at night.',starter:'Good evening. Reception. How can I help?'},
+{cat:'Hotel',place:'Rome',role:'receptionist',p:'The hotel cannot find your reservation.',starter:'I am sorry, I cannot find a reservation under that name.'},
+{cat:'Hotel',place:'Vienna',role:'receptionist',p:'Ask for an early check-in because you arrived before noon.',starter:'Welcome. Check-in normally starts at 3 p.m.'},
+{cat:'Hotel',place:'Barcelona',role:'receptionist',p:'The air conditioning in your room is not working.',starter:'Reception. Is everything okay with your room?'},
+{cat:'Hotel',place:'Prague',role:'receptionist',p:'Ask for a late checkout tomorrow.',starter:'Good evening. What can I help you with?'},
+{cat:'Hotel',place:'Malta',role:'receptionist',p:'Ask whether breakfast is included and what time it starts.',starter:'Welcome to the hotel. Do you have any questions about your stay?'},
+{cat:'Hotel',place:'Florence',role:'receptionist',p:'You were given a twin room but booked a double room.',starter:'Here is your room key. You are in room 305.'},
+{cat:'Hotel',place:'Dublin',role:'receptionist',p:'Ask the hotel to call a taxi for the airport tomorrow morning.',starter:'Of course. How can I assist you?'},
+{cat:'Restaurant',place:'Palermo',role:'waiter',p:'Ask for a local dish recommendation.',starter:'Are you ready to order, or would you like a recommendation?'},
+{cat:'Restaurant',place:'Rome',role:'waiter',p:'Tell the waiter that you are allergic to nuts and ask what is safe.',starter:'Good evening. Are you ready to order?'},
+{cat:'Restaurant',place:'Barcelona',role:'waiter',p:'The meal you received is not what you ordered.',starter:'Is everything okay with your meal?'},
+{cat:'Restaurant',place:'Paris',role:'waiter',p:'Ask for the bill and say you want to pay by card.',starter:'Was everything all right?'},
+{cat:'Restaurant',place:'Athens',role:'waiter',p:'Ask if a dish is spicy and what ingredients it contains.',starter:'Would you like to hear today’s specials?'},
+{cat:'Restaurant',place:'Vienna',role:'waiter',p:'You have been waiting a long time for your food. Ask politely about it.',starter:'Can I get you anything else while you wait?'},
+{cat:'Restaurant',place:'Malta',role:'waiter',p:'Ask for a table outside and order a drink first.',starter:'Hello. Table for one?'},
+{cat:'Restaurant',place:'Florence',role:'waiter',p:'Ask to change a side dish and order without onions.',starter:'What would you like to order?'},
+{cat:'Train',place:'Berlin',role:'train staff',p:'You realize you are on the wrong train.',starter:'Tickets, please. Is there a problem?'},
+{cat:'Train',place:'Vienna',role:'ticket clerk',p:'Ask which platform your train leaves from.',starter:'Hello. Where are you travelling to?'},
+{cat:'Train',place:'Prague',role:'train staff',p:'Your train has been cancelled and you need the next option.',starter:'I am afraid this service has been cancelled.'},
+{cat:'Train',place:'Rome',role:'ticket clerk',p:'Ask for a return ticket and the price.',starter:'Good morning. Where would you like to go?'},
+{cat:'Train',place:'Munich',role:'train staff',p:'Someone is sitting in your reserved seat. Ask for help.',starter:'Hello. What seems to be the problem?'},
+{cat:'Train',place:'Amsterdam',role:'station staff',p:'You missed your train and want to know if your ticket is still valid.',starter:'Can I see your ticket, please?'},
+{cat:'Train',place:'Paris',role:'ticket clerk',p:'Ask whether you need to change trains on the way.',starter:'Where are you heading today?'},
+{cat:'Train',place:'Milan',role:'station staff',p:'Ask where to validate your ticket before boarding.',starter:'Can I help you with your ticket?'},
+{cat:'Directions',place:'Prague',role:'local person',p:'Ask how to get to the old town.',starter:'Hi. Do you need some help?'},
+{cat:'Directions',place:'Rome',role:'local person',p:'Ask how to get to the nearest metro station.',starter:'Hello. Are you looking for somewhere?'},
+{cat:'Directions',place:'Paris',role:'local person',p:'Ask for directions to the Louvre and whether you can walk there.',starter:'Can I help you?'},
+{cat:'Directions',place:'Vienna',role:'local person',p:'Ask which tram goes to the city centre.',starter:'You look lost. Where are you trying to go?'},
+{cat:'Directions',place:'Barcelona',role:'local person',p:'Ask where the nearest pharmacy is.',starter:'Hi there. Do you need directions?'},
+{cat:'Directions',place:'Malta',role:'local person',p:'Ask how to get to the ferry terminal.',starter:'Hello. What are you looking for?'},
+{cat:'Directions',place:'Amsterdam',role:'local person',p:'Ask how long it takes to walk to the central station.',starter:'Need some help finding your way?'},
+{cat:'Directions',place:'Florence',role:'local person',p:'Ask where the main square is and what landmark to look for.',starter:'Hi. Where would you like to go?'},
+{cat:'Language school',place:'Malta',role:'classmate',p:'Introduce yourself and explain why you are learning English.',starter:'Hi! Is this your first day too?'},
+{cat:'Language school',place:'Malta',role:'teacher',p:'Explain what is most difficult for you when speaking English.',starter:'What would you most like to improve during this course?'},
+{cat:'Language school',place:'Dublin',role:'classmate',p:'Ask a classmate where they are from and why they chose the course.',starter:'Hi, I do not think we have met yet. I am Alex.'},
+{cat:'Language school',place:'London',role:'teacher',p:'Explain how long you have been learning English.',starter:'Tell me a little about your English-learning experience.'},
+{cat:'Language school',place:'Malta',role:'classmate',p:'Suggest having coffee after class and decide where to meet.',starter:'What are you doing after class today?'},
+{cat:'Language school',place:'Cambridge',role:'teacher',p:'Talk about your job and your responsibilities.',starter:'Could you tell the class what you do for work?'},
+{cat:'Language school',place:'Malta',role:'school receptionist',p:'Ask about changing to a different class level.',starter:'Hello. How can I help you with your course?'},
+{cat:'Language school',place:'Dublin',role:'classmate',p:'Discuss weekend plans and suggest visiting somewhere together.',starter:'Do you have any plans for the weekend?'},
+{cat:'Café',place:'Paris',role:'barista',p:'Your coffee order is wrong. Explain what you ordered.',starter:'Here is your latte. Anything else?'},
+{cat:'Café',place:'Rome',role:'barista',p:'Order a black coffee and something small to eat.',starter:'Good morning. What can I get for you?'},
+{cat:'Café',place:'Vienna',role:'barista',p:'Ask if there is a table near a power socket.',starter:'Hello. Are you eating in or taking away?'},
+{cat:'Café',place:'Malta',role:'barista',p:'Ask for Wi-Fi and order an Americano.',starter:'Hi! What would you like?'},
+{cat:'Café',place:'Amsterdam',role:'barista',p:'Ask for your drink to go and request no sugar.',starter:'What can I make for you today?'},
+{cat:'Café',place:'Barcelona',role:'barista',p:'Ask what pastries are fresh today.',starter:'Good morning. Would you like something to eat as well?'},
+{cat:'Café',place:'Prague',role:'barista',p:'You were charged twice. Explain the problem politely.',starter:'Is everything okay with your payment?'},
+{cat:'Café',place:'Dublin',role:'barista',p:'Start a short conversation with the barista about the weather.',starter:'Cold morning, isn’t it? What can I get you?'},
+{cat:'Shopping',place:'Milan',role:'shop assistant',p:'Return a shirt because it is the wrong size.',starter:'Hello. How can I help you today?'},
+{cat:'Shopping',place:'London',role:'shop assistant',p:'Ask if a jacket is available in another colour.',starter:'Can I help you find something?'},
+{cat:'Shopping',place:'Paris',role:'shop assistant',p:'Ask to try on a pair of shoes and find the fitting area.',starter:'Hello. What size are you looking for?'},
+{cat:'Shopping',place:'Rome',role:'shop assistant',p:'Ask whether you can pay by card and get a receipt.',starter:'Are you ready to pay?'},
+{cat:'Shopping',place:'Barcelona',role:'shop assistant',p:'Ask for a cheaper alternative to an item you like.',starter:'Do you like that one?'},
+{cat:'Shopping',place:'Vienna',role:'shop assistant',p:'Explain that an item you bought yesterday is damaged.',starter:'Hello. What can I do for you?'},
+{cat:'Shopping',place:'Amsterdam',role:'shop assistant',p:'Ask where to find a small gift for a friend.',starter:'Hi. Are you looking for anything in particular?'},
+{cat:'Shopping',place:'Malta',role:'shop assistant',p:'Ask if the price includes tax and whether there is a discount.',starter:'Hello. Can I help you with that item?'},
+{cat:'Pharmacy',place:'Malta',role:'pharmacist',p:'You have a headache and want something suitable.',starter:'Hello. What can I help you with?'},
+{cat:'Pharmacy',place:'Rome',role:'pharmacist',p:'Ask for something for a sore throat.',starter:'Good afternoon. What seems to be the problem?'},
+{cat:'Pharmacy',place:'Paris',role:'pharmacist',p:'Explain that you have a mild cold and ask for advice.',starter:'How can I help you today?'},
+{cat:'Pharmacy',place:'Vienna',role:'pharmacist',p:'Ask how often you should take an over-the-counter medicine.',starter:'Do you have any questions about how to use it?'},
+{cat:'Pharmacy',place:'Prague',role:'pharmacist',p:'Ask for plasters because you have a small blister from walking.',starter:'Hello. What do you need?'},
+{cat:'Pharmacy',place:'Barcelona',role:'pharmacist',p:'Ask for sunscreen and explain you need a high protection factor.',starter:'Good morning. Can I help you find something?'},
+{cat:'Pharmacy',place:'Athens',role:'pharmacist',p:'Ask whether a medicine may make you sleepy.',starter:'Is there anything you would like to know before taking this?'},
+{cat:'Pharmacy',place:'Dublin',role:'pharmacist',p:'Ask for something for an upset stomach and explain your symptoms briefly.',starter:'Hello. How are you feeling?'}];
+const quickQs=['What did you do after work yesterday?','What do you usually do when you feel tired?','Describe your perfect weekend in three sentences.','What was the best part of your last trip?','Which is more important: speaking correctly or speaking confidently? Why?','How do you relax after a stressful day?','What makes a good manager?'];
+const surpriseQs=['A waiter brings the wrong meal. Explain the problem politely and ask for a solution.','You missed your train. Ask a station employee what your options are.','Someone you have just met asks why you are learning English. Answer naturally and ask them a question back.','Your hotel room is noisy. Call reception and ask for another room.','A friend says learning English after 40 is too difficult. Respond naturally.','You meet another traveller at breakfast. Start a conversation and keep it going.'];
+const chunks=['Let me think…','To be honest…','I see your point, but…','What I mean is…','It depends on…'];
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}updateStats();updateDailyFocus()}
+const API_KEY_STORAGE='ing_defter_api_key',API_KEY_STORAGE_BACKUP='ing_defter_api_key_local_backup',API_KEY_BACKUP='ing_defter_api_key_backup',API_KEY_LEGACY_KEYS=['gemini_api_key','api_key','claude_api_key','ing_api_key'];
+function saveKey(v){v=String(v||'').trim();if(!v)return;try{localStorage.setItem(API_KEY_STORAGE,v);localStorage.setItem(API_KEY_STORAGE_BACKUP,v)}catch(e){}try{document.cookie=API_KEY_BACKUP+'='+encodeURIComponent(v)+'; Max-Age=31536000; Path=/; SameSite=Strict; Secure'}catch(e){}}
+function key(){let v='';try{v=(localStorage.getItem(API_KEY_STORAGE)||'').trim();if(v)return v;v=(localStorage.getItem(API_KEY_STORAGE_BACKUP)||'').trim();if(v){saveKey(v);return v}for(const k of API_KEY_LEGACY_KEYS){v=(localStorage.getItem(k)||'').trim();if(v){saveKey(v);return v}}}catch(e){}try{const p=document.cookie.split('; ').find(x=>x.startsWith(API_KEY_BACKUP+'='));if(p){v=decodeURIComponent(p.slice(API_KEY_BACKUP.length+1)).trim();if(v){saveKey(v);return v}}}catch(e){}return ''}
+function removeKey(){try{localStorage.removeItem(API_KEY_STORAGE);localStorage.removeItem(API_KEY_STORAGE_BACKUP);API_KEY_LEGACY_KEYS.forEach(k=>localStorage.removeItem(k))}catch(e){}try{document.cookie=API_KEY_BACKUP+'=; Max-Age=0; Path=/; SameSite=Strict; Secure'}catch(e){}}
+key();
+window.setKey=()=>{const k=prompt('Gemini API anahtarını gir. Bir kez kaydedince bu site adresinde hatırlanır. Boş bırakıp Tamam dersen kayıtlı anahtar silinir.',key());if(k===null)return;if(!k.trim()){removeKey();alert('API anahtarı kaldırıldı.')}else{saveKey(k);alert('API anahtarı kalıcı olarak kaydedildi.')}}
+const GEMINI_MODELS=['gemini-3.6-flash','gemini-3.5-flash-lite'];
+async function ai(system,user){const k=key();if(!k)throw Error('NO_KEY');let errs=[];for(const model of GEMINI_MODELS){try{const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),18000);const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':k},body:JSON.stringify({systemInstruction:{parts:[{text:system}]},contents:[{role:'user',parts:[{text:user}]}],generationConfig:{maxOutputTokens:1024,temperature:.6}}),signal:ctl.signal});clearTimeout(tm);const d=await r.json().catch(()=>({}));if(r.ok){const t=(d.candidates?.[0]?.content?.parts||[]).map(x=>x.text||'').join('').trim();if(t)return t}errs.push(model+': '+(d.error?.message||r.status))}catch(e){errs.push(model+': '+(e.name==='AbortError'?'timeout':e.message))}}throw Error(errs.join(' | '))}
+function cleanDialogueReply(t){
+ t=String(t||'').trim();
+ // Remove markdown emphasis and common model/meta labels.
+ t=t.replace(/\*\*/g,'').replace(/\*/g,'');
+ t=t.replace(/^(Assistant|Other|Waiter|Barista|Receptionist|Officer|Staff)\s*:\s*/i,'');
+ // Remove parenthetical/bracketed stage directions when they look like actions/translations.
+ t=t.replace(/\[(.*?)\]/g,'').replace(/\((?:smiles?|laughs?|nods?|in [^)]+|translation[^)]*)\)/gi,'');
+ return t.replace(/\s{2,}/g,' ').trim();
+}
+function hErr(e){const m=String(e.message||e);if(m.includes('NO_KEY'))return '🔑 API anahtarı yok. API düğmesine bir kez gir.';if(/429|quota|rate/i.test(m))return 'Gemini kotası dolu. Biraz sonra tekrar dene.';if(/401|403|invalid/i.test(m))return 'API anahtarı geçersiz veya izni yok.';if(/model|not available|not found/i.test(m))return 'Gemini modeli erişilemiyor. Yedek model de denendi.';return 'Ares yanıt veremedi: '+m.slice(0,170)}
+function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+function dayKey(d=new Date()){return d.toISOString().slice(0,10)}
+function ensureDay(){const d=dayKey();state.dailyStats[d]=state.dailyStats[d]||{turns:0,minutes:0,scenarios:0};return state.dailyStats[d]}
+function addTurn(minutes=1){state.turns++;state.minutes+=minutes;const d=ensureDay();d.turns++;d.minutes+=minutes;save()}
+function weekData(){let turns=0,minutes=0,scenarios=0;for(let i=0;i<7;i++){const d=new Date();d.setDate(d.getDate()-i);const x=state.dailyStats[dayKey(d)]||{};turns+=x.turns||0;minutes+=x.minutes||0;scenarios+=x.scenarios||0}return{turns,minutes,scenarios}}
+function updateStats(){const d=ensureDay(),w=weekData();if($('todayTurns'))$('todayTurns').textContent=d.turns||0;if($('todayMinutes'))$('todayMinutes').textContent=Math.round(d.minutes||0);if($('pTurns'))$('pTurns').textContent=state.turns;if($('pMinutes'))$('pMinutes').textContent=Math.round(state.minutes);if($('pMistakes'))$('pMistakes').textContent=state.mistakes.length;if($('weekBar'))$('weekBar').style.width=Math.min(100,w.turns/20*100)+'%';if($('weekText'))$('weekText').textContent=w.turns+' / 20 konuşma turu · '+Math.round(w.minutes)+' dk · '+w.scenarios+' senaryo';renderSessionReport()}
+function renderSessionReport(){const box=$('sessionReport');if(!box)return;const d=ensureDay();const focus=state.mistakes.length?state.mistakes[state.mistakes.length-1].b:'Akıcılık ve hızlı cevap';const done=(d.scenarios||0);box.innerHTML=`<div class="report-grid"><div class="report-item"><b>${d.turns||0}</b>bugünkü cevap</div><div class="report-item"><b>${Math.round(d.minutes||0)}</b>dakika</div><div class="report-item"><b>${done}</b>tamamlanan senaryo</div></div><p class="sub" style="margin-top:12px"><b>Sonraki odak:</b> ${esc(focus)}</p>`}
+function updateDailyFocus(){const c=$('dailyChunk'),h=$('dailyFocusHint');if(!c)return;if(state.mistakes.length){const m=state.mistakes[state.mistakes.length-1];c.textContent=m.b; if(h)h.textContent='Son önemli düzeltmenden geldi: “'+m.a+'”. Bugün doğal versiyonu en az 3 kez kullan.'}else{const idx=Math.abs([...dayKey()].reduce((a,ch)=>a+ch.charCodeAt(0),0))%chunks.length;c.textContent=chunks[idx];if(h)h.textContent='Bu kalıbı bugün en az 3 farklı cevapta kullan.'}}
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.querySelectorAll('#nav button').forEach(x=>x.classList.remove('active'));$(b.dataset.view).classList.add('active');b.classList.add('active');stopVoice()});
+document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{state.mode=b.dataset.mode;save();document.querySelectorAll('[data-mode]').forEach(x=>x.classList.toggle('active',x===b))});
+let activeMicBtn=null,activeSpeechStatus=null;
+
+function speechWords(s){
+ return String(s||'').trim().replace(/\s+/g,' ').split(' ').filter(Boolean);
+}
+function mergeSpeechText(existing, incoming){
+ existing=String(existing||'').trim().replace(/\s+/g,' ');
+ incoming=String(incoming||'').trim().replace(/\s+/g,' ');
+ if(!incoming)return existing;
+ if(!existing)return incoming;
+
+ const a=speechWords(existing), b=speechWords(incoming);
+ const al=a.map(x=>x.toLowerCase()), bl=b.map(x=>x.toLowerCase());
+
+ // If browser repeats the same whole phrase, do not append it.
+ const existingLower=al.join(' '), incomingLower=bl.join(' ');
+ if(existingLower===incomingLower || existingLower.endsWith(incomingLower)) return existing;
+
+ // Find longest suffix(existing) = prefix(incoming), so repeated fragments are merged once.
+ let overlap=0, max=Math.min(al.length,bl.length);
+ for(let k=max;k>=1;k--){
+   let same=true;
+   for(let i=0;i<k;i++){
+     if(al[al.length-k+i]!==bl[i]){same=false;break}
+   }
+   if(same){overlap=k;break}
+ }
+ return [...a,...b.slice(overlap)].join(' ');
+}
+
+window.startVoice=(id,btnId,statusId)=>{
+ const R=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!R){alert('Bu tarayıcı ses tanımayı desteklemiyor.');return}
+ stopVoice();
+
+ const out=$(id);
+ const base=(out.value||'').trim();
+ let committed='';
+ rec=new R();
+ rec.lang='en-US';
+ rec.continuous=true;
+ rec.interimResults=true;
+ listening=true;
+ activeMicBtn=btnId?$(btnId):null;
+ activeSpeechStatus=statusId?$(statusId):null;
+
+ if(activeMicBtn){activeMicBtn.classList.add('mic-live');activeMicBtn.textContent='🎙️ Dinliyorum'}
+ if(activeSpeechStatus)activeSpeechStatus.textContent='Seni dinliyorum…';
+
+ rec.onresult=e=>{
+   let interim='';
+   for(let i=e.resultIndex;i<e.results.length;i++){
+     const phrase=(e.results[i][0].transcript||'').trim();
+     if(!phrase)continue;
+     if(e.results[i].isFinal){
+       committed=mergeSpeechText(committed,phrase);
+     }else{
+       interim=phrase;
+     }
+   }
+   const spoken=mergeSpeechText(committed,interim);
+   out.value=[base,spoken].filter(Boolean).join(' ').replace(/\s+/g,' ').trim();
+ };
+
+ rec.onerror=e=>{
+   if(e.error==='not-allowed'){
+     listening=false;
+     if(activeSpeechStatus)activeSpeechStatus.textContent='Mikrofon izni gerekiyor.';
+   }else if(e.error!=='no-speech' && activeSpeechStatus){
+     activeSpeechStatus.textContent='Ses tanıma: '+e.error;
+   }
+ };
+
+ rec.onend=()=>{
+   listening=false;
+   if(activeMicBtn){activeMicBtn.classList.remove('mic-live');activeMicBtn.textContent='🎤 Konuş'}
+   if(activeSpeechStatus && !activeSpeechStatus.textContent.includes('izin'))activeSpeechStatus.textContent='Dinleme durdu.';
+ };
+
+ try{rec.start()}catch(e){}
+}
+
+window.stopVoice=(btnId,statusId)=>{
+ listening=false;
+ if(rec)try{rec.stop()}catch(e){}
+ const b=btnId?$(btnId):activeMicBtn;
+ if(b){b.classList.remove('mic-live');b.textContent='🎤 Konuş'}
+ const s=statusId?$(statusId):activeSpeechStatus;
+ if(s)s.textContent='Dinleme durdu.';
+ activeMicBtn=null;
+ activeSpeechStatus=null;
+}
+window.speak=t=>{try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='en-US';u.rate=.9;speechSynthesis.speak(u)}catch(e){}}
+window.newCoach=()=>{$('coachChat').innerHTML='<div class="msg ai">Ares: '+['What do you usually do after work?','Tell me about your last trip.','What makes you feel relaxed?'][Math.floor(Math.random()*3)]+'</div>'}
+window.sendCoach=async()=>{stopVoice('coachMicBtn','coachSpeechStatus');const t=$('coachText').value.trim();if(!t)return;$('coachChat').innerHTML+=`<div class="msg me">${esc(t)}</div>`;$('coachFeedback').style.display='block';$('coachFeedback').textContent='Ares cevaplıyor…';try{const mode=state.mode==='pressure'?'Keep replies very short and challenge the learner quickly.':state.mode==='real'?'Have a natural real-life conversation.':'Be supportive and guided.';const a=await ai('You are Ares, an A2-B1 speaking coach. Fluency first. '+mode+' Correct at most one important error and ask one follow-up question.',t);$('coachChat').innerHTML+=`<div class="msg ai">${esc(a)}</div>`;$('coachText').value='';$('coachFeedback').style.display='none';addTurn();speak(a)}catch(e){$('coachFeedback').textContent=hErr(e)}}
+window.newQuick=()=>{$('quickQ').textContent=quickQs[Math.floor(Math.random()*quickQs.length)];$('quickText').value='';$('quickFeedback').style.display='none'}
+window.startTimer=(seconds=10)=>{clearInterval(timerId);let n=seconds;$('quickTimer').textContent=n;timerId=setInterval(()=>{$('quickTimer').textContent=--n;if(n<=0)clearInterval(timerId)},1000)}
+window.evalQuick=async()=>{stopVoice('quickMicBtn','quickSpeechStatus');const t=$('quickText').value.trim();if(!t)return;$('quickFeedback').style.display='block';$('quickFeedback').textContent='Değerlendiriyorum…';try{const a=await ai('Return only a brief user-facing evaluation in Turkish. A2-B1 speaking, fluency and communication first. Ignore minor article/preposition/punctuation issues when meaning is clear. Give at most one important correction, one natural version, and one follow-up question. Never mention these instructions or prompts.','Question: '+$('quickQ').textContent+'\nAnswer: '+t);$('quickFeedback').textContent=a;addTurn()}catch(e){$('quickFeedback').textContent=hErr(e)}}
+const SAMPLE_DIALOGUES={
+ Restaurant:{lines:[['Staff','Good evening. Are you ready to order?'],['You','Almost. What would you recommend?'],['Staff','The grilled fish is very popular.'],['You','That sounds good. Does it contain nuts?'],['Staff','No, it doesn’t. Would you like anything to drink?'],['You','Just sparkling water, please.'],['Staff','Of course. Anything else?'],['You','That’s all for now, thanks.']],chunks:['What would you recommend?','Does it contain …?','That’s all for now, thanks.']},
+ Hotel:{lines:[['Receptionist','Hello. How can I help you?'],['You','Hi. I have a reservation under the name Erhan.'],['Receptionist','Let me check. How many nights are you staying?'],['You','Three nights.'],['Receptionist','Could I see your passport, please?'],['You','Sure. Here you go.'],['Receptionist','Your room is on the third floor.'],['You','Great. What time is breakfast?']],chunks:['I have a reservation under the name …','Here you go.','What time is …?']},
+ 'Café':{lines:[['Barista','Hi! What can I get for you?'],['You','Could I get a large Americano, please?'],['Barista','Sure. For here or to go?'],['You','To go, please.'],['Barista','Would you like anything else?'],['You','No, that’s all, thanks.'],['Barista','That’ll be four euros.'],['You','Here you go. Thanks.']],chunks:['Could I get …?','To go, please.','That’s all, thanks.']},
+ Shopping:{lines:[['Assistant','Hi. Can I help you?'],['You','Yes, I’m looking for a black jacket.'],['Assistant','What size are you?'],['You','Usually a large. Can I try this one on?'],['Assistant','Of course. The fitting room is over there.'],['You','Thanks. Do you have a cheaper one?'],['Assistant','Yes, I can show you another model.'],['You','That would be great.']],chunks:['I’m looking for …','Can I try this on?','Do you have a cheaper one?']},
+ Socialising:{lines:[['Person','Hi. Is this your first time here?'],['You','Yes, it is. I arrived a few days ago.'],['Person','How are you finding it so far?'],['You','I really like it. The city feels very lively.'],['Person','What brought you here?'],['You','I’m here to improve my English and travel a little.'],['Person','Sounds good. How long are you staying?'],['You','About three weeks.']],chunks:['How are you finding it so far?','What brought you here?','I’m here to …']},
+ Pharmacy:{lines:[['Pharmacist','Hello. What can I help you with?'],['You','I have a sore throat and a slight headache.'],['Pharmacist','How long have you had these symptoms?'],['You','Since yesterday.'],['Pharmacist','Do you have a fever?'],['You','No, I don’t think so.'],['Pharmacist','I can suggest something mild.'],['You','Thanks. How often should I take it?']],chunks:['I have a …','Since yesterday.','How often should I take it?']},
+ 'Airport & Passport':{lines:[['Officer','What is the purpose of your visit?'],['You','I’m here for tourism and an English course.'],['Officer','How long are you staying?'],['You','Three weeks.'],['Officer','Where are you staying?'],['You','At a student residence in St. Julian’s.'],['Officer','Do you have a return ticket?'],['You','Yes. I can show it to you if you’d like.']],chunks:['The purpose of my visit is …','I’m staying at …','I can show it to you.']},
+ Airport:{lines:[['Agent','Hello. How can I help you?'],['You','My checked bag hasn’t arrived.'],['Agent','Do you have your baggage receipt?'],['You','Yes, here it is.'],['Agent','What does your suitcase look like?'],['You','It’s a medium-sized black suitcase.'],['Agent','Where are you staying?'],['You','At a hotel in the city centre.']],chunks:['My checked bag hasn’t arrived.','Here it is.','It’s a medium-sized …']},
+ Train:{lines:[['You','Excuse me, which platform is the train to Prague?'],['Staff','Platform six.'],['You','Does it leave on time?'],['Staff','It’s delayed by about ten minutes.'],['You','Do I need to change trains?'],['Staff','No, it’s a direct train.'],['You','Great. Thank you for your help.'],['Staff','You’re welcome.']],chunks:['Which platform is …?','Do I need to change trains?','Is it a direct train?']},
+ Directions:{lines:[['You','Excuse me, could you help me?'],['Local','Sure. Where are you trying to go?'],['You','I’m looking for the city centre.'],['Local','Go straight and turn left at the traffic lights.'],['You','Is it far from here?'],['Local','No, about ten minutes on foot.'],['You','So I turn left at the lights, right?'],['Local','Exactly.']],chunks:['I’m looking for …','Is it far from here?','So I …, right?']},
+ 'Language school':{lines:[['Teacher','Hi. Tell me a little about yourself.'],['You','I’m Erhan. I’m from Turkey and I work in Ankara.'],['Teacher','Why are you studying English?'],['You','I want to speak more naturally and confidently.'],['Teacher','What is the most difficult part for you?'],['You','Speaking. I understand quite well, but I can’t always answer quickly.'],['Teacher','What do you hope to improve here?'],['You','I’d like to become more confident in real conversations.']],chunks:['I want to speak more …','The most difficult part for me is …','I’d like to become more …']}
+};
+function sampleForScenario(s){return SAMPLE_DIALOGUES[s.cat]||SAMPLE_DIALOGUES.Socialising}
+window.showSampleDialogue=kind=>{
+ const s=state[kind],box=$(kind+'Sample');if(!s||!box)return;
+ const d=sampleForScenario(s);const lines=d.lines.map(x=>`<div class="msg ${x[0]==='You'?'me':'ai'}"><b>${esc(x[0])}:</b> ${esc(x[1])}</div>`).join('');
+ box.style.display='block';box.innerHTML=`<div class="card" style="margin:14px 0 0;background:#fffaf3"><div class="tiny">📖 ÖNCE GÖR → SONRA KAPAT → KENDİN KONUŞ</div><div style="margin-top:8px">${lines}</div><div class="tiny" style="margin-top:10px"><b>İşe yarayan kalıplar:</b> ${d.chunks.map(esc).join(' · ')}</div><div class="row" style="margin-top:10px"><button class="pill" onclick="listenSampleDialogue('${kind}')">🔊 Sohbeti Dinle</button><button class="pill primary" onclick="practiceAfterSample('${kind}')">🎭 Kapat ve Ben Deneyeyim</button><button class="pill" onclick="hideSampleDialogue('${kind}')">Kapat</button></div></div>`;
+};
+window.hideSampleDialogue=kind=>{const b=$(kind+'Sample');if(b)b.style.display='none'};
+window.listenSampleDialogue=kind=>{const s=state[kind];if(!s)return;const d=sampleForScenario(s);speak(d.lines.map(x=>x[0]+': '+x[1]).join('. '))};
+window.practiceAfterSample=kind=>{hideSampleDialogue(kind);state[kind+'Chat']=[];save();renderScenario(kind);const t=$(kind+'Text');if(t)t.focus()};
+
+function scenarioKey(s){return [s.cat,s.place,s.p].join('|')}
+function scenarioInfo(kind,s){const k=scenarioKey(s),store=state.scenarioStats[kind]||(state.scenarioStats[kind]={});return store[k]||(store[k]={plays:0,completed:0,lastSeen:'',bestScore:0})}
+function markScenarioSeen(kind,s){const info=scenarioInfo(kind,s);info.plays=(info.plays||0)+1;info.lastSeen=dayKey()}
+function markScenarioCompleted(kind,s,score){const info=scenarioInfo(kind,s);info.completed=(info.completed||0)+1;if(Number.isFinite(score))info.bestScore=Math.max(info.bestScore||0,score);const d=ensureDay();d.scenarios=(d.scenarios||0)+1}
+function smartPick(kind,list,current){let pool=list.filter(x=>!current||scenarioKey(x)!==scenarioKey(current));if(!pool.length)pool=list.slice();const stats=state.scenarioStats[kind]||{};let min=Math.min(...pool.map(x=>(stats[scenarioKey(x)]?.plays||0)));let least=pool.filter(x=>(stats[scenarioKey(x)]?.plays||0)===min);least.sort((a,b)=>(stats[scenarioKey(a)]?.completed||0)-(stats[scenarioKey(b)]?.completed||0));const bestCompleted=stats[scenarioKey(least[0])]?.completed||0;least=least.filter(x=>(stats[scenarioKey(x)]?.completed||0)===bestCompleted);return least[Math.floor(Math.random()*least.length)]}
+function scenarioStatus(kind,s){const i=scenarioInfo(kind,s);return `${i.plays||0} kez seçildi · ${i.completed||0} değerlendirme${i.bestScore?` · en iyi ${i.bestScore.toFixed(1)}/10`:''}`}
+function renderRoleTopics(){
+ const meta={Restaurant:['🍽️','Restoran','Sipariş, yanlış yemek, öneri isteme'],Hotel:['🏨','Otel','Check-in, rezervasyon, oda sorunları'],'Café':['☕','Kafe','Sipariş, yanlış kahve, kısa sohbet'],Shopping:['🛍️','Alışveriş','İade, beden, ürün sorma'],Socialising:['🤝','Sosyalleşme','Tanışma ve sohbet sürdürme'],Pharmacy:['💊','Eczane','Basit sağlık ihtiyacını anlatma']};
+ $('roleTopics').innerHTML=[...new Set(roles.map(x=>x.cat))].map(c=>{const m=meta[c]||['🎭',c,'Gerçek hayat senaryosu'];return `<button class="role-category-card ${state.role&&state.role.cat===c?'active':''}" onclick="pickRole('${c}')"><div class="role-category-icon">${m[0]}</div><div class="role-category-title">${m[1]}</div><div class="role-category-desc">${m[2]}</div></button>`}).join('');
+}
+window.pickRole=c=>{const pool=roles.filter(x=>x.cat===c);if(!pool.length)return;state.role=smartPick('role',pool,state.role);markScenarioSeen('role',state.role);state.roleChat=[];save();renderScenario('role');renderRoleTopics()}
+window.newRole=()=>{state.role=smartPick('role',roles,state.role);markScenarioSeen('role',state.role);state.roleChat=[];save();renderScenario('role');renderRoleTopics()}
+window.resetRole=()=>{state.roleChat=[];save();renderScenario('role')}
+
+function renderAbroadTopics(){
+ const box=$('abroadTopics'); if(!box)return;
+ const meta={
+  'Airport & Passport':['🛂','Pasaport Kontrol','Ziyaret amacı, kalış süresi ve pasaport konuşması'],
+  'Airport':['🧳','Havalimanı','Bagaj, uçuş ve havalimanı işlemleri'],
+  'Hotel':['🏨','Otel','Check-in, rezervasyon ve oda sorunları'],
+  'Restaurant':['🍽️','Restoran','Sipariş, öneri ve yemek konuşmaları'],
+  'Train':['🚆','Tren','Bilet, peron ve yanlış tren durumları'],
+  'Directions':['🗺️','Yol Tarifi','Adres sorma ve yönleri anlama'],
+  'Language school':['🎓','Dil Okulu','İlk gün, tanışma ve İngilizce hedefleri'],
+  'Café':['☕','Kafe','Sipariş, ödeme ve kısa günlük konuşmalar'],
+  'Shopping':['🛍️','Alışveriş','Beden, iade, fiyat ve ürün konuşmaları'],
+  'Pharmacy':['💊','Eczane','Basit sağlık ihtiyacı ve ürün sorma']
+ };
+ const cats=[...new Set(abroad.map(x=>x.cat))];
+ box.innerHTML=cats.map(c=>{
+   const m=meta[c]||['🌍',c,'Gerçek hayat yurtdışı konuşması'];
+   const active=state.abroad&&state.abroad.cat===c?'active':'';
+   return `<button type="button" class="abroad-category-card ${active}" data-cat="${esc(c)}"><div class="abroad-category-icon">${m[0]}</div><div class="abroad-category-title">${m[1]}</div><div class="abroad-category-desc">${m[2]}</div></button>`;
+ }).join('');
+ box.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>pickAbroadCategory(b.dataset.cat));
+}
+window.pickAbroadCategory=c=>{const list=abroad.filter(x=>x.cat===c);if(!list.length)return;state.abroad=smartPick('abroad',list,state.abroad);markScenarioSeen('abroad',state.abroad);state.abroadChat=[];save();renderAbroadTopics();renderScenario('abroad')}
+window.newAbroad=()=>{state.abroad=smartPick('abroad',abroad,state.abroad);markScenarioSeen('abroad',state.abroad);state.abroadChat=[];save();renderAbroadTopics();renderScenario('abroad')}
+window.resetAbroad=()=>{if(!state.abroad)state.abroad=abroad[0];state.abroadChat=[];save();renderAbroadTopics();renderScenario('abroad')}
+function renderScenario(kind){const s=state[kind];$(kind+'Meta').textContent=s.cat+' · '+s.place+' · '+scenarioStatus(kind,s);$(kind+'Situation').textContent=s.p;$(kind+'Role').innerHTML='Ares = <b>'+esc(s.role)+'</b>';if($(kind+'Caption'))$(kind+'Caption').textContent=(state[kind+'Chat'].slice().reverse().find(x=>x.r==='ai')?.t)||s.starter;if($(kind+'Goal'))$(kind+'Goal').innerHTML='<b>Hedef:</b> '+esc(s.p);$(kind+'Chat').innerHTML=`<div class="msg ai">${esc(s.starter)}</div>`+state[kind+'Chat'].map(m=>`<div class="msg ${m.r==='user'?'me':'ai'}">${esc(m.t)}</div>`).join('');renderPartner()}
+window.sendScenario=async kind=>{stopVoice(kind+'MicBtn',kind+'SpeechStatus');const t=$(kind+'Text').value.trim();if(!t)return;const s=state[kind],arr=state[kind+'Chat'];arr.push({r:'user',t});$(kind+'Text').value='';renderScenario(kind);const fb=$(kind+'Feedback');fb.style.display='block';fb.textContent='Ares cevaplıyor…';const av=$(kind+'Avatar');if(av)av.classList.add('speaking');try{const hist=arr.slice(-8).map(x=>(x.r==='user'?'Learner: ':'Other: ')+x.t).join('\n');const a=await ai(`You are a ${s.role} in ${s.place}. Stay in character. Speak ONLY in English, regardless of the city or country. Never use French, Italian, Maltese, German, Spanish or any other non-English word or expression. Never use markdown, asterisks, translations, stage directions, labels, or meta-commentary. Use short, natural A2-B1 English. Do not teach or correct during the role-play. Reply as the real person would and ask at most one realistic follow-up question. If the interaction is naturally finished, close it politely instead of inventing another unnecessary question.`,hist);arr.push({r:'ai',t:a});save();renderScenario(kind);fb.style.display='none';addTurn();speak(a)}catch(e){fb.textContent=hErr(e)}finally{if(av)av.classList.remove('speaking')}}
+window.clearScenarioChat=kind=>{
+ stopVoice(kind+'MicBtn',kind+'SpeechStatus');
+ state[kind+'Chat']=[];
+ save();
+ const text=$(kind+'Text'); if(text)text.value='';
+ const fb=$(kind+'Feedback'); if(fb){fb.style.display='none';fb.textContent='';}
+ renderScenario(kind);
+}
+
+window.finishScenario=async kind=>{
+ const arr=state[kind+'Chat'],fb=$(kind+'Feedback');
+ fb.style.display='block';
+ if(!arr.length){fb.textContent='Önce birkaç tur konuş.';return}
+ fb.textContent='Konuşma raporu hazırlanıyor…';
+ const learner=arr.filter(x=>x.r==='user').map((x,i)=>`${i+1}. ${x.t}`).join('\n');
+ try{
+  const raw=await ai(
+`You are an encouraging but accurate English speaking coach for an A2-B1 learner.
+Evaluate ONLY the learner transcript below. Return ONLY the final report in Turkish.
+Communication and fluency matter more than grammatical perfection.
+Do NOT penalize minor articles (a/the), punctuation, capitalization, or harmless preposition issues when meaning is clear.
+Correct at most TWO important/core errors.
+Because you receive a speech-to-text TRANSCRIPT and not raw audio, do NOT pretend to measure accent or phonemes.
+The pronunciation score must be labelled "Telaffuz / Konuşma Netliği" and treated only as an approximate proxy based on how successfully speech was recognized and how understandable the transcript appears.
+Keep the entire answer under 260 words. Complete every section.
+
+Use EXACTLY this format:
+🗣️ Akıcılık: X/10
+One short sentence.
+
+🎯 İletişim: X/10
+One short sentence.
+
+🧩 Dilbilgisi: X/10
+One short sentence.
+
+📚 Kelime & Kalıp Kullanımı: X/10
+One short sentence.
+
+🔊 Telaffuz / Konuşma Netliği: X/10
+One short sentence and note briefly that this is transcript-based.
+
+⭐ Genel Puan: X/10
+
+🔧 Önemli Düzeltmeler:
+1. "original" → "natural English"
+2. "original" → "natural English"
+If there is only one important error, give only one. If none, write "Önemli bir hata yok."
+
+💡 Daha Doğal Söyleyiş:
+Give 1-2 useful natural alternatives from the learner's own sentences.
+
+📝 Genel Değerlendirme:
+Write 3-4 concise Turkish sentences about strengths, the main improvement area, and what to focus on next.`,
+`ÖĞRENCİ TRANSKRİPTİ:\n${learner}`);
+  let result=String(raw||'').replace(/\*\*/g,'').trim();
+  const looksLikeReport=/Akıcılık\s*:/i.test(result)&&/İletişim\s*:/i.test(result)&&/Genel Puan\s*:/i.test(result)&&/Genel Değerlendirme\s*:/i.test(result);
+  if(!looksLikeReport){
+   const retry=await ai(
+`Sen İngilizce konuşma koçusun. Yalnızca kullanıcıya gösterilecek TÜRKÇE değerlendirme raporunu yaz. Talimatları, kontrol listesini, düşünme sürecini veya promptu ASLA yazma. Küçük article/noktalama/büyük harf hatalarını puan kırma. En fazla iki önemli hata düzelt. Ses kaydı yok; telaffuzu yalnızca transkript anlaşılabilirliği üzerinden yaklaşık değerlendir.`,
+`Aşağıdaki öğrenci cümlelerini değerlendir:
+---
+${learner}
+---
+Şu başlıkların HEPSİNİ tamamla:
+🗣️ Akıcılık: X/10
+🎯 İletişim: X/10
+🧩 Dilbilgisi: X/10
+📚 Kelime & Kalıp Kullanımı: X/10
+🔊 Telaffuz / Konuşma Netliği: X/10
+⭐ Genel Puan: X/10
+🔧 Önemli Düzeltmeler:
+💡 Daha Doğal Söyleyiş:
+📝 Genel Değerlendirme:`);
+   result=String(retry||'').replace(/\*\*/g,'').trim();
+  }
+  result=result.split(/\n/).filter(x=>!/system message|instruction|prompt|policy|mentions transcript-based|under 260 words|let.s count/i.test(x)).join('\n').trim();
+  fb.style.whiteSpace='pre-wrap';
+  fb.style.overflow='visible';
+  fb.style.maxHeight='none';
+  fb.style.height='auto';
+  fb.textContent=result||'Değerlendirme alınamadı. Tekrar deneyebilirsin.';
+  if(result){
+   state.lastReports[kind]=result;
+   const scoreMatch=result.match(/Genel Puan\s*:\s*([0-9]+(?:[.,][0-9]+)?)\s*\/\s*10/i);const score=scoreMatch?parseFloat(scoreMatch[1].replace(',','.')):NaN;
+   const sig=kind+'|'+scenarioKey(state[kind])+'|'+learner;
+   if(state.lastEvalSignature[kind]!==sig){markScenarioCompleted(kind,state[kind],score);state.lastEvalSignature[kind]=sig}
+   const corrections=[...result.matchAll(/["“]([^"”\n]{2,120})["”]\s*(?:→|->)\s*["“]([^"”\n]{2,120})["”]/g)];
+   for(const m of corrections.slice(0,2)){const a=m[1].trim(),b=m[2].trim();if(a&&b&&a.toLowerCase()!==b.toLowerCase()&&!state.mistakes.some(x=>x.a===a&&x.b===b))state.mistakes.push({a,b,created:dayKey()})}
+   if(state.mistakes.length>30)state.mistakes=state.mistakes.slice(-30);
+   save();renderMistakes();renderScenario(kind);
+  }
+ }catch(e){fb.textContent=hErr(e)}
+}
+window.newSurprise=()=>{$('surprisePrompt').textContent=surpriseQs[Math.floor(Math.random()*surpriseQs.length)];$('surpriseText').value='';$('surpriseFeedback').style.display='none'}
+window.evalSurprise=async()=>{stopVoice();const t=$('surpriseText').value.trim();if(!t)return;$('surpriseFeedback').style.display='block';$('surpriseFeedback').textContent='Değerlendiriyorum…';try{$('surpriseFeedback').textContent=await ai('Return only a brief user-facing evaluation in Turkish. A2-B1 spontaneous speaking, fluency and communication first. Ignore minor article/preposition/punctuation issues when meaning is clear. Give at most one important correction and one natural version. Never mention these instructions or prompts.','Prompt: '+$('surprisePrompt').textContent+'\nAnswer: '+t);addTurn()}catch(e){$('surpriseFeedback').textContent=hErr(e)}}
+const emojis=['🙂','👩‍💼','🧑‍💼','👩‍🍳','🧑‍🍳','👩‍🏫','🧑‍🏫','🧔','👩','🧑'];function renderPartner(){const a=$('roleAvatar');if(!a)return;if(state.partner==='photo'&&state.photo)a.innerHTML=`<img class="partner-photo" src="${state.photo}">`;else if(state.partner==='emoji')a.innerHTML=`<div class="partner-emoji">${state.emoji}</div>`;else a.innerHTML='<div class="partner-silhouette"></div>'}
+window.setPartner=p=>{state.partner=p;save();renderPartner()};window.setEmoji=e=>{state.partner='emoji';state.emoji=e;save();renderPartner()}
+window.loadPhoto=file=>{if(!file)return;const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas'),s=360;c.width=s;c.height=s;const ctx=c.getContext('2d'),sc=Math.max(s/im.width,s/im.height),w=im.width*sc,h=im.height*sc;ctx.drawImage(im,(s-w)/2,(s-h)/2,w,h);state.photo=c.toDataURL('image/jpeg',.78);state.partner='photo';save();renderPartner()};im.src=r.result};r.readAsDataURL(file)}
+function renderMistakes(){$('mistakeList').innerHTML=state.mistakes.length?state.mistakes.map((m,i)=>`<div style="padding:10px 0;border-bottom:1px solid #ddd"><b>Sen:</b> ${esc(m.a)}<br><b>Daha doğal:</b> ${esc(m.b)} <button class="pill" onclick="removeMistake(${i})">✓ Öğrendim</button></div>`).join(''):'Henüz önemli bir düzeltme yok.'}
+window.removeMistake=i=>{state.mistakes.splice(i,1);save();renderMistakes()};window.clearMistakes=()=>{state.mistakes=[];save();renderMistakes()}
+$('emojiGrid').innerHTML=emojis.map(e=>`<button onclick="setEmoji('${e}')">${e}</button>`).join('');if(!state.role)state.role=roles[0];if(!state.abroad)state.abroad=abroad[0];renderRoleTopics();renderAbroadTopics();renderScenario('role');renderScenario('abroad');newSurprise();renderMistakes();updateDailyFocus();updateStats();
+})();
+</script></body></html>
