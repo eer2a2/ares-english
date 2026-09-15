@@ -1,0 +1,588 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#1E2A38"><title>Ares Sentence Builder v8.1</title>
+<style>
+:root{--paper:#efeae0;--paper2:#e4ddcc;--ink:#1e2a38;--soft:#4b5a6b;--accent:#b4432b;--leaf:#5b7361;--gold:#b8892b;--card:#fbf8f1;--line:#c9c0ac;--dark:#1e2a38}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:Arial,sans-serif;background-image:linear-gradient(var(--paper2) 1px,transparent 1px);background-size:100% 32px}button,textarea{font:inherit}button{cursor:pointer}.app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}.side{background:var(--dark);color:#fff;padding:22px 14px;position:sticky;top:0;height:100vh}.brand{padding:0 10px 18px;border-bottom:1px solid #ffffff22}.brand h1{font:700 24px Georgia;margin:0}.brand p{margin:5px 0;color:#9fb0bf;font-size:12px}.back{display:block;color:#dce4ea;text-decoration:none;padding:11px 12px;border-radius:10px;margin-top:14px}.main{padding:28px 34px 70px;max-width:1100px;width:100%;margin:0 auto}.top{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}.top h1{font:700 32px Georgia;margin:0}.sub,.tiny{color:var(--soft);font-size:13px}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:19px;margin:15px 0;box-shadow:0 5px 20px #1e2a3812}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}.connector{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px;text-align:left}.connector.active{outline:2px solid var(--accent);background:#fff4ef}.connector b{display:block;font-size:17px;margin-bottom:4px}.pill{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 14px}.pill.primary{background:var(--accent);color:#fff;border-color:var(--accent)}.pill.good{background:var(--leaf);color:#fff;border-color:var(--leaf)}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.prompt{font:700 22px/1.4 Georgia;margin:12px 0;white-space:pre-line}.answer{width:100%;min-height:100px;border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff}.feedback{display:none;margin-top:12px;padding:13px;border-left:4px solid var(--leaf);background:#eef3ef;border-radius:8px;white-space:pre-wrap;line-height:1.5}.chat{margin-top:14px;border:1px solid var(--line);border-radius:12px;background:#fff;padding:12px;max-height:420px;overflow:auto}.msg{padding:10px 12px;border-radius:12px;margin:8px 0;line-height:1.45;white-space:pre-wrap}.msg.user{background:#eef3ef;margin-left:8%}.msg.ares{background:#f7efe8;margin-right:8%}.msg .who{font-weight:700;font-size:12px;color:var(--soft);margin-bottom:4px}.chat-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.audio-box{margin-top:10px;padding:10px;border:1px dashed var(--line);border-radius:10px;background:#fff}.saved-list{margin-top:10px}.saved-item{padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;margin:7px 0}.saved-item button{margin-left:6px}.level{display:inline-block;background:var(--gold);color:#fff;border-radius:999px;padding:5px 9px;font-size:12px}.score{font:700 28px Georgia;color:var(--accent)}.bar{height:9px;background:var(--paper2);border-radius:999px;overflow:hidden}.bar span{display:block;height:100%;background:var(--leaf)}.tip{padding:12px;border-radius:10px;background:#fffaf0;border:1px dashed var(--gold);line-height:1.45}@media(max-width:820px){.app{grid-template-columns:1fr}.side{position:relative;height:auto}.main{padding:18px 14px 55px}.top h1{font-size:27px}}
+</style></head><body><div class="app"><aside class="side"><div class="brand"><h1>🐾 Ares English</h1><p>Sentence Builder · v8.1</p></div><a class="back" href="./speaking.html">← Ares Speaking'e dön</a></aside><main class="main">
+<div class="top"><div><h1>🧩 Sentence Builder</h1><div class="sub">Ezberleme değil: bağla, üret, söyle, değerlendir.</div></div><button class="pill" onclick="setKey()">🔑 API</button></div>
+<div class="card"><div class="tiny">BAĞLAÇ / YAPI SEÇ</div><div class="grid" id="connectors"></div></div>
+<div class="card"><div class="row"><span class="level">A2 → B1</span><b id="name"></b></div><div class="tip" id="tip"></div><div style="margin-top:10px" class="sub" id="pattern"></div></div>
+<div class="card"><div class="row"><button class="pill" data-mode="complete" onclick="setMode('complete',this)">1 · Tamamla</button><button class="pill" data-mode="translate" onclick="setMode('translate',this)">2 · Çevir</button><button class="pill" data-mode="combine" onclick="setMode('combine',this)">3 · İki fikri bağla</button><button class="pill" data-mode="free" onclick="setMode('free',this)">4 · Serbest üret</button></div><div class="tiny" style="margin-top:16px" id="modeHint"></div><div class="prompt" id="question"></div><textarea class="answer" id="answer" placeholder="İngilizce cevabını buraya yaz veya Konuş'a bas..."></textarea><div class="row" style="margin-top:10px"><button class="pill" id="mic" onclick="startVoice()">🎤 Konuş</button><button class="pill" onclick="stopVoice()">⏹️ Durdur</button><button class="pill primary" onclick="evaluateAnswer()">📊 Değerlendir</button><button class="pill good" onclick="nextQuestion()">➡️ Yeni görev</button></div><div class="tiny" id="speechStatus" style="margin-top:7px"></div><div class="feedback" id="feedback"></div>
+  <div class="chat" id="chat"></div>
+  <div class="chat-actions">
+    <button class="pill" onclick="speakLastAres()">🔊 Ares'i Seslendir</button>
+    <button class="pill" id="recordBtn" onclick="toggleRecording()">⏺️ Ses Kaydı Başlat</button>
+    <button class="pill" onclick="saveSession()">💾 Analiz için Kaydet</button>
+    <button class="pill" onclick="clearChat()">🧹 Sohbeti Temizle</button>
+    <button class="pill" onclick="exportTranscript()">📄 Metni Dışa Aktar</button>
+    <button class="pill" onclick="exportAudio()">🎙️ Sesi Dışa Aktar</button>
+  </div>
+  <div class="audio-box" id="audioBox" style="display:none"><div class="tiny">Bu oturumun ses kaydı</div><audio id="audioPlayer" controls></audio></div>
+  <div class="saved-list" id="savedList"></div>
+</div>
+<div class="card"><div class="row" style="justify-content:space-between"><b>Bugünkü üretim</b><span class="score" id="count">0</span></div><div class="bar"><span id="bar"></span></div><div class="tiny" style="margin-top:7px">Hedef: 10 anlamlı cümle. Küçük article/preposition hataları iletişimi bozmuyorsa ağır cezalandırılmaz.</div></div>
+</main></div><script>
+const DATA={
+although:{name:"although",meaning:"-mesine / -masına rağmen",tip:"İki zıt fikri bağlar. Although + özne + fiil gelir. Aynı cümlede ayrıca 'but' kullanma.",pattern:"Although + clause, clause",complete:["Although I was tired, ...","Although the weather was bad, ...","Although I was nervous, ..."],translate:["Yorgun olmama rağmen dışarı çıktım.","İngilizce konuşmak zor olsa da pratik yapıyorum.","Yağmur yağmasına rağmen yürüyüşe çıktık."],combine:[["I was tired.","I finished my work."],["The hotel was expensive.","I liked it."],["He studied a lot.","He didn't pass the exam."]],free:["Tell me about something you did although you were tired.","Describe a place you liked although it had one problem.","Make a sentence about learning English using although."]},
+even_though:{name:"even though",meaning:"-mesine rağmen (daha güçlü)",tip:"Although'a benzer ama zıtlığı daha güçlü vurgular. Ardından tam cümle gelir.",pattern:"Even though + clause, clause",complete:["Even though I didn't sleep well, ...","Even though it was expensive, ...","Even though I made mistakes, ..."],translate:["Çok yorgun olmama rağmen çalışmaya devam ettim.","Pahalı olmasına rağmen onu satın aldım.","Hata yapmama rağmen İngilizce konuşmaya devam ettim."],combine:[["It was raining heavily.","We went out."],["I was afraid.","I tried it."],["The trip was short.","I enjoyed it a lot."]],free:["Say something surprising about yourself using even though.","Talk about a trip using even though.","Make a sentence about speaking English using even though."]},
+however:{name:"however",meaning:"ancak / bununla birlikte",tip:"İki ayrı düşünce arasında kontrast kurar. Genellikle yeni cümlenin başında virgülle kullanılır.",pattern:"Sentence. However, sentence.",complete:["I wanted to go out. However, ...","The course was difficult. However, ...","The hotel looked nice. However, ..."],translate:["Gitmek istedim. Ancak çok yorgundum.","İngilizceyi anlıyorum. Ancak hızlı cevap veremiyorum.","Otel güzeldi. Ancak odası çok küçüktü."],combine:[["The restaurant was busy.","The service was fast."],["I prepared well.","I still felt nervous."],["The city is beautiful.","It is very expensive."]],free:["Give an opinion and add a contrasting point with however.","Talk about travel using however.","Talk about your English progress using however."]},
+because:{name:"because",meaning:"çünkü / -dığı için",tip:"Sebep verir. Because'dan sonra özne + fiil gelir.",pattern:"Result + because + reason",complete:["I stayed at home because ...","I want to improve my English because ...","I chose this hotel because ..."],translate:["Yorgun olduğum için eve gittim.","İngilizcemi geliştirmek istiyorum çünkü seyahat etmeyi seviyorum.","Oteli konumu iyi olduğu için seçtim."],combine:[["I was late.","The bus didn't come."],["I study English.","I want to speak confidently."],["I ordered pasta.","I love Italian food."]],free:["Explain one decision using because.","Talk about why you learn English.","Explain why you like or dislike a city."]},
+so:{name:"so",meaning:"bu yüzden / dolayısıyla",tip:"Önce sebebi, sonra sonucu verir: reason + so + result.",pattern:"Reason + so + result",complete:["I was tired, so ...","The weather was beautiful, so ...","I couldn't understand him, so ..."],translate:["Yorgundum, bu yüzden erken yattım.","Hava güzeldi, bu yüzden yürüyüşe çıktık.","Onu anlayamadım, bu yüzden tekrar etmesini istedim."],combine:[["I missed the bus.","I took a taxi."],["The café was full.","We sat outside."],["I need more speaking practice.","I use Ares every day."]],free:["Describe a problem and its result using so.","Talk about a travel decision using so.","Make a sentence about your English routine using so."]},
+despite:{name:"despite",meaning:"-e rağmen",tip:"Despite'dan sonra tam cümle değil; isim veya V-ing kullanılır. 'Despite I was tired' değil → 'Despite being tired'.",pattern:"Despite + noun / V-ing, clause",complete:["Despite being tired, ...","Despite the rain, ...","Despite making some mistakes, ..."],translate:["Yorgun olmama rağmen çalıştım.","Yağmura rağmen dışarı çıktık.","Bazı hatalar yapmama rağmen konuşmaya devam ettim."],combine:[["I was tired.","I went to the gym."],["There was heavy traffic.","We arrived on time."],["I felt nervous.","I answered the question."]],free:["Make a sentence with despite + V-ing.","Talk about a difficulty using despite.","Use despite in a sentence about English."]},
+instead_of:{name:"instead of",meaning:"yerine",tip:"Bir seçeneğin yerine başka bir şey yaptığını anlatır. Ardından isim veya V-ing gelir.",pattern:"Instead of + noun / V-ing, ...",complete:["Instead of staying at home, ...","Instead of taking a taxi, ...","Instead of worrying about mistakes, ..."],translate:["Taksiye binmek yerine yürüdüm.","Evde kalmak yerine arkadaşlarımla dışarı çıktım.","Hatalar hakkında endişelenmek yerine konuşmaya çalışıyorum."],combine:[["I didn't drive.","I took the train."],["I didn't watch TV.","I studied English."],["I didn't order dessert.","I had coffee."]],free:["Describe a choice you made using instead of.","Talk about a travel choice.","Make a sentence about studying English."]},
+unless:{name:"unless",meaning:"-medikçe / -mezse",tip:"Unless ≈ if ... not. Gelecek anlamında bile unless'ten sonra genellikle Simple Present kullanılır.",pattern:"Unless + present, will/can + verb",complete:["Unless I practice speaking, ...","Unless the weather improves, ...","Unless you book early, ..."],translate:["Pratik yapmazsam daha akıcı konuşamam.","Hava düzelmezse dışarı çıkmayacağız.","Erken rezervasyon yapmazsan iyi bir oda bulamayabilirsin."],combine:[["You practice.","You won't improve."],["We leave now.","We will miss the train."],["You ask.","You won't know the answer."]],free:["Give yourself advice using unless.","Make a travel warning using unless.","Make a sentence about English practice."]},
+as_soon_as:{name:"as soon as",meaning:"-er -mez / olur olmaz",tip:"Bir şey olur olmaz diğerinin gerçekleştiğini söyler. Gelecek anlamında as soon as bölümünde Simple Present kullanılır.",pattern:"As soon as + present, will + verb",complete:["As soon as I arrive at the hotel, ...","As soon as the class finishes, ...","As soon as I feel more confident, ..."],translate:["Otele varır varmaz seni arayacağım.","Ders biter bitmez dışarı çıkacağım.","Kendime daha çok güvenir güvenmez daha fazla konuşacağım."],combine:[["I arrive.","I will text you."],["The rain stops.","We will go out."],["I finish work.","I will call you."]],free:["Describe your next trip using as soon as.","Make a plan for after work.","Make a sentence about what you will do when you feel confident."]}
+};
+let selected='although',mode='complete',qIndex=-1,recognition=null;const $=id=>document.getElementById(id);const KEY='ing_defter_api_key',BACK='ing_defter_api_key_local_backup';
+function key(){try{return(localStorage.getItem(KEY)||localStorage.getItem(BACK)||'').trim()}catch(e){return''}}
+function setKey(){const v=prompt('Gemini API anahtarını gir:');if(v&&v.trim()){localStorage.setItem(KEY,v.trim());localStorage.setItem(BACK,v.trim());alert('API anahtarı kaydedildi. Ares Speaking ile ortak kullanılır.')}}
+function renderConnectors(){$('connectors').innerHTML=Object.entries(DATA).map(([k,v])=>`<button class="connector ${k===selected?'active':''}" onclick="selectConnector('${k}')"><b>${v.name}</b><span class="tiny">${v.meaning}</span></button>`).join('')}
+function selectConnector(k){selected=k;qIndex=-1;renderConnectors();renderLesson();nextQuestion()}
+function renderLesson(){let d=DATA[selected];$('name').textContent=d.name+' · '+d.meaning;$('tip').textContent=d.tip;$('pattern').textContent='Kalıp: '+d.pattern}
+function setMode(m,b){mode=m;qIndex=-1;document.querySelectorAll('[data-mode]').forEach(x=>x.classList.toggle('primary',x===b));nextQuestion()}
+function currentQuestion(){let d=DATA[selected],x=d[mode][qIndex%d[mode].length];if(mode==='combine')return `Bu iki fikri “${d.name}” kullanarak bağla:\n1) ${x[0]}\n2) ${x[1]}`;if(mode==='translate')return `İngilizceye çevir ve “${d.name}” yapısını kullan:\n${x}`;if(mode==='free')return x;return `Cümleyi doğal biçimde tamamla:\n${x}`}
+function nextQuestion(){qIndex++;$('question').textContent=currentQuestion();$('answer').value='';$('feedback').style.display='none';$('modeHint').textContent={complete:'Cümleyi anlamlı biçimde tamamla.',translate:'Türkçe fikri İngilizce üret.',combine:'İki kısa fikri tek doğal yapıda birleştir.',free:'Kendi hayatından veya fikrinden cümle üret.'}[mode]}
+function localFeedback(a){let d=DATA[selected],ok=a.toLowerCase().includes(d.name.toLowerCase());return ok?`✅ Yapıyı kullandın. Ayrıntılı AI değerlendirmesi için API anahtarı gerekir.\n\nKontrol ipucu: ${d.tip}`:`⚠️ Bu görevde “${d.name}” yapısını kullan.\n\nİpucu: ${d.pattern}`}
+async function aiEval(a){
+  const k=key();
+  if(!k)return {text:localFeedback(a),complete:true};
+  const d=DATA[selected];
+  const task=currentQuestion();
+
+  const hasConversation=!!document.querySelector('#chat .msg.ares');
+  const conversationText=getTranscript();
+
+  const promptText=`You are Ares, an A2-B1 English speaking coach.
+Fluency and communication come first.
+Do NOT treat tiny article, minor preposition, or punctuation issues as major errors when meaning is clear.
+Correct only important grammar, meaning, or naturalness problems.
+
+Target structure for the ORIGINAL exercise: ${d.name}
+Rule: ${d.tip}
+Original task: ${task}
+Conversation so far:
+${conversationText || "(no previous conversation)"}
+
+Learner's new answer:
+${a}
+
+IMPORTANT:
+- If there is NO previous Ares message, this is the first exercise answer. Check whether the target structure is used correctly.
+- If there IS a previous Ares message, this is an ongoing conversation. Do NOT require the learner to repeat "${d.name}" or any other target structure.
+- In ongoing conversation, judge whether the answer naturally answers Ares's previous question.
+- Short conversational answers are allowed.
+- Keep tense consistent with the question. Example: "Did you learn...?" -> "Yes, I learned..."
+- Ask ONE short, natural follow-up question that continues the topic. Do not force the target structure again.
+
+Return ONLY valid JSON. No markdown. Use exactly these keys:
+{
+  "result":"Çok iyi | İyi | Tekrar dene",
+  "natural":"one complete natural English version of the learner's answer",
+  "reason":"one or two short Turkish sentences",
+  "followup":"one short natural English follow-up question"
+}`;
+
+  const models=['gemini-3.6-flash','gemini-3.5-flash-lite'];
+  let lastError='';
+
+  for(const model of models){
+    try{
+      const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(k)}`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          contents:[{parts:[{text:promptText}]}],
+          generationConfig:{
+            temperature:0.25,
+            maxOutputTokens:700,
+            responseMimeType:'application/json'
+          }
+        })
+      });
+
+      const j=await r.json();
+      if(!r.ok){lastError=j?.error?.message||String(r.status);continue}
+
+      let raw=(j.candidates?.[0]?.content?.parts||[]).map(x=>x.text||'').join('').trim();
+      raw=raw.replace(/^```json\s*/i,'').replace(/```$/,'').trim();
+
+      let obj;
+      try{ obj=JSON.parse(raw); }
+      catch(e){ lastError='AI cevabı JSON olarak tamamlanmadı.'; continue; }
+
+      const result=String(obj.result||'').trim();
+      const natural=String(obj.natural||'').trim();
+      const reason=String(obj.reason||'').trim();
+      const followup=String(obj.followup||'').trim();
+
+      if(!result || !natural || !reason || !followup){
+        lastError='AI cevabında eksik bölüm vardı.';
+        continue;
+      }
+
+      return {
+        complete:true,
+        text:`SONUÇ: ${result}\n\nDOĞAL CÜMLE: ${natural}\n\nNEDEN: ${reason}\n\nKONUŞMA: ${followup}`
+      };
+    }catch(e){
+      lastError=e?.message||'Bağlantı hatası';
+    }
+  }
+  throw new Error(lastError||'AI yanıt vermedi');
+}
+async function evaluateAnswer(){
+  const a=$('answer').value.trim();
+  if(!a)return;
+  stopVoice();
+  addMessage('user',a);
+  $('feedback').style.display='block';
+  $('feedback').textContent='Ares değerlendiriyor…';
+  try{
+    const result=await aiEval(a);
+    $('feedback').textContent=result.text;
+    addMessage('ares',result.text);
+    speakText(extractFollowup(result.text) || result.text);
+    if(result.complete){
+      let n=Number(localStorage.getItem('ares_sentence_builder_count')||0)+1;
+      localStorage.setItem('ares_sentence_builder_count',n);
+      updateCount();
+    }
+    $('answer').value='';
+  }catch(e){
+    $('feedback').textContent='Ares değerlendiremedi: '+e.message+'\n\nCevabın kaybolmadı. Tekrar Değerlendir’e basabilirsin.';
+  }
+}
+function updateCount(){let n=Number(localStorage.getItem('ares_sentence_builder_count')||0);$('count').textContent=n;$('bar').style.width=Math.min(100,(n%11)*10)+'%'}
+
+let voiceSession=0;
+let mediaRecorder=null;
+let recordedChunks=[];
+let recordedBlob=null;
+let lastAresText='';
+
+function normalizeSpeechText(t){ return String(t||'').replace(/\s+/g,' ').trim(); }
+
+function addMessage(role,text){
+  const chat=$('chat');
+  const div=document.createElement('div');
+  div.className='msg '+role;
+  const who=document.createElement('div');
+  who.className='who';
+  who.textContent=role==='user'?'Sen':'Ares';
+  const body=document.createElement('div');
+  body.textContent=text;
+  div.appendChild(who); div.appendChild(body);
+  chat.appendChild(div);
+  chat.scrollTop=chat.scrollHeight;
+  if(role==='ares') lastAresText=text;
+}
+
+function extractFollowup(text){
+  const m=String(text||'').match(/KONUŞMA:\s*([\s\S]*)/i);
+  return m?m[1].trim():'';
+}
+
+let aresTtsText='';
+let aresTtsRetryTimer=null;
+
+function getAresSpeechText(){
+  const fromMemory=extractFollowup(lastAresText)||lastAresText;
+  if(fromMemory && String(fromMemory).trim()) return String(fromMemory).trim();
+
+  const fb=$('feedback');
+  const fromFeedback=fb ? (extractFollowup(fb.textContent)||fb.textContent) : '';
+  if(fromFeedback && String(fromFeedback).trim()) return String(fromFeedback).trim();
+
+  const bubbles=[...document.querySelectorAll('#chat .ares')];
+  if(bubbles.length){
+    const t=bubbles[bubbles.length-1].textContent||'';
+    return (extractFollowup(t)||t).trim();
+  }
+  return '';
+}
+
+function chooseEnglishVoice(){
+  const voices=window.speechSynthesis ? speechSynthesis.getVoices() : [];
+  if(!voices || !voices.length) return null;
+  return voices.find(v=>/^en-US/i.test(v.lang))
+      || voices.find(v=>/^en-GB/i.test(v.lang))
+      || voices.find(v=>/^en/i.test(v.lang))
+      || null;
+}
+
+function speakText(text){
+  text=String(text||'').trim();
+  if(!text) return false;
+
+  if(!('speechSynthesis' in window) || !('SpeechSynthesisUtterance' in window)){
+    const s=$('speechStatus');
+    if(s) s.textContent='Seslendirme bu tarayıcıda desteklenmiyor.';
+    return false;
+  }
+
+  aresTtsText=text;
+  if(aresTtsRetryTimer){ clearTimeout(aresTtsRetryTimer); aresTtsRetryTimer=null; }
+
+  try{
+    speechSynthesis.cancel();
+    if(speechSynthesis.paused) speechSynthesis.resume();
+
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang='en-US';
+    u.rate=0.88;
+    u.pitch=1;
+    u.volume=1;
+
+    const voice=chooseEnglishVoice();
+    if(voice) u.voice=voice;
+
+    u.onstart=()=>{
+      const s=$('speechStatus');
+      if(s) s.textContent="🔊 Ares konuşuyor…";
+    };
+    u.onend=()=>{
+      const s=$('speechStatus');
+      if(s && s.textContent.includes('Ares konuşuyor')) s.textContent='';
+    };
+    u.onerror=(ev)=>{
+      const s=$('speechStatus');
+      if(s) s.textContent='Seslendirme başlatılamadı. Bir kez daha Ares’i Seslendir’e dokun.';
+    };
+
+    // Android/Chrome can ignore the first speak() immediately after cancel().
+    // A tiny delay makes the user-initiated playback reliable.
+    setTimeout(()=>{
+      try{
+        if(speechSynthesis.paused) speechSynthesis.resume();
+        speechSynthesis.speak(u);
+      }catch(e){}
+    },80);
+    return true;
+  }catch(e){
+    const s=$('speechStatus');
+    if(s) s.textContent='Seslendirme hatası: '+(e.message||e);
+    return false;
+  }
+}
+
+function speakLastAres(){
+  const text=getAresSpeechText();
+  if(!text){
+    const s=$('speechStatus');
+    if(s) s.textContent='Önce Ares’in bir değerlendirme veya takip sorusu oluşturması gerekiyor.';
+    return;
+  }
+  speakText(text);
+}
+
+// Prime/update Android voice list when the browser exposes it asynchronously.
+if('speechSynthesis' in window){
+  try{
+    speechSynthesis.getVoices();
+    speechSynthesis.onvoiceschanged=()=>{ try{ speechSynthesis.getVoices(); }catch(e){} };
+    document.addEventListener('visibilitychange',()=>{
+      if(!document.hidden && speechSynthesis.paused){
+        try{ speechSynthesis.resume(); }catch(e){}
+      }
+    });
+  }catch(e){}
+}
+
+function startVoice(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){
+    $('speechStatus').textContent='Bu tarayıcı ses tanımayı desteklemiyor.';
+    return;
+  }
+
+  stopVoice();
+
+  const mySession=++voiceSession;
+  const state={
+    session:mySession,
+    stopped:false,
+    rec:null,
+    restartTimer:null,
+    committed:'',
+    currentInterim:'',
+    lastRendered:''
+  };
+  window.__aresSpeechState=state;
+  $('answer').value='';
+
+  const norm=s=>normalizeSpeechText(s);
+
+  function tokenOverlapMerge(base, addition){
+    base=norm(base); addition=norm(addition);
+    if(!base)return addition;
+    if(!addition)return base;
+
+    const b=base.split(' ');
+    const a=addition.split(' ');
+
+    const max=Math.min(b.length,a.length,20);
+    let overlap=0;
+
+    for(let k=max;k>=1;k--){
+      const tail=b.slice(-k).join(' ').toLowerCase();
+      const head=a.slice(0,k).join(' ').toLowerCase();
+      if(tail===head){ overlap=k; break; }
+    }
+
+    // If the new result is just a shorter/partial restatement of the end,
+    // don't append it again.
+    const bl=base.toLowerCase();
+    const al=addition.toLowerCase();
+    if(bl.endsWith(al)) return base;
+
+    // If browser re-emits a longer phrase that already contains the tail,
+    // append only the genuinely new suffix.
+    if(overlap>0){
+      return norm([...b, ...a.slice(overlap)].join(' '));
+    }
+
+    // Conservative duplicate guard for exact repeated chunks.
+    if(bl===al) return base;
+
+    return norm(base+' '+addition);
+  }
+
+  function render(interim=''){
+    const shown=norm(state.committed + (interim?(' '+interim):''));
+    if(shown && shown!==state.lastRendered){
+      $('answer').value=shown;
+      state.lastRendered=shown;
+    }
+    return shown;
+  }
+
+  function launch(){
+    if(state.stopped || mySession!==voiceSession)return;
+
+    const rec=new SR();
+    state.rec=rec;
+    recognition=rec;
+
+    rec.lang='en-US';
+    rec.interimResults=true;
+    rec.continuous=true;
+    rec.maxAlternatives=1;
+
+    rec.onstart=()=>{
+      if(state.stopped || mySession!==voiceSession)return;
+      $('speechStatus').textContent='🎙️ Dinliyorum… Duraksayabilirsin. Bitirdiğinde Durdur’a bas.';
+      $('mic').textContent='🎙️ Dinliyor';
+    };
+
+    rec.onresult=e=>{
+      if(state.stopped || mySession!==voiceSession)return;
+
+      let interim='';
+      for(let i=e.resultIndex;i<e.results.length;i++){
+        const piece=norm(e.results[i][0].transcript);
+        if(!piece)continue;
+
+        if(e.results[i].isFinal){
+          state.committed=tokenOverlapMerge(state.committed,piece);
+        }else{
+          interim=piece;
+        }
+      }
+
+      state.currentInterim=interim;
+      render(interim);
+    };
+
+    rec.onerror=e=>{
+      if(mySession!==voiceSession)return;
+
+      if(['not-allowed','service-not-allowed','audio-capture'].includes(e.error)){
+        state.stopped=true;
+        $('speechStatus').textContent='Mikrofon: '+e.error;
+        $('mic').textContent='🎤 Konuş';
+        return;
+      }
+
+      // Silence/aborted during restart is normal in long-listening mode.
+      if(e.error!=='no-speech' && e.error!=='aborted'){
+        $('speechStatus').textContent='Mikrofon: '+e.error;
+      }
+    };
+
+    rec.onend=()=>{
+      if(mySession!==voiceSession)return;
+
+      // Do not commit interim on automatic browser stop; it may be a partial
+      // re-emission of the last finalized phrase and causes duplication.
+      state.currentInterim='';
+      render('');
+
+      if(state.stopped){
+        recognition=null;
+        state.rec=null;
+        $('mic').textContent='🎤 Konuş';
+        const text=norm(state.committed);
+        $('answer').value=text;
+        $('speechStatus').textContent=text
+          ? '✅ Cümlen alındı. Değerlendir’e basabilirsin.'
+          : 'Dinleme durdu.';
+        return;
+      }
+
+      // Mobile Chromium often stops Web Speech after a pause.
+      // Restart cleanly, while keeping only finalized committed text.
+      state.restartTimer=setTimeout(()=>{
+        if(!state.stopped && mySession===voiceSession)launch();
+      },180);
+    };
+
+    try{
+      rec.start();
+    }catch(e){
+      state.restartTimer=setTimeout(()=>{
+        if(!state.stopped && mySession===voiceSession)launch();
+      },300);
+    }
+  }
+
+  window.__aresStopLongListening=()=>{
+    state.stopped=true;
+    if(state.restartTimer)clearTimeout(state.restartTimer);
+
+    const rec=state.rec||recognition;
+    if(rec){
+      try{rec.stop()}catch(e){
+        try{rec.abort()}catch(_){}
+      }
+    }
+
+    recognition=null;
+    state.currentInterim='';
+    const text=norm(state.committed);
+    $('answer').value=text;
+    $('mic').textContent='🎤 Konuş';
+    $('speechStatus').textContent=text
+      ? '✅ Cümlen alındı. Değerlendir’e basabilirsin.'
+      : '⏹️ Dinleme durduruldu.';
+  };
+
+  launch();
+}
+
+function stopVoice(){
+  voiceSession++;
+
+  if(typeof window.__aresStopLongListening==='function'){
+    const fn=window.__aresStopLongListening;
+    window.__aresStopLongListening=null;
+    fn();
+    return;
+  }
+
+  const rec=recognition;
+  recognition=null;
+  if(rec){
+    try{rec.abort()}catch(e){}
+  }
+  $('mic').textContent='🎤 Konuş';
+}
+
+async function toggleRecording(){
+  if(mediaRecorder && mediaRecorder.state==='recording'){
+    mediaRecorder.stop();
+    $('recordBtn').textContent='⏺️ Ses Kaydı Başlat';
+    return;
+  }
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    recordedChunks=[];
+    mediaRecorder=new MediaRecorder(stream);
+    mediaRecorder.ondataavailable=e=>{ if(e.data.size) recordedChunks.push(e.data); };
+    mediaRecorder.onstop=()=>{
+      recordedBlob=new Blob(recordedChunks,{type:mediaRecorder.mimeType||'audio/webm'});
+      const url=URL.createObjectURL(recordedBlob);
+      $('audioPlayer').src=url;
+      $('audioBox').style.display='block';
+      stream.getTracks().forEach(t=>t.stop());
+    };
+    mediaRecorder.start();
+    $('recordBtn').textContent='⏹️ Ses Kaydı Durdur';
+  }catch(e){
+    alert('Ses kaydı başlatılamadı: '+e.message);
+  }
+}
+
+function getTranscript(){
+  return [...document.querySelectorAll('#chat .msg')].map(el=>{
+    const who=el.classList.contains('user')?'Sen':'Ares';
+    const body=el.querySelector('div:last-child')?.textContent||'';
+    return `${who}: ${body}`;
+  }).join('\n\n');
+}
+
+function saveSession(){
+  const transcript=getTranscript();
+  if(!transcript){alert('Kaydedilecek sohbet yok.');return}
+  const key='ares_sentence_builder_sessions';
+  const list=JSON.parse(localStorage.getItem(key)||'[]');
+  list.unshift({id:Date.now(),date:new Date().toLocaleString('tr-TR'),connector:DATA[selected].name,mode,transcript});
+  localStorage.setItem(key,JSON.stringify(list.slice(0,30)));
+  renderSaved();
+  alert('Sohbet analiz için kaydedildi.');
+}
+
+function clearChat(){
+  $('chat').innerHTML='';
+  $('feedback').style.display='none';
+  $('feedback').textContent='';
+  $('answer').value='';
+  lastAresText='';
+}
+
+function exportTranscript(){
+  const text=getTranscript();
+  if(!text){alert('Dışa aktarılacak sohbet yok.');return}
+  const blob=new Blob([text],{type:'text/plain;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`ares-sentence-builder-${new Date().toISOString().slice(0,10)}.txt`;
+  a.click(); URL.revokeObjectURL(a.href);
+}
+
+function exportAudio(){
+  if(!recordedBlob){alert('Henüz ses kaydı yok.');return}
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(recordedBlob);
+  a.download=`ares-speaking-${new Date().toISOString().replace(/[:.]/g,'-')}.webm`;
+  a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+
+function renderSaved(){
+  const box=$('savedList');
+  const list=JSON.parse(localStorage.getItem('ares_sentence_builder_sessions')||'[]');
+  if(!list.length){box.innerHTML='';return}
+  box.innerHTML='<div class="tiny" style="margin-top:10px">Kayıtlı konuşmalar</div>'+list.slice(0,5).map(s=>
+    `<div class="saved-item"><b>${s.connector}</b> · ${s.date}<button class="pill" onclick="loadSaved(${s.id})">Aç</button><button class="pill" onclick="deleteSaved(${s.id})">Sil</button></div>`
+  ).join('');
+}
+
+function loadSaved(id){
+  const list=JSON.parse(localStorage.getItem('ares_sentence_builder_sessions')||'[]');
+  const s=list.find(x=>x.id===id); if(!s)return;
+  clearChat();
+  s.transcript.split(/\n\n/).forEach(block=>{
+    const idx=block.indexOf(':');
+    if(idx<0)return;
+    const who=block.slice(0,idx), text=block.slice(idx+1).trim();
+    addMessage(who==='Sen'?'user':'ares',text);
+  });
+}
+
+function deleteSaved(id){
+  const key='ares_sentence_builder_sessions';
+  const list=JSON.parse(localStorage.getItem(key)||'[]').filter(x=>x.id!==id);
+  localStorage.setItem(key,JSON.stringify(list));
+  renderSaved();
+}
+
+renderConnectors();renderLesson();nextQuestion();updateCount();renderSaved();
+
+</script></body></html>
