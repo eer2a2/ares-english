@@ -471,14 +471,12 @@
  async function check(){
    try{
      const s=await session();
-     const q=await Promise.race([
-       sb.from("device_access").select("status,person_name,device_name").eq("user_id",s.user.id).maybeSingle(),
-       new Promise((_,reject)=>setTimeout(()=>reject(new Error("Kontrol zaman aşımına uğradı.")),8000))
-     ]);
+     const q=await sb.rpc("ares_check_access");
      if(q.error) throw q.error;
-     if(!q.data){msg.textContent="Bu cihaz henüz kayıtlı değil. Bir kez erişim talebi gönderin.";form.style.display="block";chk.style.display="none";return;}
-     if(q.data.status==="approved"){lock.remove();return;}
-     if(q.data.status==="blocked"){msg.textContent="Bu cihazın erişimi engellenmiş.";form.style.display="none";chk.style.display="none";return;}
+     const status=q.data;
+     if(status==="unregistered"){msg.textContent="Bu cihaz henüz kayıtlı değil. Bir kez erişim talebi gönderin.";form.style.display="block";chk.style.display="none";return;}
+     if(status==="approved"){lock.remove();return;}
+     if(status==="blocked"){msg.textContent="Bu cihazın erişimi engellenmiş.";form.style.display="none";chk.style.display="none";return;}
      msg.textContent="Erişim talebiniz gönderildi. Yönetici onayı bekleniyor.";form.style.display="none";chk.style.display="block";
    }catch(e){msg.textContent="Bağlantı kurulamadı: "+(e?.message||e);form.style.display="none";chk.style.display="block";}
  }
@@ -489,8 +487,9 @@
    req.disabled=true; req.textContent="GÖNDERİLİYOR…";
    try{
      const s=await session();
-     const ins=await sb.from("device_access").insert({user_id:s.user.id,person_name:name,device_name:device,status:"pending"});
-     if(ins.error && ins.error.code!=="23505") throw ins.error;
+     const ins=await sb.rpc("ares_request_access",{p_name:name,p_device:device});
+     if(ins.error) throw ins.error;
+     if(ins.data==="approved"){lock.remove();return;}
      msg.textContent="Erişim talebiniz gönderildi. Yönetici onayı bekleniyor.";
      form.style.display="none";
      chk.style.display="block";
@@ -500,6 +499,7 @@
    }catch(e){msg.textContent="Talep gönderilemedi: "+(e?.message||e);req.disabled=false;req.textContent="ERİŞİM TALEBİ GÖNDER";}
  });
  chk.addEventListener("click",check);
+ setInterval(()=>{if(document.body.contains(lock) && chk.style.display!=="none") check();},3000);
  check();
 })();
 </script>
