@@ -25,7 +25,7 @@ button{border:0;border-radius:13px;padding:13px 15px;font-size:15px;font-weight:
   <div id="msg"></div>
 </div>
 <div id="app">
- <div class="card top"><div><b id="count">Talepler</b><div class="meta" style="margin:3px 0 0">Otomatik yenilenir</div></div><div class="row"><button id="refresh" class="primary">YENİLE</button><button id="logout" class="logout">ÇIKIŞ</button></div></div>
+ <div class="card top"><div><b id="count">Talepler</b><div class="meta" style="margin:3px 0 0">Otomatik yenilenir</div></div><div class="row"><button id="notify" class="primary">🔔 BİLDİRİMLERİ AÇ</button><button id="refresh" class="primary">YENİLE</button><button id="logout" class="logout">ÇIKIŞ</button></div></div>
  <div id="list"></div>
 </div></div>
 <script>
@@ -33,6 +33,31 @@ const U="https://yedpdbsosaisalcnwcqv.supabase.co";
 const K="sb_publishable_jtT-XD3Ge97HkRNaUQydgw_VqSQdHt7";
 const sb=supabase.createClient(U,K,{auth:{storageKey:"ares-admin-auth",persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const $=id=>document.getElementById(id), login=$("login"), app=$("app"), list=$("list"), msg=$("msg");
+
+const VAPID_PUBLIC="BBLD0TkAncexhOpXmjz8Lsu0xejD40ToZWkjSmVRM85LKfctiEibyJHLmPnEpYBg85VQlPyMdMnjMwAYDQtIM14";
+function b64ToU8(s){const pad='='.repeat((4-s.length%4)%4),b=atob((s+pad).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from([...b].map(c=>c.charCodeAt(0)))}
+async function enableNotifications(){
+ try{
+  if(!('serviceWorker' in navigator)||!('PushManager' in window)) throw new Error('Bu cihaz web push bildirimini desteklemiyor.');
+  const perm=await Notification.requestPermission();
+  if(perm!=='granted') throw new Error('Bildirim izni verilmedi.');
+  const reg=await navigator.serviceWorker.register('./ares-admin-sw.js',{scope:'./'});
+  await navigator.serviceWorker.ready;
+  let sub=await reg.pushManager.getSubscription();
+  if(!sub) sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64ToU8(VAPID_PUBLIC)});
+  const j=sub.toJSON();
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session) throw new Error('Önce yönetici girişi gerekli.');
+  const row={user_id:session.user.id,endpoint:j.endpoint,p256dh:j.keys.p256dh,auth_key:j.keys.auth,updated_at:new Date().toISOString()};
+  const {error}=await sb.from('push_subscriptions').upsert(row,{onConflict:'endpoint'});
+  if(error) throw error;
+  $('notify').textContent='🔔 BİLDİRİMLER AÇIK'; $('notify').disabled=true;
+  alert('Ares English erişim bildirimleri açıldı.');
+ }catch(e){alert(e.message||String(e))}
+}
+async function syncNotifyButton(){
+ try{if(!('serviceWorker' in navigator))return;const reg=await navigator.serviceWorker.getRegistration('./');const sub=reg?await reg.pushManager.getSubscription():null;if(sub&&Notification.permission==='granted'){$('notify').textContent='🔔 BİLDİRİMLER AÇIK';$('notify').disabled=true}}catch{}
+}
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function label(s){return s==="pending"?"ONAY BEKLİYOR":s==="approved"?"ONAYLI":"ENGELLİ"}
 function date(x){try{return new Date(x).toLocaleString("tr-TR")}catch{return ""}}
@@ -45,7 +70,7 @@ async function load(){
 }
 window.setStatus=async(id,status)=>{const patch={status,last_seen_at:new Date().toISOString()};if(status==="approved")patch.approved_at=new Date().toISOString();const {error}=await sb.from("device_access").update(patch).eq("id",id);if(error)alert(error.message);else load()}
 window.removeDevice=async id=>{if(!confirm("Bu cihaz kaydı silinsin mi?"))return;const {error}=await sb.from("device_access").delete().eq("id",id);if(error)alert(error.message);else load()}
-async function show(){const {data:{session}}=await sb.auth.getSession();if(session){login.style.display="none";app.style.display="block";load()}else{login.style.display="block";app.style.display="none"}}
+async function show(){const {data:{session}}=await sb.auth.getSession();if(session){login.style.display="none";app.style.display="block";load();syncNotifyButton()}else{login.style.display="block";app.style.display="none"}}
 $("loginBtn").onclick=async()=>{
  msg.textContent="Gönderiliyor…";
  const email=$("email").value.trim();
@@ -60,10 +85,10 @@ $("loginBtn").onclick=async()=>{
 }
 sb.auth.onAuthStateChange((event,session)=>{
  if(session){
-   login.style.display="none"; app.style.display="block"; load();
+   login.style.display="none"; app.style.display="block"; load(); syncNotifyButton();
    if(location.hash || location.search.includes("code=")) history.replaceState({},document.title,location.pathname);
  }
 });
-$("refresh").onclick=load;$("logout").onclick=async()=>{await sb.auth.signOut();show()}
+$("notify").onclick=enableNotifications;$("refresh").onclick=load;$("logout").onclick=async()=>{await sb.auth.signOut();show()}
 show();setInterval(()=>{if(app.style.display!=="none")load()},5000);
 </script></body></html>
