@@ -471,7 +471,10 @@
  async function check(){
    try{
      const s=await session();
-     const q=await sb.from("device_access").select("status,person_name,device_name").eq("user_id",s.user.id).maybeSingle();
+     const q=await Promise.race([
+       sb.from("device_access").select("status,person_name,device_name").eq("user_id",s.user.id).maybeSingle(),
+       new Promise((_,reject)=>setTimeout(()=>reject(new Error("Kontrol zaman aşımına uğradı.")),8000))
+     ]);
      if(q.error) throw q.error;
      if(!q.data){msg.textContent="Bu cihaz henüz kayıtlı değil. Bir kez erişim talebi gönderin.";form.style.display="block";chk.style.display="none";return;}
      if(q.data.status==="approved"){lock.remove();return;}
@@ -488,7 +491,12 @@
      const s=await session();
      const ins=await sb.from("device_access").insert({user_id:s.user.id,person_name:name,device_name:device,status:"pending"});
      if(ins.error && ins.error.code!=="23505") throw ins.error;
-     await check();
+     msg.textContent="Erişim talebiniz gönderildi. Yönetici onayı bekleniyor.";
+     form.style.display="none";
+     chk.style.display="block";
+     req.disabled=false;
+     req.textContent="ERİŞİM TALEBİ GÖNDER";
+     return;
    }catch(e){msg.textContent="Talep gönderilemedi: "+(e?.message||e);req.disabled=false;req.textContent="ERİŞİM TALEBİ GÖNDER";}
  });
  chk.addEventListener("click",check);
