@@ -433,8 +433,69 @@
 .col-ai-notice.offline{border-color:#dce1e5;background:#f7f8f9}
 .col-ai-notice.busy{border-color:#dce1e5;background:#f7f8f9}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+
+<style id="ares-app-lock-style">
+#ares-app-lock{position:fixed;inset:0;z-index:2147483647;background:#081120;display:flex;align-items:center;justify-content:center;padding:20px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+#ares-app-lock .box{width:min(480px,94vw);background:#fff;border-radius:24px;padding:30px;color:#202a35;box-shadow:0 24px 70px rgba(0,0,0,.35)}
+#ares-app-lock h2{text-align:center;margin:8px 0 12px;font-size:30px} #ares-app-lock .lock{text-align:center;font-size:48px}
+#ares-app-lock p{text-align:center;line-height:1.45;color:#4d5966} #ares-app-lock label{display:block;font-weight:700;margin:13px 0 6px}
+#ares-app-lock input{width:100%;padding:14px;border:1px solid #cfd5dc;border-radius:14px;font-size:17px;box-sizing:border-box}
+#ares-app-lock button{width:100%;margin-top:16px;padding:15px;border:0;border-radius:14px;background:#18a957;color:#fff;font-size:17px;font-weight:800}
+#ares-app-lock button:disabled{opacity:.65}
+</style>
+<div id="ares-app-lock"><div class="box">
+<div class="lock">🔐</div><h2>Ares English</h2>
+<p id="ares-lock-msg">Cihaz erişimi kontrol ediliyor…</p>
+<div id="ares-lock-form" style="display:none">
+<label>Adınız</label><input id="ares-lock-name" placeholder="Örn. Ahmet" autocomplete="name">
+<label>Cihaz adı</label><input id="ares-lock-device" value="Chrome">
+<button id="ares-lock-request" type="button">ERİŞİM TALEBİ GÖNDER</button>
+</div>
+<button id="ares-lock-check" type="button" style="display:none;background:#34475a">ONAYI KONTROL ET</button>
+</div></div>
+<script>
+(function(){
+ const SB_URL='https://yedpdbsosaisalcnwcqv.supabase.co', SB_KEY='sb_publishable_jtT-XD3Ge97HkRNaUQydgw_VqSQdHt7';
+ const sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{storageKey:"ares-main-auth",persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
+ const lock=document.getElementById("ares-app-lock"), msg=document.getElementById("ares-lock-msg"), form=document.getElementById("ares-lock-form");
+ const req=document.getElementById("ares-lock-request"), chk=document.getElementById("ares-lock-check");
+ async function session(){
+   let r=await sb.auth.getSession(), s=r.data.session;
+   if(!s){let x=await sb.auth.signInAnonymously(); if(x.error) throw x.error; s=x.data.session;}
+   if(!s?.user?.id) throw new Error("Cihaz oturumu oluşturulamadı.");
+   return s;
+ }
+ async function check(){
+   try{
+     const s=await session();
+     const q=await sb.from("device_access").select("status,person_name,device_name").eq("user_id",s.user.id).maybeSingle();
+     if(q.error) throw q.error;
+     if(!q.data){msg.textContent="Bu cihaz henüz kayıtlı değil. Bir kez erişim talebi gönderin.";form.style.display="block";chk.style.display="none";return;}
+     if(q.data.status==="approved"){lock.remove();return;}
+     if(q.data.status==="blocked"){msg.textContent="Bu cihazın erişimi engellenmiş.";form.style.display="none";chk.style.display="none";return;}
+     msg.textContent="Erişim talebiniz gönderildi. Yönetici onayı bekleniyor.";form.style.display="none";chk.style.display="block";
+   }catch(e){msg.textContent="Bağlantı kurulamadı: "+(e?.message||e);form.style.display="none";chk.style.display="block";}
+ }
+ req.addEventListener("click",async()=>{
+   const name=document.getElementById("ares-lock-name").value.trim();
+   const device=document.getElementById("ares-lock-device").value.trim()||"Chrome";
+   if(!name){msg.textContent="Lütfen adınızı yazın.";return;}
+   req.disabled=true; req.textContent="GÖNDERİLİYOR…";
+   try{
+     const s=await session();
+     const ins=await sb.from("device_access").insert({user_id:s.user.id,person_name:name,device_name:device,status:"pending"});
+     if(ins.error && ins.error.code!=="23505") throw ins.error;
+     await check();
+   }catch(e){msg.textContent="Talep gönderilemedi: "+(e?.message||e);req.disabled=false;req.textContent="ERİŞİM TALEBİ GÖNDER";}
+ });
+ chk.addEventListener("click",check);
+ check();
+})();
+</script>
+
 <div id="app">
   <nav id="sidebar">
     <div class="brand">
