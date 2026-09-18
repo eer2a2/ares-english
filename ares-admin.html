@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ares English • Yönetici</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#071321;color:#15202b;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+.wrap{max-width:680px;margin:auto;padding:18px}.head{color:#fff;padding:10px 2px 18px}.head h1{margin:0;font-size:26px}.head p{opacity:.72;margin:5px 0 0}
+.card{background:#fff;border-radius:22px;padding:18px;margin-bottom:14px;box-shadow:0 12px 35px #0003}
+input{width:100%;padding:14px;border:1px solid #ccd3da;border-radius:13px;font-size:16px;margin:6px 0}
+button{border:0;border-radius:13px;padding:13px 15px;font-size:15px;font-weight:800;cursor:pointer}
+.primary,.approve{background:#16ad5b;color:white}.block{background:#fff0f0;color:#b42318}.delete{background:#f1f3f5;color:#444}.logout{background:#24364b;color:#fff}
+.row{display:flex;gap:9px;flex-wrap:wrap}.row button{flex:1}.device{font-weight:800;font-size:18px}.name{font-size:15px;margin-top:4px}.meta{font-size:13px;color:#667085;margin:8px 0 13px}
+.badge{display:inline-block;padding:5px 9px;border-radius:999px;font-size:12px;font-weight:800}.pending{background:#fff3cd;color:#805b00}.approved{background:#dcfce7;color:#166534}.blocked{background:#fee2e2;color:#991b1b}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px}.empty{text-align:center;color:#667085;padding:22px 4px}
+#app{display:none}#msg{color:#b42318;font-size:14px;margin-top:8px}
+</style></head>
+<body><div class="wrap">
+<div class="head"><h1>🔐 Ares English Yönetici</h1><p>Telefonundan erişim taleplerini yönet.</p></div>
+<div id="login" class="card">
+  <h2 style="margin-top:0">Yönetici Girişi</h2>
+  <input id="email" type="email" value="erhanerbab@gmail.com" autocomplete="username">
+  <input id="pass" type="password" placeholder="Şifreniz" autocomplete="current-password">
+  <button id="loginBtn" class="primary" style="width:100%;margin-top:7px">GİRİŞ YAP</button>
+  <div id="msg"></div>
+</div>
+<div id="app">
+ <div class="card top"><div><b id="count">Talepler</b><div class="meta" style="margin:3px 0 0">Otomatik yenilenir</div></div><div class="row"><button id="refresh" class="primary">YENİLE</button><button id="logout" class="logout">ÇIKIŞ</button></div></div>
+ <div id="list"></div>
+</div></div>
+<script>
+const U="https://yedpdbsosaisalcnwcqv.supabase.co";
+const K="sb_publishable_jtT-XD3Ge97HkRNaUQydgw_VqSQdHt7";
+const sb=supabase.createClient(U,K,{auth:{storageKey:"ares-admin-auth",persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
+const $=id=>document.getElementById(id), login=$("login"), app=$("app"), list=$("list"), msg=$("msg");
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function label(s){return s==="pending"?"ONAY BEKLİYOR":s==="approved"?"ONAYLI":"ENGELLİ"}
+function date(x){try{return new Date(x).toLocaleString("tr-TR")}catch{return ""}}
+async function load(){
+ const {data,error}=await sb.from("device_access").select("id,person_name,device_name,status,requested_at,approved_at").order("requested_at",{ascending:false});
+ if(error){list.innerHTML='<div class="card empty">Kayıtlar alınamadı: '+esc(error.message)+'</div>';return}
+ const a=[...(data||[])].sort((x,y)=>(x.status==="pending"?0:1)-(y.status==="pending"?0:1));
+ $("count").textContent=(a.filter(x=>x.status==="pending").length)+" bekleyen talep";
+ list.innerHTML=a.length?a.map(d=>`<div class="card"><div class="top"><div><div class="device">${esc(d.device_name||"Cihaz")}</div><div class="name">${esc(d.person_name||"İsimsiz")}</div></div><span class="badge ${d.status}">${label(d.status)}</span></div><div class="meta">Talep: ${date(d.requested_at)}</div><div class="row">${d.status!=="approved"?`<button class="approve" onclick="setStatus('${d.id}','approved')">✓ ONAYLA</button>`:""}${d.status!=="blocked"?`<button class="block" onclick="setStatus('${d.id}','blocked')">ENGELLE</button>`:""}<button class="delete" onclick="removeDevice('${d.id}')">SİL</button></div></div>`).join(""):'<div class="card empty">Henüz cihaz talebi yok.</div>';
+}
+window.setStatus=async(id,status)=>{const patch={status,last_seen_at:new Date().toISOString()};if(status==="approved")patch.approved_at=new Date().toISOString();const {error}=await sb.from("device_access").update(patch).eq("id",id);if(error)alert(error.message);else load()}
+window.removeDevice=async id=>{if(!confirm("Bu cihaz kaydı silinsin mi?"))return;const {error}=await sb.from("device_access").delete().eq("id",id);if(error)alert(error.message);else load()}
+async function show(){const {data:{session}}=await sb.auth.getSession();if(session){login.style.display="none";app.style.display="block";load()}else{login.style.display="block";app.style.display="none"}}
+$("loginBtn").onclick=async()=>{msg.textContent="";const {error}=await sb.auth.signInWithPassword({email:$("email").value.trim(),password:$("pass").value});if(error){msg.textContent="Giriş yapılamadı: "+error.message;return}show()}
+$("refresh").onclick=load;$("logout").onclick=async()=>{await sb.auth.signOut();show()}
+show();setInterval(()=>{if(app.style.display!=="none")load()},5000);
+</script></body></html>
