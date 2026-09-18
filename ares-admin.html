@@ -22,10 +22,15 @@ button{border:0;border-radius:13px;padding:13px 15px;font-size:15px;font-weight:
   <h2 style="margin-top:0">Yönetici Girişi</h2>
   <input id="email" type="email" value="erhanerbab@gmail.com" autocomplete="email">
   <button id="loginBtn" class="primary" style="width:100%;margin-top:7px">E-POSTA İLE GİRİŞ BAĞLANTISI GÖNDER</button>
+  <div id="pwaLogin" style="display:none;margin-top:12px;border-top:1px solid #e5e7eb;padding-top:12px">
+    <div style="font-weight:800;margin-bottom:6px">Ana ekran girişi</div>
+    <input id="devicePin" type="password" inputmode="numeric" maxlength="6" placeholder="6 haneli yönetici kodu" autocomplete="one-time-code">
+    <button id="pinLoginBtn" class="primary" style="width:100%;margin-top:7px">YÖNETİCİ KODUYLA GİR</button>
+  </div>
   <div id="msg"></div>
 </div>
 <div id="app">
- <div class="card top"><div><b id="count">Talepler</b><div class="meta" style="margin:3px 0 0">Otomatik yenilenir</div></div><div class="row"><button id="notify" class="primary">🔔 BİLDİRİMLERİ AÇ</button><button id="refresh" class="primary">YENİLE</button><button id="logout" class="logout">ÇIKIŞ</button></div></div>
+ <div class="card top"><div><b id="count">Talepler</b><div class="meta" style="margin:3px 0 0">Otomatik yenilenir</div></div><div class="row"><button id="activateHome" class="primary">📱 ANA EKRANI ETKİNLEŞTİR</button><button id="notify" class="primary">🔔 BİLDİRİMLERİ AÇ</button><button id="refresh" class="primary">YENİLE</button><button id="logout" class="logout">ÇIKIŞ</button></div></div>
  <div id="list"></div>
 </div></div>
 <script>
@@ -33,6 +38,8 @@ const U="https://yedpdbsosaisalcnwcqv.supabase.co";
 const K="sb_publishable_jtT-XD3Ge97HkRNaUQydgw_VqSQdHt7";
 const sb=supabase.createClient(U,K,{auth:{storageKey:"ares-admin-auth",persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const $=id=>document.getElementById(id), login=$("login"), app=$("app"), list=$("list"), msg=$("msg");
+const IS_STANDALONE=window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone===true;
+if(IS_STANDALONE) $("pwaLogin").style.display="block";
 
 const VAPID_PUBLIC="BBLD0TkAncexhOpXmjz8Lsu0xejD40ToZWkjSmVRM85LKfctiEibyJHLmPnEpYBg85VQlPyMdMnjMwAYDQtIM14";
 function b64ToU8(s){const pad='='.repeat((4-s.length%4)%4),b=atob((s+pad).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from([...b].map(c=>c.charCodeAt(0)))}
@@ -55,6 +62,26 @@ async function enableNotifications(){
   alert('Ares English erişim bildirimleri açıldı.');
  }catch(e){alert(e.message||String(e))}
 }
+
+async function activateHomeScreen(){
+ try{
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session) throw new Error('Önce yönetici girişi gerekli.');
+  const pin=String(Math.floor(100000+Math.random()*900000));
+  const {error}=await sb.auth.updateUser({password:pin});
+  if(error) throw error;
+  alert('Ana ekran yönetici kodun: '+pin+'\n\nAna ekrandaki Ares Yönetici’yi açıp bu 6 haneli kodu bir kez gir.');
+ }catch(e){alert(e.message||String(e))}
+}
+async function pinLogin(){
+ const pin=$("devicePin").value.trim();
+ if(!/^\d{6}$/.test(pin)){msg.style.color='#b42318';msg.textContent='6 haneli yönetici kodunu gir.';return}
+ msg.style.color='#667085';msg.textContent='Giriş yapılıyor…';
+ const {error}=await sb.auth.signInWithPassword({email:$("email").value.trim(),password:pin});
+ if(error){msg.style.color='#b42318';msg.textContent='Kodla giriş yapılamadı: '+error.message;return}
+ msg.textContent='';show();
+}
+
 async function syncNotifyButton(){
  try{if(!('serviceWorker' in navigator))return;const reg=await navigator.serviceWorker.getRegistration('./');const sub=reg?await reg.pushManager.getSubscription():null;if(sub&&Notification.permission==='granted'){$('notify').textContent='🔔 BİLDİRİMLER AÇIK';$('notify').disabled=true}}catch{}
 }
@@ -70,7 +97,7 @@ async function load(){
 }
 window.setStatus=async(id,status)=>{const patch={status,last_seen_at:new Date().toISOString()};if(status==="approved")patch.approved_at=new Date().toISOString();const {error}=await sb.from("device_access").update(patch).eq("id",id);if(error)alert(error.message);else load()}
 window.removeDevice=async id=>{if(!confirm("Bu cihaz kaydı silinsin mi?"))return;const {error}=await sb.from("device_access").delete().eq("id",id);if(error)alert(error.message);else load()}
-async function show(){const {data:{session}}=await sb.auth.getSession();if(session){login.style.display="none";app.style.display="block";load();syncNotifyButton()}else{login.style.display="block";app.style.display="none"}}
+async function show(){const {data:{session}}=await sb.auth.getSession();if(session){login.style.display="none";app.style.display="block";$("activateHome").style.display=IS_STANDALONE?"none":"inline-block";load();syncNotifyButton()}else{login.style.display="block";app.style.display="none"}}
 $("loginBtn").onclick=async()=>{
  msg.textContent="Gönderiliyor…";
  const email=$("email").value.trim();
@@ -89,6 +116,6 @@ sb.auth.onAuthStateChange((event,session)=>{
    if(location.hash || location.search.includes("code=")) history.replaceState({},document.title,location.pathname);
  }
 });
-$("notify").onclick=enableNotifications;$("refresh").onclick=load;$("logout").onclick=async()=>{await sb.auth.signOut();show()}
+$("activateHome").onclick=activateHomeScreen;$("pinLoginBtn").onclick=pinLogin;$("notify").onclick=enableNotifications;$("refresh").onclick=load;$("logout").onclick=async()=>{await sb.auth.signOut();show()}
 show();setInterval(()=>{if(app.style.display!=="none")load()},5000);
 </script></body></html>
