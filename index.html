@@ -460,6 +460,12 @@
 (function(){
  const SB_URL='https://yedpdbsosaisalcnwcqv.supabase.co', SB_KEY='sb_publishable_jtT-XD3Ge97HkRNaUQydgw_VqSQdHt7';
  const sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{storageKey:"ares-main-auth",persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
+ const DEVICE_KEY="ares-device-token-v1";
+ let DEVICE_TOKEN=localStorage.getItem(DEVICE_KEY);
+ if(!DEVICE_TOKEN){
+   DEVICE_TOKEN=(crypto.randomUUID?crypto.randomUUID():("ares-"+Date.now()+"-"+Math.random().toString(36).slice(2)+"-"+Math.random().toString(36).slice(2)));
+   localStorage.setItem(DEVICE_KEY,DEVICE_TOKEN);
+ }
  const lock=document.getElementById("ares-app-lock"), msg=document.getElementById("ares-lock-msg"), form=document.getElementById("ares-lock-form");
  const req=document.getElementById("ares-lock-request"), chk=document.getElementById("ares-lock-check");
  async function session(){
@@ -470,8 +476,7 @@
  }
  async function check(){
    try{
-     const s=await session();
-     const q=await sb.rpc("ares_check_access");
+     const q=await sb.rpc("ares_check_device",{p_token:DEVICE_TOKEN});
      if(q.error) throw q.error;
      const status=q.data;
      if(status==="unregistered"){msg.textContent="Bu cihaz henüz kayıtlı değil. Bir kez erişim talebi gönderin.";form.style.display="block";chk.style.display="none";return;}
@@ -486,8 +491,7 @@
    if(!name){msg.textContent="Lütfen adınızı yazın.";return;}
    req.disabled=true; req.textContent="GÖNDERİLİYOR…";
    try{
-     const s=await session();
-     const ins=await sb.rpc("ares_request_access",{p_name:name,p_device:device});
+     const ins=await sb.rpc("ares_request_device",{p_token:DEVICE_TOKEN,p_name:name,p_device:device});
      if(ins.error) throw ins.error;
      if(ins.data==="approved"){lock.remove();return;}
      msg.textContent="Erişim talebiniz gönderildi. Yönetici onayı bekleniyor.";
