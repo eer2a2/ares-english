@@ -20,9 +20,8 @@ button{border:0;border-radius:13px;padding:13px 15px;font-size:15px;font-weight:
 <div class="head"><h1>🔐 Ares English Yönetici</h1><p>Telefonundan erişim taleplerini yönet.</p></div>
 <div id="login" class="card">
   <h2 style="margin-top:0">Yönetici Girişi</h2>
-  <input id="email" type="email" value="erhanerbab@gmail.com" autocomplete="username">
-  <input id="pass" type="password" placeholder="Şifreniz" autocomplete="current-password">
-  <button id="loginBtn" class="primary" style="width:100%;margin-top:7px">GİRİŞ YAP</button>
+  <input id="email" type="email" value="erhanerbab@gmail.com" autocomplete="email">
+  <button id="loginBtn" class="primary" style="width:100%;margin-top:7px">E-POSTA İLE GİRİŞ BAĞLANTISI GÖNDER</button>
   <div id="msg"></div>
 </div>
 <div id="app">
@@ -47,7 +46,17 @@ async function load(){
 window.setStatus=async(id,status)=>{const patch={status,last_seen_at:new Date().toISOString()};if(status==="approved")patch.approved_at=new Date().toISOString();const {error}=await sb.from("device_access").update(patch).eq("id",id);if(error)alert(error.message);else load()}
 window.removeDevice=async id=>{if(!confirm("Bu cihaz kaydı silinsin mi?"))return;const {error}=await sb.from("device_access").delete().eq("id",id);if(error)alert(error.message);else load()}
 async function show(){const {data:{session}}=await sb.auth.getSession();if(session){login.style.display="none";app.style.display="block";load()}else{login.style.display="block";app.style.display="none"}}
-$("loginBtn").onclick=async()=>{msg.textContent="";const {error}=await sb.auth.signInWithPassword({email:$("email").value.trim(),password:$("pass").value});if(error){msg.textContent="Giriş yapılamadı: "+error.message;return}show()}
+$("loginBtn").onclick=async()=>{
+ msg.textContent="Gönderiliyor…";
+ const email=$("email").value.trim();
+ const {error}=await sb.auth.signInWithOtp({
+   email,
+   options:{emailRedirectTo:window.location.origin+window.location.pathname,shouldCreateUser:false}
+ });
+ if(error){msg.textContent="Bağlantı gönderilemedi: "+error.message;return}
+ msg.style.color="#166534";
+ msg.textContent="Giriş bağlantısı e-postanıza gönderildi. E-postadaki bağlantıya dokunun.";
+}
 $("refresh").onclick=load;$("logout").onclick=async()=>{await sb.auth.signOut();show()}
 show();setInterval(()=>{if(app.style.display!=="none")load()},5000);
 </script></body></html>
