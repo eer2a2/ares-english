@@ -31,7 +31,7 @@ button{border:0;border-radius:13px;padding:13px 15px;font-size:15px;font-weight:
 <script>
 const U="https://yedpdbsosaisalcnwcqv.supabase.co";
 const K="sb_publishable_jtT-XD3Ge97HkRNaUQydgw_VqSQdHt7";
-const sb=supabase.createClient(U,K,{auth:{storageKey:"ares-admin-auth",persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
+const sb=supabase.createClient(U,K,{auth:{storageKey:"ares-admin-auth",persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const $=id=>document.getElementById(id), login=$("login"), app=$("app"), list=$("list"), msg=$("msg");
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function label(s){return s==="pending"?"ONAY BEKLİYOR":s==="approved"?"ONAYLI":"ENGELLİ"}
@@ -51,12 +51,19 @@ $("loginBtn").onclick=async()=>{
  const email=$("email").value.trim();
  const {error}=await sb.auth.signInWithOtp({
    email,
-   options:{emailRedirectTo:window.location.origin+window.location.pathname,shouldCreateUser:false}
+   options:{emailRedirectTo:"https://eer2a2.github.io/ares-english/ares-admin.html",shouldCreateUser:false}
  });
  if(error){msg.textContent="Bağlantı gönderilemedi: "+error.message;return}
+ $("loginBtn").disabled=true; setTimeout(()=>$("loginBtn").disabled=false,60000);
  msg.style.color="#166534";
  msg.textContent="Giriş bağlantısı e-postanıza gönderildi. E-postadaki bağlantıya dokunun.";
 }
+sb.auth.onAuthStateChange((event,session)=>{
+ if(session){
+   login.style.display="none"; app.style.display="block"; load();
+   if(location.hash || location.search.includes("code=")) history.replaceState({},document.title,location.pathname);
+ }
+});
 $("refresh").onclick=load;$("logout").onclick=async()=>{await sb.auth.signOut();show()}
 show();setInterval(()=>{if(app.style.display!=="none")load()},5000);
 </script></body></html>
