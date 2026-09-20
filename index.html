@@ -434,6 +434,7 @@
 .col-ai-notice.busy{border-color:#dce1e5;background:#f7f8f9}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- ARES: dynamic lesson tests + close distractors + semantic variants -->
 </head>
 <body>
 
@@ -7998,17 +7999,84 @@ const NOVEL_STRUCTURE_BANK={
 };
 function structureQuestionsForLesson(l){const text=l.sentences.map(x=>x[0]).join(' '),out=[];Object.keys(NOVEL_STRUCTURE_BANK).forEach(k=>{const re=new RegExp('\\b'+k.replace(/ /g,'\\s+')+'\\b','i');if(re.test(text)){NOVEL_STRUCTURE_BANK[k].forEach(x=>out.push({type:'structure',blanked:esc(x[0]).replace('___','<span class="quiz-blank">…….</span>'),answer:x[1].toLowerCase(),en:x[0].replace('___',x[1]),tr:x[2],skill:'Yapı'}))}});return out;}
 function collocationQuestionsForLesson(l){const text=l.sentences.map(x=>x[0]).join(' ').toLowerCase(),fixed=(typeof getStudyCollocations==='function'?getStudyCollocations():[]),out=[];fixed.forEach(c=>{const phrase=String(c.phrase||'').trim();if(!phrase||!text.includes(phrase.toLowerCase()))return;const ex=(c.examples||[]).find(e=>!text.includes(String(e).toLowerCase()));if(!ex)return;const re=new RegExp(phrase.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'i');if(!re.test(ex))return;out.push({type:'chunk',blanked:esc(ex).replace(re,'<span class="quiz-blank">…….</span>'),answer:phrase.toLowerCase(),en:ex,tr:c.meaning||'',skill:'Kalıp / Chunk',constrained:true})});return out;}
+
+// vNext: test variety + plausible distractors.
+// Recent questions are remembered per lesson so a new test prefers unseen material.
+function ltHistoryKey(no){return 'aresLessonTestHistoryV2_'+no;}
+function getLtHistory(no){try{return JSON.parse(localStorage.getItem(ltHistoryKey(no))||'[]')}catch(e){return []}}
+function saveLtHistory(no,sigs){
+  let h=getLtHistory(no);
+  sigs.forEach(s=>{h=h.filter(x=>x!==s);h.push(s)});
+  localStorage.setItem(ltHistoryKey(no),JSON.stringify(h.slice(-80)));
+}
+function qSig(q){
+  return [q.type,q.prompt||'',q.blanked||'',q.tr||'',q.answer||''].join('|').toLowerCase();
+}
+function preferUnseen(arr,no){
+  const seen=new Set(getLtHistory(no));
+  const fresh=shuffleArr(arr.filter(q=>!seen.has(qSig(q))));
+  const old=shuffleArr(arr.filter(q=>seen.has(qSig(q))));
+  return fresh.concat(old);
+}
+function roughWordClass(en){
+  const s=String(en||'').trim().toLowerCase();
+  if(/\s/.test(s)) return 'phrase';
+  if(/ly$/.test(s)) return 'adv';
+  if(/(ing|ed)$/.test(s)) return 'verbish';
+  if(/(ous|ful|less|ive|al|able|ible|ic|y)$/.test(s)) return 'adj';
+  return 'word';
+}
+function lessonCloseDistractors(l,w,count){
+  const correctTr=String(w[1]||'').trim().toLowerCase();
+  const cls=roughWordClass(w[0]);
+  let pool=l.words
+    .filter(x=>x[0]&&x[1]&&String(x[1]).trim().toLowerCase()!==correctTr)
+    .map(x=>({en:x[0],tr:x[1]}));
+  // Prefer items with a similar grammatical shape; then same-lesson items.
+  const sameClass=pool.filter(x=>roughWordClass(x.en)===cls);
+  let candidates=sameClass.length>=count?sameClass:pool;
+  // If lesson pool is too small, use the global close-distractor heuristic only as fallback.
+  if(candidates.length<count){
+    const global=pickCloseDistractors(getAllWords(),{en:w[0],tr:w[1]},'tr',count*2);
+    candidates=candidates.concat(global.filter(x=>!candidates.some(y=>String(y.tr).toLowerCase()===String(x.tr).toLowerCase())));
+  }
+  // Rank by English-form similarity only after keeping the semantic context local to the lesson.
+  candidates=candidates.map(x=>({x,score:diceCoefficient(String(w[0]),String(x.en))}))
+    .sort((a,b)=>b.score-a.score).map(z=>z.x);
+  const top=candidates.slice(0,Math.max(count*3,count));
+  return shuffleArr(top).slice(0,count).map(x=>x.tr);
+}
+
 function buildLessonTestQuestions(l,count){
- const allWords=getAllWords(),items=[];
- // 1) Recognition: vocabulary meaning, not arbitrary missing words.
- shuffleArr(l.words.slice()).forEach(w=>{if(!w[0]||!w[1])return;const ds=pickCloseDistractors(allWords,{tr:w[1]},'tr',3).map(x=>x.tr);if(ds.length===3)items.push({type:'choice',prompt:w[0],options:shuffleArr([w[1],...ds]),answer:w[1],en:w[0],tr:w[1],skill:'Kelime'});});
- // 2) Meaningful blanks: only a structure or a complete natural chunk.
+ const items=[];
+ // 1) Vocabulary recognition. Distractors come first from the SAME lesson and similar word-shape,
+ // so options are plausible rather than unrelated random words.
+ shuffleArr(l.words.slice()).forEach(w=>{
+   if(!w[0]||!w[1])return;
+   const ds=lessonCloseDistractors(l,w,3);
+   if(ds.length===3)items.push({type:'choice',prompt:w[0],options:shuffleArr([w[1],...ds]),answer:w[1],en:w[0],tr:w[1],skill:'Kelime'});
+ });
+ // 2) Structure/chunk questions already use novel contexts.
  items.push(...structureQuestionsForLesson(l),...collocationQuestionsForLesson(l));
- // 3) Production: full sentence recall/production; never delete a random word from a memorised sentence.
- shuffleArr(l.sentences.slice()).forEach(s=>items.push({type:'production',prompt:s[1],answer:s[0],en:s[0],tr:s[1],skill:'Cümle Kurma'}));
- // balanced selection: roughly 20% recognition, 30% structure/chunk, 50% production when pool permits.
- const rec=shuffleArr(items.filter(x=>x.type==='choice')), controlled=shuffleArr(items.filter(x=>x.type==='structure'||x.type==='chunk')), prod=shuffleArr(items.filter(x=>x.type==='production'));
- let out=[];const take=(a,n)=>{while(a.length&&n-->0)out.push(a.shift())};take(rec,Math.max(2,Math.round(count*.2)));take(controlled,Math.max(2,Math.round(count*.3)));take(prod,count-out.length);const rest=shuffleArr([...rec,...controlled,...prod]);while(out.length<count&&rest.length)out.push(rest.shift());return shuffleArr(out).slice(0,count);
+ // 3) Production questions use the lesson targets, but recent prompts are deprioritized.
+ l.sentences.forEach(s=>items.push({type:'production',prompt:s[1],answer:s[0],en:s[0],tr:s[1],skill:'Cümle Kurma'}));
+
+ const rec=preferUnseen(items.filter(x=>x.type==='choice'),l.no);
+ const controlled=preferUnseen(items.filter(x=>x.type==='structure'||x.type==='chunk'),l.no);
+ const prod=preferUnseen(items.filter(x=>x.type==='production'),l.no);
+
+ let out=[];
+ const take=(a,n)=>{while(a.length&&n-->0)out.push(a.shift())};
+ take(rec,Math.max(2,Math.round(count*.2)));
+ take(controlled,Math.max(2,Math.round(count*.3)));
+ take(prod,count-out.length);
+
+ const rest=preferUnseen([...rec,...controlled,...prod],l.no);
+ while(out.length<count&&rest.length)out.push(rest.shift());
+
+ out=shuffleArr(out).slice(0,count);
+ saveLtHistory(l.no,out.map(qSig));
+ return out;
 }
 
 function productionPracticeHtml(l){const picks=shuffleArr(l.sentences.slice()).slice(0,3);return `<div id="lesson-production" class="card lesson-stage-card"><h3 class="section-title" style="margin-top:0">✍️ Üret · Yeni Cümleyi Sen Kur</h3><p class="hint">Burada amaç cümleyi ezberlemek değil. Türkçe fikri gör, İngilizceyi kendin üret. Kontrolden sonra doğal örneği karşılaştır.</p><div class="production-grid">${picks.map((s,i)=>`<div class="production-task"><b>${esc(s[1])}</b><input id="prod-${l.no}-${i}" class="quiz-input" placeholder="İngilizce cümleni kur…"><button class="pill" onclick="checkProduction(${l.no},${i},'${escJs(s[0])}','${escJs(s[1])}')">Kontrol Et</button><div id="prod-fb-${l.no}-${i}" class="quiz-feedback"></div></div>`).join('')}</div></div>`}
@@ -8047,6 +8115,9 @@ function semanticLocalVariant(user,target){
     .replace(/\bhave coffee\b/g,'drink coffee')
     .replace(/\bhave a black coffee\b/g,'drink black coffee')
     .replace(/\bhave a coffee\b/g,'drink coffee')
+    .replace(/\bhave lunch\b/g,'eat lunch')
+    .replace(/\bhave breakfast\b/g,'eat breakfast')
+    .replace(/\bhave dinner\b/g,'eat dinner')
     .replace(/\bget to work\b/g,'go to work')
     .replace(/\busually do not\b/g,'do not usually')
     .replace(/\busually dont\b/g,'dont usually')
