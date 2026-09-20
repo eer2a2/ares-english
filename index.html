@@ -435,6 +435,21 @@
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <!-- ARES: dynamic lesson tests + close distractors + semantic variants -->
+
+<style id="ares-analysis-production-polish">
+#lesson-analysis{border:1px solid rgba(30,42,56,.10)!important;border-radius:18px!important;padding:20px 22px!important;background:#fff!important;box-shadow:0 6px 22px rgba(30,42,56,.055)!important}
+#lesson-analysis summary{font-size:20px!important;font-weight:800!important;color:#24364a!important;margin-bottom:8px!important}
+#lesson-analysis .hint{line-height:1.55!important;margin:7px 0 16px!important}
+#lesson-analysis [style*="grid"]{gap:14px!important}
+#lesson-analysis .card{box-shadow:none!important;border:1px solid rgba(63,100,115,.15)!important;border-radius:15px!important;padding:16px!important;background:#fbfcfa!important}
+#lesson-analysis b{color:#26384b!important}
+#lesson-analysis p{line-height:1.5!important}
+.production-task{border:1px solid rgba(63,100,115,.14)!important;border-radius:15px!important;padding:16px!important;background:#fbfaf6!important;min-height:150px}
+.production-task>b{display:block;color:#26384b!important;font-size:16px!important;line-height:1.4!important;margin-bottom:12px!important}
+.production-task .quiz-input{width:100%!important;min-height:50px!important;border-radius:11px!important;border:1px solid rgba(30,42,56,.14)!important;background:#fff!important;padding:12px 14px!important;margin:0 0 10px!important;box-sizing:border-box!important}
+.production-task .pill{min-height:38px!important;padding:8px 16px!important}
+</style>
+
 </head>
 <body>
 
@@ -7984,7 +7999,11 @@ function scrollLessonStage(id,no,key){saveFlow(no,key);const el=document.getElem
 function guidedPath(l){const f=flowState(l.no);const steps=[['learn','lesson-study-material','Kelime & İfadeler','ÖĞREN','Anlamı tanı'],['analyse','lesson-analysis','Analiz','ANLA','Kalıbı fark et'],['produce','lesson-production','Üret','KULLAN','Yeni cümle kur'],['speak','lesson-speaking','Konuş','KONUŞ','Bağlam içinde kullan'],['test','lesson-test-launch','Test','ÖLÇ','Ölç ve yanlışları kaydet']];return `<div class="learning-path">${steps.map((x,i)=>`<div class="learning-step ${f[x[0]]?'active-step':''}" onclick="scrollLessonStage('${x[1]}',${l.no},'${x[0]}')"><span class="step-kicker">${x[3]}</span><b>${i+1} · ${x[2]}</b><span class="hint">${x[4]}</span>${f[x[0]]?'<div class="stage-done">✓ çalışıldı</div>':''}</div>`).join('')}</div>`}
 
 // Fix duplicated labels such as "duringduring + ..." in analysis cards.
-function cleanAnalysisHtml(html){return String(html).replace(/(<b>during<\/b><code>)during\s*\+?/gi,'$1').replace(/(<b>for<\/b><code>)for\s*\+?/gi,'$1').replace(/(<b>while<\/b><code>)while\s*\+?/gi,'$1').replace(/(<b>since<\/b><code>)since\s*\+?/gi,'$1');}
+function cleanAnalysisHtml(html){
+ html=String(html||'')
+   .replace(/>\s*(because|while|during|before|after|since|although|though|if|when|for|so)\1\b/gi,'>$1')
+   .replace(/\b(because|while|during|before|after|since|although|though|if|when|for|so)(?=\1\s*\+)/gi,'');
+return String(html).replace(/(<b>during<\/b><code>)during\s*\+?/gi,'$1').replace(/(<b>for<\/b><code>)for\s*\+?/gi,'$1').replace(/(<b>while<\/b><code>)while\s*\+?/gi,'$1').replace(/(<b>since<\/b><code>)since\s*\+?/gi,'$1');}
 
 const NOVEL_STRUCTURE_BANK={
  during:[['I checked my phone twice ___ the meeting.','during','Toplantı sırasında telefonumu iki kez kontrol ettim.'],['I met several new people ___ my course.','during','Kursum sırasında birkaç yeni insanla tanıştım.']],
