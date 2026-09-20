@@ -2997,7 +2997,7 @@ function render(){
   else if(currentView==='zorcumleler'){ crumbEl.textContent='Kelime Defteri'; titleEl.textContent='Zor Cümleler'; c.innerHTML = viewZorCumleler(); }
   else if(currentView==='collocations'){ crumbEl.textContent='Kelime Defteri'; titleEl.textContent='Kelime Kalıpları (Collocations)'; c.innerHTML = viewCollocations(); }
   else if(currentView==='collocation-test'){ crumbEl.textContent='Kelime Defteri'; titleEl.textContent='Kalıp Testi'; collocationTestState = { questions:[], index:0, correct:0, mode:collocationTestState.mode }; c.innerHTML = viewCollocationTest(); }
-  else if(currentView==='mistakes'){ crumbEl.textContent='Kelime Defteri'; titleEl.textContent='Yanlışlarım'; c.innerHTML = viewMistakes(); }
+  else if(currentView==='mistakes'){ crumbEl.textContent='Kelime Defteri'; titleEl.textContent='Yanlış Havuzu'; c.innerHTML = viewMistakes(); }
   else if(currentView==='favorites'){ crumbEl.textContent='Kelime Defteri'; titleEl.textContent='Favori Derslerim'; c.innerHTML = viewFavorites(); }
   else if(currentView==='flashcards'){ flashMode='all'; flashQueue=null; crumbEl.textContent='Pratik'; titleEl.textContent='Kelime Kartları'; c.innerHTML = viewFlashcards(); }
   else if(currentView==='review'){ flashMode='due'; flashQueue=null; crumbEl.textContent='Pratik'; titleEl.textContent='Bugün Tekrar Et'; c.innerHTML = viewFlashcards(); }
@@ -7625,7 +7625,7 @@ function viewGeneralAssessment(){
  if(gaState.index>=gaState.questions.length)return gaResult();
  const q=gaState.questions[gaState.index], pct=Math.round(100*gaState.index/gaState.questions.length);
  let body='';
- if(q.type==='mc')body=gaShuffle(q.opts).map(o=>`<button type="button" class="ga-option" data-ga-option="${encodeURIComponent(o)}">${esc(o)}</button>`).join('');
+ if(q.type==='mc')body=gaShuffle(q.opts).map(o=>`<button type="button" class="ga-option" data-ga-option="${encodeURIComponent(o)}" onclick="gaChooseOption(this,event)">${esc(o)}</button>`).join('');
  else if(q.type==='dictation')body=`<button class="pill" onclick="gaListenDictation()">Dinle</button><input id="ga-answer" class="quiz-input" placeholder="Duyduğunu yaz…" style="margin-top:12px">${gaCheckBtn()}`;
  else if(q.type==='pronunciation')body=`<div class="card" style="background:var(--paper)">${spk(q.q)}${esc(q.q)}</div><button id="ga-mic" class="pill primary" onclick="gaPronounce()">Konuş ve Kontrol Et</button><div id="ga-heard" class="hint" style="margin-top:10px"></div>`;
  else if(q.type==='speaking')body=`<textarea id="ga-answer" class="quiz-input" style="min-height:90px" placeholder="Mikrofonla konuş veya cevabını yaz…"></textarea><div style="display:flex;gap:8px;flex-wrap:wrap"><button id="ga-speak-btn" class="pill" onclick="gaSpeakMic()">🎤 Konuş / Durdur</button>${gaCheckBtn()}</div>`;
@@ -7810,6 +7810,153 @@ function gaSpeakMic(){
 }
 function gaResult(){const avg=a=>a&&a.length?Math.round(a.reduce((x,y)=>x+y,0)/a.length):0;let vals=Object.keys(GA_SKILLS).map(k=>[k,avg(gaState.scores[k]||[])]),overall=Math.round(vals.reduce((s,x)=>s+x[1],0)/vals.length);let weak=vals.slice().sort((a,b)=>a[1]-b[1]).slice(0,2);progress.generalAssessmentHistory=progress.generalAssessmentHistory||[];if(!gaState.saved){progress.generalAssessmentHistory.unshift({date:new Date().toISOString(),score:overall,count:gaState.count,skills:Object.fromEntries(vals)});progress.generalAssessmentHistory=progress.generalAssessmentHistory.slice(0,20);saveProgress(progress);gaState.saved=true}
  const cards=vals.map(([k,v])=>`<div class="ga-skill"><strong>${GA_SKILLS[k]}</strong><div class="ga-score">${v}</div></div>`).join('');const mistakes=gaState.answers.filter(x=>x.score<70).slice(0,8).map(x=>`<div class="card ga-bad"><strong>${GA_SKILLS[x.q.type]}</strong><div>${esc(x.q.q)}</div><div class="hint">Sen: ${esc(x.answer||'—')}${x.q.a||x.q.sample?` · Örnek/cevap: ${esc(x.q.a||x.q.sample)}`:''}</div></div>`).join('');return `<div class="ga-hero"><div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">Sınav Sonucu</h2><div class="ga-score">${overall}/100</div></div><div class="ga-result-grid">${cards}</div><div class="card ga-good"><strong>Odak önerisi</strong><div class="hint" style="margin-top:5px">Bir sonraki çalışmada özellikle ${weak.map(x=>GA_SKILLS[x[0]]).join(' ve ')} alanlarına dön.</div></div>${mistakes?`<h3>Tekrar Bakılacaklar</h3>${mistakes}`:'<div class="card ga-good">Belirgin bir zayıf cevap görünmüyor.</div>'}<button class="pill primary" style="margin-top:14px" onclick="gaState.started=false;gaState.saved=false;navigate('generalassessment')">Yeni Sınav</button></div>`}
+</script>
+
+
+<style id="ares-final-learning-loop">
+.learning-path{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px;margin:0 0 18px}.learning-step{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:12px}.learning-step b{display:block;margin-bottom:4px}.analysis-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}.analysis-item{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--paper)}.analysis-item code{font-family:var(--mono);font-size:12px}.dash-progress{display:grid;grid-template-columns:1.35fr .9fr;gap:16px;margin-bottom:20px}.trend-card,.focus-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}.trend-head{display:flex;justify-content:space-between;gap:12px;align-items:end}.trend-big{font-family:var(--serif);font-size:34px;color:var(--leaf)}.skill-row{display:grid;grid-template-columns:130px 1fr 45px;gap:8px;align-items:center;margin:9px 0;font-size:12px}.skill-track{height:8px;background:var(--paper-dark);border-radius:99px;overflow:hidden}.skill-track i{display:block;height:100%;background:var(--leaf);border-radius:99px}.mistake-card{border:1px solid var(--line);border-radius:12px;padding:13px;margin:9px 0;background:var(--card)}.mistake-meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:7px}.review-due{border-left:4px solid var(--gold)}.lt-context{padding:10px 12px;border-radius:10px;background:var(--paper);border:1px solid var(--line);margin:10px 0}.soft-note{padding:10px 12px;border-radius:10px;background:rgba(91,115,97,.09);border:1px solid rgba(91,115,97,.25);font-size:13px;line-height:1.5}@media(max-width:760px){.dash-progress{grid-template-columns:1fr}.skill-row{grid-template-columns:105px 1fr 40px}.learning-path{grid-template-columns:1fr 1fr}}
+</style>
+<script id="ares-final-learning-loop-js">
+// ARES FINAL learning loop: Learn -> Analyse -> Practise -> Speak -> Test -> Review.
+progress.mistakes=progress.mistakes||[];
+progress.generalAssessmentHistory=progress.generalAssessmentHistory||[];
+progress.reviewHistory=progress.reviewHistory||[];
+
+function inferLessonNoFromText(en){
+  const needle=String(en||'').trim().toLowerCase(); if(!needle)return null;
+  const hit=DATA.lessons.find(l=>l.sentences.some(x=>String(x[0]).trim().toLowerCase()===needle)||l.words.some(x=>String(x[0]).trim().toLowerCase()===needle));
+  return hit?hit.no:null;
+}
+function mistakeKind(type,en){
+  const t=String(type||'').toLowerCase();
+  if(t.includes('ses')||t.includes('konuş'))return 'Konuşma / anlaşılabilirlik';
+  if(t.includes('dikte'))return 'Dinleme / yazım';
+  if(t.includes('kelime'))return 'Kelime';
+  if(t.includes('cümle')||String(en||'').trim().includes(' '))return 'Cümle / yapı';
+  return 'Kelime / yazım';
+}
+const _oldAddMistake=addMistake;
+addMistake=function(en,tr,mtype){
+  const now=Date.now(), existing=progress.mistakes.find(m=>m.en===en);
+  if(existing){existing.hits=(existing.hits||1)+1;existing.lastWrong=now;existing.type=mtype||existing.type;existing.kind=mistakeKind(existing.type,en);existing.lesson=existing.lesson||inferLessonNoFromText(en);existing.due=now;saveProgress(progress);return}
+  progress.mistakes.unshift({en,tr,type:mtype||'cümle',kind:mistakeKind(mtype,en),lesson:inferLessonNoFromText(en),hits:1,streak:0,lastWrong:now,due:now});
+  if(progress.mistakes.length>200)progress.mistakes.pop();
+};
+const _oldRemoveMistake=removeMistake;
+removeMistake=function(en){
+  const m=progress.mistakes.find(x=>x.en===en);
+  if(!m){_oldRemoveMistake(en);return}
+  m.streak=(m.streak||0)+1;
+  if(m.streak>=2){progress.mistakes=progress.mistakes.filter(x=>x.en!==en)}
+  else {m.due=Date.now()+24*60*60*1000;m.lastCorrect=Date.now()}
+};
+function mistakeDueCount(){return progress.mistakes.filter(m=>!m.due||m.due<=Date.now()).length}
+function skillPct(obj){return obj&&obj.total?Math.round(100*obj.correct/obj.total):null}
+function recentTrendData(){
+  const out=[];for(let i=6;i>=0;i--){const d=dateStrOffset(-i),x=progress.dailyStats[d];out.push({d,label:new Date(d+'T12:00:00').toLocaleDateString('tr-TR',{weekday:'short'}),pct:x&&x.total?Math.round(100*x.correct/x.total):null})}return out;
+}
+function dashboardLearningPanel(){
+  const trend=recentTrendData(), vals=trend.filter(x=>x.pct!==null), latest=vals.length?vals[vals.length-1].pct:null, prev=vals.length>1?vals[vals.length-2].pct:null, delta=(latest!==null&&prev!==null)?latest-prev:null;
+  const pts=trend.map((x,i)=>{const y=x.pct===null?82:82-(x.pct*.62);return `${10+i*48},${y}`}).join(' ');
+  const q=skillPct(progress.quizScore),w=skillPct(progress.wordQuizScore),tr=skillPct(progress.translateScore);
+  const lessonVals=Object.values(progress.lessonStats||{}).filter(x=>x.total).map(x=>100*x.correct/x.total), lm=lessonVals.length?Math.round(lessonVals.reduce((a,b)=>a+b,0)/lessonVals.length):null;
+  const skills=[['Ders testleri',lm],['Cümle / gramer',q],['Kelime',w],['Çeviri / üretim',tr]].filter(x=>x[1]!==null);
+  const focus=skills.length?skills.slice().sort((a,b)=>a[1]-b[1])[0][0]:'İlk testini tamamla';
+  return `<div class="dash-progress"><div class="trend-card"><div class="trend-head"><div><div class="hint">SON 7 GÜN · GELİŞİM</div><div class="trend-big">${latest===null?'—':latest+'%'}</div></div><div class="hint">${delta===null?'Yeni sonuçlarla trend oluşacak':delta>0?'↑ '+delta+' puan':delta<0?'Sonuçlar dalgalanabilir · '+delta+' puan':'→ Sabit'}</div></div><svg viewBox="0 0 310 95" width="100%" height="120" aria-label="Son 7 gün başarı grafiği"><line x1="10" y1="82" x2="300" y2="82" stroke="currentColor" opacity=".12"/><polyline points="${pts}" fill="none" stroke="currentColor" stroke-width="3" opacity=".7"/>${trend.map((x,i)=>`<circle cx="${10+i*48}" cy="${x.pct===null?82:82-x.pct*.62}" r="${x.pct===null?2:4}" fill="currentColor" opacity="${x.pct===null?.15:.8}"/>`).join('')}</svg><div style="display:flex;justify-content:space-between" class="hint">${trend.map(x=>`<span>${x.label}</span>`).join('')}</div></div><div class="focus-card"><div class="hint">BUGÜNÜN ODAĞI</div><h3 style="margin:5px 0 12px">${esc(focus)}</h3>${skills.map(x=>`<div class="skill-row"><span>${esc(x[0])}</span><span class="skill-track"><i style="width:${x[1]}%"></i></span><b>${x[1]}%</b></div>`).join('')}<div class="soft-note" style="margin-top:14px"><b>${mistakeDueCount()} tekrar</b> bugün hazır. Amaç not değil; zayıf noktayı tekrar kullanarak güçlendirmek.</div><button class="pill" style="margin-top:10px" onclick="navigate('mistakes')">Yanlış Havuzuna Git</button></div></div>`;
+}
+const _baseDashboard=viewDashboard;
+viewDashboard=function(){return dashboardLearningPanel()+_baseDashboard()};
+
+const STRUCTURES=[
+ {re:/\bwhile\b/i,name:'while',rule:'while + özne + fiil',tip:'Bir eylem sürerken başka bir durumu/eylemi anlatır.'},
+ {re:/\bduring\b/i,name:'during',rule:'during + isim / isim grubu',tip:'Bir olayın veya dönemin sırasında/boyunca.'},
+ {re:/\balthough\b/i,name:'although',rule:'although + cümle',tip:'Zıt iki fikri bağlar: -mesine rağmen.'},
+ {re:/\beven though\b/i,name:'even though',rule:'even though + cümle',tip:'Although’dan daha güçlü bir zıtlık verir.'},
+ {re:/\bbecause\b/i,name:'because',rule:'because + sebep cümlesi',tip:'Nedeni açıklar.'},
+ {re:/\bso\b/i,name:'so',rule:'sonuç cümlesi + so + sonuç',tip:'Sebebin sonucunu bağlar.'},
+ {re:/\bsince\b/i,name:'since',rule:'since + başlangıç noktası / cümle',tip:'Özellikle present perfect ile başlangıç noktasını gösterir.'},
+ {re:/\bfor\b/i,name:'for',rule:'for + süre',tip:'Ne kadar süredir? sorusuna cevap verir.'},
+ {re:/\bused to\b/i,name:'used to',rule:'used to + V1',tip:'Geçmişte düzenli olup artık olmayan durum/alışkanlık.'},
+ {re:/\bgoing to\b/i,name:'be going to',rule:'be going to + V1',tip:'Plan veya güçlü belirtiye dayalı gelecek.'},
+ {re:/\bshould have\b/i,name:'should have',rule:'should have + V3',tip:'Geçmişte yapılması daha iyi olurdu.'}
+];
+function lessonAnalysis(l){
+  const text=l.sentences.map(x=>x[0]).join(' '), found=STRUCTURES.filter(x=>x.re.test(text));
+  const chunks=[]; const fixed=(typeof getStudyCollocations==='function'?getStudyCollocations():[]);
+  fixed.forEach(c=>{if(text.toLowerCase().includes(String(c.phrase||'').toLowerCase())&&!chunks.some(x=>x.phrase===c.phrase))chunks.push(c)});
+  const items=[];
+  found.slice(0,6).forEach(x=>{const ex=l.sentences.find(s=>x.re.test(s[0]));items.push(`<div class="analysis-item"><b>${esc(x.name)}</b><code>${esc(x.rule)}</code><p class="hint">${esc(x.tip)}</p>${ex?`<div>${spk(ex[0])}${esc(ex[0])}</div><div class="tr">${esc(ex[1])}</div>`:''}</div>`)});
+  chunks.slice(0,5).forEach(c=>items.push(`<div class="analysis-item"><b>${esc(c.phrase)}</b><div class="hint">${esc(c.meaning||'Doğal kalıp')}</div>${c.examples&&c.examples[0]?`<div style="margin-top:6px">${spk(c.examples[0])}${esc(c.examples[0])}</div>`:''}</div>`));
+  if(!items.length){l.sentences.slice(0,4).forEach(s=>items.push(`<div class="analysis-item"><b>Doğal cümle kalıbı</b><div>${spk(s[0])}${esc(s[0])}</div><div class="tr">${esc(s[1])}</div><p class="hint">Cümleyi ezberlemek yerine yapısını fark et ve kendi hayatına uyarlamaya çalış.</p></div>`))}
+  return `<details class="card" open><summary style="cursor:pointer;font-weight:800">🔎 Kalıp & Yapı Analizi</summary><p class="hint">Bu bölüm ders cümlelerini ezberletmez; tekrar eden yapıları ve doğal kalıpları görünür hale getirir.</p><div class="analysis-grid">${items.join('')}</div></details>`;
+}
+const _baseLesson=viewLesson;
+viewLesson=function(l){
+  if(!l)return _baseLesson(l);
+  const path=`<div class="learning-path"><div class="learning-step"><b>1 · Kelime & İfadeler</b><span class="hint">Anlamı tanı</span></div><div class="learning-step"><b>2 · Analiz</b><span class="hint">Kalıbı fark et</span></div><div class="learning-step"><b>3 · Üret</b><span class="hint">Yeni cümle kur</span></div><div class="learning-step"><b>4 · Konuş</b><span class="hint">Bağlam içinde kullan</span></div><div class="learning-step"><b>5 · Test</b><span class="hint">Ölç ve yanlışları kaydet</span></div></div>`;
+  const speak=`<div class="card"><h3 class="section-title" style="margin-top:0">🎤 Konuşarak Kullan</h3><p class="hint">Tek kelime telaffuz puanı yok. Role Play / Abroad gibi bağlam içinde konuş. Ares seni anladıysa sohbet devam eder; tarayıcının tek başına yanlış duyduğu bir kelime otomatik olarak “telaffuz hatası” sayılmaz.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="pill primary" onclick="window.location.href='./speaking.html'">Ares Speaking'i Aç</button><button class="pill" onclick="navigate('lessontest',${l.no});setTimeout(()=>setLessonTestMode('voice'),0)">Bu Dersi Sesli Test Et</button></div></div>`;
+  return path+lessonAnalysis(l)+_baseLesson(l)+speak;
+};
+
+// Voice lesson tests use full contextual sentences, not isolated word pronunciation.
+buildLessonVoiceQuestions=function(l,count){
+  const arr=shuffleArr(l.sentences.slice()).map(s=>({type:'voice',tr:s[1],en:s[0],context:true}));
+  return arr.slice(0,Math.min(count,arr.length));
+};
+const _baseViewLessonTest=viewLessonTest;
+viewLessonTest=function(lessonNo){
+  let html=_baseViewLessonTest(lessonNo);
+  if(lessonTestState.mode==='voice'){
+    html=html.replace('Bu derste geçen cümle ve kelimelerden karışık bir test oluşturulur. Sesli modda, Türkçesini görüp İngilizcesini mikrofona söylersin — gerçek konuşma pratiği için önerilir.','Sesli mod artık tek kelime telaffuz sınavı değildir. Dersteki anlamı bağlam içinde İngilizce cümleyle üretirsin; tarayıcının yanlış duyması otomatik olarak hata sayılmaz.')
+      .replace('Türkçesini söyle: (İngilizcesini yüksek sesle mikrofona söyle)','Anlamı İngilizce bir cümleyle söyle. Hazır olduğunda mikrofona bas; akıcılık önce.');
+  }
+  return html;
+};
+checkLessonTestVoice=function(){
+ const btn=document.getElementById('lt-voice-btn');
+ if(recordingActive){
+  btn.textContent='⏳ Bitiriliyor…';btn.disabled=true;
+  stopVoiceRecording((transcript,supported,errorReason)=>{
+   btn.textContent='🎤 Şimdi Söyle';btn.disabled=true;
+   const st=lessonTestState,q=st.questions[st.index],fb=document.getElementById('lt-feedback');
+   if(!supported){fb.innerHTML='Ses tanıma kullanılamıyor. Bu soru otomatik puanlanmadı.<div class="btns" style="display:flex;gap:8px;margin-top:8px"><button class="pill good" onclick="markLessonTestVoiceManual(true)">✓ Cümlem doğruydu</button><button class="pill bad" onclick="markLessonTestVoiceManual(false)">Tekrar çalışacağım</button></div>';return}
+   if(!transcript){fb.innerHTML='⚠️ Ses tanıma net bir metin oluşturamadı. <b>Yanlış saymadım.</b> <button class="pill primary" onclick="checkLessonTestVoice()">Tekrar Dene</button>';btn.disabled=false;return}
+   const pct=wordMatchScore(normSpeech(q.en),normSpeech(transcript));
+   if(pct>=70){st.correct++;removeMistake(q.en);recordLessonStat(st.lesson,true);recordDailyStat(true);fb.innerHTML=`✓ Anlam ve hedef cümle net biçimde algılandı.<div class="lt-context"><b>Duyduğum:</b> ${esc(transcript)}<br><b>Doğal örnek:</b> ${esc(q.en)}</div>`;fb.className='quiz-feedback ok';saveProgress(progress);document.getElementById('lt-next').style.display='inline-flex'}
+   else {fb.innerHTML=`<div class="soft-note"><b>Ses tanıma tam eşleştiremedi; bunu telaffuz hatası saymıyorum.</b><br>Duyduğum: ${esc(transcript)}<br>Doğal örnek: ${esc(q.en)}</div><div class="btns" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:9px"><button class="pill good" onclick="markLessonTestVoiceManual(true)">✓ Anlamım doğruydu</button><button class="pill primary" onclick="document.getElementById('lt-voice-btn').disabled=false;checkLessonTestVoice()">🎤 Tekrar Dene</button><button class="pill bad" onclick="markLessonTestVoiceManual(false)">Yanlış Havuzuna Ekle</button></div>`;fb.className='quiz-feedback';btn.disabled=false}
+   updateMistakeBadge();
+  });return;
+ }
+ const started=beginVoiceRecording((audioUrl)=>{const slot=document.getElementById('lt-audio-slot');if(slot)slot.innerHTML=playbackHtml(audioUrl)});if(started){btn.disabled=false;btn.textContent='⏹️ Durdur'}
+};
+
+viewMistakes=function(){
+ const list=progress.mistakes||[]; if(!list.length)return '<div class="card"><h3 style="margin-top:0">Yanlış Havuzu boş 🎯</h3><p class="hint">Testlerde zorlandığın kelime, yazım, yapı ve konuşma öğeleri burada birikecek. İki başarılı tekrar sonrası aktif havuzdan çıkar.</p></div>';
+ const due=list.filter(m=>!m.due||m.due<=Date.now());
+ let html=`<div class="card"><h3 style="margin-top:0">🧠 Akıllı Yanlış Havuzu</h3><p class="hint">Aynı soruyu ezberletmek yerine hatayı türüne göre tekrar çalıştırır. Yazım hatasını yazdırır; yapı hatasını yeni cümlede kullandırır; konuşma hatasını bağlam içinde tekrar ettirir.</p><div class="score-row"><div class="score-item"><b>${list.length}</b>Aktif</div><div class="score-item"><b>${due.length}</b>Bugün tekrar</div></div></div>`;
+ list.forEach((m,i)=>{m.kind=m.kind||mistakeKind(m.type,m.en);m.lesson=m.lesson||inferLessonNoFromText(m.en);html+=`<div class="mistake-card ${(!m.due||m.due<=Date.now())?'review-due':''}"><div class="mistake-meta"><span class="badge">${esc(m.kind)}</span>${m.lesson?`<span class="badge">${m.lesson}. Ders</span>`:''}<span class="badge">${m.hits||1} kez zorlandı</span></div><div class="en"><b>${spk(m.en)}${esc(m.en)}</b></div><div class="tr">${esc(m.tr||'')}</div><div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:9px"><button class="pill primary" onclick="mistakePractice(${i})">Şimdi Tekrar Et</button><button class="pill" onclick="removeMistakeUI('${escJs(m.en)}')">Listeden Kaldır</button></div><div id="mistake-practice-${i}"></div></div>`});
+ return html;
+};
+function mistakePractice(i){
+ const m=progress.mistakes[i];if(!m)return;const box=document.getElementById('mistake-practice-'+i);if(!box)return;
+ const kind=m.kind||mistakeKind(m.type,m.en);let task='';
+ if(kind.includes('Dinleme'))task=`Dinle ve sonra cümleyi kendin yaz: ${spk(m.en)} <input id="mr-${i}" class="quiz-input" placeholder="Duyduğunu yaz…">`;
+ else if(kind.includes('Konuşma'))task=`<b>Bağlam içinde tekrar söyle:</b> “${esc(m.tr||'Bu fikri İngilizce söyle.')}”<div class="hint">Tek kelimeyi değil, mümkünse tam bir cümleyi söyle.</div><input id="mr-${i}" class="quiz-input" placeholder="İstersen önce cümleni buraya yaz…">`;
+ else task=`<b>Yeni deneme:</b> ${esc(m.tr||'Türkçesine bakıp İngilizcesini üret.')}<input id="mr-${i}" class="quiz-input" placeholder="İngilizcesini yaz…">`;
+ box.innerHTML=`<div class="lt-context">${task}<button class="pill primary" onclick="checkMistakePractice(${i})">Kontrol Et</button><div id="mr-fb-${i}" class="quiz-feedback"></div></div>`;
+}
+function checkMistakePractice(i){
+ const m=progress.mistakes[i],el=document.getElementById('mr-'+i),fb=document.getElementById('mr-fb-'+i);if(!m||!el||!el.value.trim())return;
+ const sim=wordMatchScore(normSpeech(m.en),normSpeech(el.value));
+ if(sim>=75){fb.textContent='✓ Güzel. Bir doğru tekrar kaydedildi.';fb.className='quiz-feedback ok';removeMistake(m.en);progress.reviewHistory.push({date:Date.now(),en:m.en,ok:true});saveProgress(progress);setTimeout(()=>navigate('mistakes'),600)}
+ else {fb.innerHTML=`Bir kez daha dene. <b>Doğal cevap:</b> ${esc(m.en)}`;fb.className='quiz-feedback bad';m.hits=(m.hits||1)+1;m.due=Date.now()+6*60*60*1000;saveProgress(progress)}
+}
+
+function gaChooseOption(btn,e){
+ if(e){e.preventDefault();e.stopPropagation()} if(!btn||gaOptionLocked||!gaState.started)return false;
+ gaOptionLocked=true;document.querySelectorAll('.ga-option').forEach(x=>{x.disabled=true;x.classList.remove('ga-selected')});btn.classList.add('ga-selected');
+ const raw=btn.getAttribute('data-ga-option');const answer=decodeURIComponent(raw||'');setTimeout(()=>{try{gaSubmit(answer)}finally{gaOptionLocked=false}},120);return false;
+}
 </script>
 
 </body>
