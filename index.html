@@ -450,6 +450,41 @@
 .production-task .pill{min-height:38px!important;padding:8px 16px!important}
 </style>
 
+
+<style id="ares-pro-analysis-v2">
+#lesson-analysis.pro-analysis-wrap{padding:22px 24px!important;border-radius:18px!important;background:#fff!important}
+#lesson-analysis>summary{font-size:21px!important;font-weight:800!important;color:#24364a!important;list-style:none}
+.pro-analysis-head{display:flex;justify-content:space-between;align-items:center;gap:18px;margin:8px 0 18px}
+.pro-analysis-head p{margin:0;color:#66717c;line-height:1.45}
+.pro-head-note{background:#eef5fa;color:#3f6473;border-radius:10px;padding:10px 13px;font-size:13px;white-space:nowrap}
+.pro-analysis-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.pro-analysis-card{border:1px solid #dfe5e4;border-radius:15px;padding:16px;background:#fbfcfb;min-height:230px;box-sizing:border-box}
+.pro-analysis-top{display:flex;align-items:flex-start;gap:11px}
+.pro-num{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#4f7f94;color:#fff;font-weight:800;flex:0 0 34px}
+.pro-analysis-name{min-width:0;flex:1}
+.pro-analysis-name b{display:block;font-size:19px;line-height:1.1;color:#223448!important;margin:2px 0 6px}
+.pro-analysis-name code{display:block;background:transparent!important;padding:0!important;font-family:inherit!important;color:#46586a!important;font-size:13px;line-height:1.35}
+.pro-tag{font-size:11px;font-weight:700;padding:6px 9px;border-radius:999px;background:#e7f0f4;color:#3f6473}
+.pro-tip{margin:15px 0 13px;padding:11px 12px;border-radius:9px;background:#edf5f8;color:#334a5a;line-height:1.4}
+.pro-example-label{border-top:1px solid #e4e7e5;padding-top:12px;margin-top:4px;font-size:12px;font-weight:800;color:#405064}
+.pro-example{display:flex;gap:6px;align-items:flex-start;margin-top:8px;font-weight:700;line-height:1.42;color:#24364a}
+.pro-example .spk{flex:0 0 auto}
+.pro-tr{margin-top:7px;color:#72808d;line-height:1.4}
+.tone-1 .pro-num{background:#5d8c79}.tone-1 .pro-tag{background:#e7f3ec;color:#4f7867}.tone-1 .pro-tip{background:#edf6f0}
+.tone-2 .pro-num{background:#b97846}.tone-2 .pro-tag{background:#faeee4;color:#a76635}.tone-2 .pro-tip{background:#fbf2ea}
+
+/* Production section: clearer hierarchy and breathing room */
+#lesson-production{padding:22px 24px!important;border-radius:18px!important}
+#lesson-production .section-title{font-size:20px!important;color:#34485d!important;margin-bottom:8px!important}
+#lesson-production>.hint{margin:0 0 18px!important;line-height:1.5!important}
+#lesson-production .production-grid{gap:14px!important}
+#lesson-production .production-task{padding:17px!important;min-height:190px!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important}
+#lesson-production .production-task>b{min-height:44px;margin-bottom:12px!important}
+#lesson-production .quiz-input{min-height:54px!important;margin-bottom:12px!important}
+#lesson-production .production-task .pill{background:#3f6473!important;color:white!important;border-color:#3f6473!important;font-weight:700!important}
+@media(max-width:900px){.pro-analysis-grid{grid-template-columns:1fr}.pro-analysis-head{align-items:flex-start;flex-direction:column}.pro-head-note{white-space:normal}}
+</style>
+
 </head>
 <body>
 
@@ -7903,14 +7938,44 @@ const STRUCTURES=[
  {re:/\bshould have\b/i,name:'should have',rule:'should have + V3',tip:'Geçmişte yapılması daha iyi olurdu.'}
 ];
 function lessonAnalysis(l){
-  const text=l.sentences.map(x=>x[0]).join(' '), found=STRUCTURES.filter(x=>x.re.test(text));
+  const text=l.sentences.map(x=>x[0]).join(' ');
+  const found=STRUCTURES.filter(x=>x.re.test(text));
   const chunks=[]; const fixed=(typeof getStudyCollocations==='function'?getStudyCollocations():[]);
   fixed.forEach(c=>{if(text.toLowerCase().includes(String(c.phrase||'').toLowerCase())&&!chunks.some(x=>x.phrase===c.phrase))chunks.push(c)});
   const items=[];
-  found.slice(0,6).forEach(x=>{const ex=l.sentences.find(s=>x.re.test(s[0]));items.push(`<div class="analysis-item"><b>${esc(x.name)}</b><code>${esc(x.rule)}</code><p class="hint">${esc(x.tip)}</p>${ex?`<div>${spk(ex[0])}${esc(ex[0])}</div><div class="tr">${esc(ex[1])}</div>`:''}</div>`)});
-  chunks.slice(0,5).forEach(c=>items.push(`<div class="analysis-item"><b>${esc(c.phrase)}</b><div class="hint">${esc(c.meaning||'Doğal kalıp')}</div>${c.examples&&c.examples[0]?`<div style="margin-top:6px">${spk(c.examples[0])}${esc(c.examples[0])}</div>`:''}</div>`));
-  if(!items.length){l.sentences.slice(0,4).forEach(s=>items.push(`<div class="analysis-item"><b>Doğal cümle kalıbı</b><div>${spk(s[0])}${esc(s[0])}</div><div class="tr">${esc(s[1])}</div><p class="hint">Cümleyi ezberlemek yerine yapısını fark et ve kendi hayatına uyarlamaya çalış.</p></div>`))}
-  return `<details class="card" open><summary style="cursor:pointer;font-weight:800">🔎 Kalıp & Yapı Analizi</summary><p class="hint">Bu bölüm ders cümlelerini ezberletmez; tekrar eden yapıları ve doğal kalıpları görünür hale getirir.</p><div class="analysis-grid">${items.join('')}</div></details>`;
+  const cleanRule=(name,rule)=>{
+    let r=String(rule||'').trim(), n=String(name||'').trim();
+    const re=new RegExp('^'+n.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\s*','i');
+    r=r.replace(re,'').trim();
+    return r || String(rule||'').trim();
+  };
+  const kind=(name)=>{
+    const n=String(name||'').toLowerCase();
+    if(n==='because'||n==='although'||n==='while'||n==='when') return 'Bağlaç';
+    if(n==='so') return 'Sonuç';
+    if(n==='for'||n==='since') return 'Süre';
+    return 'Yapı';
+  };
+  found.slice(0,6).forEach((x,i)=>{
+    const ex=l.sentences.find(s=>x.re.test(s[0]));
+    const rule=cleanRule(x.name,x.rule);
+    items.push(`<div class="pro-analysis-card tone-${i%3}">
+      <div class="pro-analysis-top"><span class="pro-num">${i+1}</span><div class="pro-analysis-name"><b>${esc(x.name)}</b><code>${esc(rule)}</code></div><span class="pro-tag">${kind(x.name)}</span></div>
+      <div class="pro-tip">${esc(x.tip)}</div>
+      ${ex?`<div class="pro-example-label">💬 Örnek Cümle</div><div class="pro-example">${spk(ex[0])}<span>${esc(ex[0])}</span></div><div class="pro-tr">${esc(ex[1])}</div>`:''}
+    </div>`);
+  });
+  chunks.slice(0,5).forEach((c,i)=>items.push(`<div class="pro-analysis-card tone-${i%3}">
+    <div class="pro-analysis-top"><span class="pro-num">${items.length+1}</span><div class="pro-analysis-name"><b>${esc(c.phrase)}</b><code>doğal kalıp</code></div><span class="pro-tag">Chunk</span></div>
+    <div class="pro-tip">${esc(c.meaning||'Doğal kalıp')}</div>
+    ${c.examples&&c.examples[0]?`<div class="pro-example-label">💬 Örnek Cümle</div><div class="pro-example">${spk(c.examples[0])}<span>${esc(c.examples[0])}</span></div>`:''}
+  </div>`));
+  if(!items.length){l.sentences.slice(0,3).forEach((x,i)=>items.push(`<div class="pro-analysis-card tone-${i%3}"><div class="pro-analysis-top"><span class="pro-num">${i+1}</span><div class="pro-analysis-name"><b>Doğal cümle kalıbı</b></div></div><div class="pro-example">${spk(x[0])}<span>${esc(x[0])}</span></div><div class="pro-tr">${esc(x[1])}</div></div>`))}
+  return `<details class="card pro-analysis-wrap" open>
+    <summary>🔎 Kalıp & Yapı Analizi</summary>
+    <div class="pro-analysis-head"><p>Bu bölüm ders cümlelerini ezberletmez; tekrar eden yapıları ve doğal kalıpları görünür hale getirir.</p><span class="pro-head-note">💡 Aynı yapıyı farklı cümlelerde kullan.</span></div>
+    <div class="pro-analysis-grid">${items.join('')}</div>
+  </details>`;
 }
 const _baseLesson=viewLesson;
 viewLesson=function(l){
