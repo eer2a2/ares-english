@@ -3316,7 +3316,7 @@ function viewLesson(l){
       <button class="pill" onclick="toggleBlur()">Türkçeyi Gizle / Göster</button>
       <button class="pill" onclick="toggleBlurEn()">İngilizceyi Gizle / Göster</button>
       <button class="pill" onclick="window.print()">🖨️ Yazdır / PDF</button>
-      <button class="pill ${done?'done':''}" onclick="toggleDone(${l.no}); navigate('lesson', ${l.no});">${done?'✓ Tamamlandı':'Ders Bitti işaretle'}</button>
+      <button class="pill ${done?'done':''}" onclick="toggleDone(${l.no}); navigate('lesson', ${l.no});">${done?'✓ Tamamlandı':'✓ Dersi Tamamla'}</button>
       <button class="pill primary" onclick="navigate('lessontest', ${l.no})">📝 Ders Testi</button>
       <button class="pill primary" onclick="navigate('dashboard')">Ana Sayfaya Dön</button>
     </div>
@@ -8086,7 +8086,8 @@ function checkProduction(no,i,target,tr){const el=document.getElementById(`prod-
 viewLesson=function(l){
  if(!l)return _baseLesson(l);
  let base=_baseLesson(l);
- base=base.replace(/<button class="pill[^>]*" onclick="toggleDone\([^)]*\); navigate\('lesson', [^)]*\);">[\s\S]*?<\/button>/,'');
+ // Keep the original manual lesson-completion control.
+ // It remains independent from test scores so Erhan decides when a lesson is genuinely finished.
  base=base.replace('<div class="cols">','<div id="lesson-study-material" class="cols lesson-stage-card">');
  const analysis=cleanAnalysisHtml(lessonAnalysis(l)).replace('<details class="card"','<details id="lesson-analysis" class="card lesson-stage-card"');
  const speak=`<div id="lesson-speaking" class="card lesson-stage-card"><h3 class="section-title" style="margin-top:0">🎤 Konuş · Bağlam İçinde Kullan</h3><p class="hint">Role Play / Abroad mantığı: hazır cümleyi okumak yerine soruya doğal cevap ver. Tarayıcının tek bir kelimeyi yanlış duyması otomatik olarak telaffuz hatası sayılmaz.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="pill primary" onclick="saveFlow(${l.no},'speak');window.location.href='./speaking.html'">Ares Speaking'i Aç</button><button class="pill" onclick="saveFlow(${l.no},'speak');navigate('lessontest',${l.no});setTimeout(()=>setLessonTestMode('voice'),0)">Bu Dersi Sesli Çalış</button></div></div>`;
