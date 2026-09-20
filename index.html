@@ -7964,3 +7964,74 @@ function gaChooseOption(btn,e){
 
 <!-- v68 PHRASAL VERBS PRO: audited phrasal-verb structures, separability and natural examples -->
 <!-- v65 BUILDER & WRITING PRO: builder fallback explanations + 3/5/10 guided journal + teacher assessment/export -->
+
+<style id="ares-guided-lesson-v2">
+.learning-step{cursor:pointer;transition:.15s;position:relative}.learning-step:hover{transform:translateY(-1px);border-color:var(--leaf)}.learning-step.active-step{outline:2px solid var(--leaf);background:rgba(91,115,97,.08)}.learning-step .step-kicker{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);display:block;margin-bottom:3px}.lesson-stage-card{scroll-margin-top:18px}.production-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px}.production-task{border:1px solid var(--line);border-radius:12px;padding:13px;background:var(--paper)}.production-task .quiz-input{margin:9px 0 5px}.stage-done{font-size:11px;color:var(--leaf);font-weight:700;margin-top:6px}.test-kind{display:inline-flex;padding:4px 8px;border-radius:999px;background:var(--paper-dark);font-size:11px;color:var(--ink-soft);margin-bottom:8px}.lesson-complete-note{padding:12px;border-left:4px solid var(--leaf);background:rgba(91,115,97,.08);border-radius:8px;margin-top:12px}
+</style>
+<script id="ares-guided-lesson-v2">
+// Guided lesson flow v2: learn -> analyse -> produce -> speak -> test.
+progress.lessonFlow=progress.lessonFlow||{};
+function flowState(no){return progress.lessonFlow[no]||(progress.lessonFlow[no]={learn:false,analyse:false,produce:false,speak:false,test:false});}
+function saveFlow(no,key){const f=flowState(no);f[key]=true;saveProgress(progress);}
+function scrollLessonStage(id,no,key){saveFlow(no,key);const el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}
+function guidedPath(l){const f=flowState(l.no);const steps=[['learn','lesson-study-material','Kelime & İfadeler','ÖĞREN','Anlamı tanı'],['analyse','lesson-analysis','Analiz','ANLA','Kalıbı fark et'],['produce','lesson-production','Üret','KULLAN','Yeni cümle kur'],['speak','lesson-speaking','Konuş','KONUŞ','Bağlam içinde kullan'],['test','lesson-test-launch','Test','ÖLÇ','Ölç ve yanlışları kaydet']];return `<div class="learning-path">${steps.map((x,i)=>`<div class="learning-step ${f[x[0]]?'active-step':''}" onclick="scrollLessonStage('${x[1]}',${l.no},'${x[0]}')"><span class="step-kicker">${x[3]}</span><b>${i+1} · ${x[2]}</b><span class="hint">${x[4]}</span>${f[x[0]]?'<div class="stage-done">✓ çalışıldı</div>':''}</div>`).join('')}</div>`}
+
+// Fix duplicated labels such as "duringduring + ..." in analysis cards.
+function cleanAnalysisHtml(html){return String(html).replace(/(<b>during<\/b><code>)during\s*\+?/gi,'$1').replace(/(<b>for<\/b><code>)for\s*\+?/gi,'$1').replace(/(<b>while<\/b><code>)while\s*\+?/gi,'$1').replace(/(<b>since<\/b><code>)since\s*\+?/gi,'$1');}
+
+const NOVEL_STRUCTURE_BANK={
+ during:[['I checked my phone twice ___ the meeting.','during','Toplantı sırasında telefonumu iki kez kontrol ettim.'],['I met several new people ___ my course.','during','Kursum sırasında birkaç yeni insanla tanıştım.']],
+ while:[['I listened to a podcast ___ I was walking home.','while','Eve yürürken podcast dinledim.'],['The phone rang ___ we were having dinner.','while','Akşam yemeği yerken telefon çaldı.']],
+ for:[['I stayed there ___ three weeks.','for','Orada üç hafta kaldım.'],['We talked ___ about twenty minutes.','for','Yaklaşık yirmi dakika konuştuk.']],
+ since:[['I have studied English ___ last year.','since','Geçen yıldan beri İngilizce çalışıyorum.'],['I have known him ___ 2022.','since','Onu 2022’den beri tanıyorum.']],
+ although:[['___ I was tired, I went for a walk.','although','Yorgun olmama rağmen yürüyüşe çıktım.'],['___ it was raining, we went out.','although','Yağmur yağmasına rağmen dışarı çıktık.']],
+ because:[['I stayed home ___ I was tired.','because','Yorgun olduğum için evde kaldım.'],['I am learning English ___ I want to travel more easily.','because','Daha rahat seyahat etmek istediğim için İngilizce öğreniyorum.']],
+ 'even though':[['___ I was nervous, I answered the question.','even though','Gergin olmama rağmen soruyu cevapladım.']],
+ 'as soon as':[['I will call you ___ I arrive.','as soon as','Varır varmaz seni arayacağım.']],
+ 'should have':[['I ___ booked the hotel earlier.','should have','Oteli daha erken ayırtmalıydım.']]
+};
+function structureQuestionsForLesson(l){const text=l.sentences.map(x=>x[0]).join(' '),out=[];Object.keys(NOVEL_STRUCTURE_BANK).forEach(k=>{const re=new RegExp('\\b'+k.replace(/ /g,'\\s+')+'\\b','i');if(re.test(text)){NOVEL_STRUCTURE_BANK[k].forEach(x=>out.push({type:'structure',blanked:esc(x[0]).replace('___','<span class="quiz-blank">…….</span>'),answer:x[1].toLowerCase(),en:x[0].replace('___',x[1]),tr:x[2],skill:'Yapı'}))}});return out;}
+function collocationQuestionsForLesson(l){const text=l.sentences.map(x=>x[0]).join(' ').toLowerCase(),fixed=(typeof getStudyCollocations==='function'?getStudyCollocations():[]),out=[];fixed.forEach(c=>{const phrase=String(c.phrase||'').trim();if(!phrase||!text.includes(phrase.toLowerCase()))return;const ex=(c.examples||[]).find(e=>!text.includes(String(e).toLowerCase()));if(!ex)return;const re=new RegExp(phrase.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'i');if(!re.test(ex))return;out.push({type:'chunk',blanked:esc(ex).replace(re,'<span class="quiz-blank">…….</span>'),answer:phrase.toLowerCase(),en:ex,tr:c.meaning||'',skill:'Kalıp / Chunk'})});return out;}
+function buildLessonTestQuestions(l,count){
+ const allWords=getAllWords(),items=[];
+ // 1) Recognition: vocabulary meaning, not arbitrary missing words.
+ shuffleArr(l.words.slice()).forEach(w=>{if(!w[0]||!w[1])return;const ds=pickCloseDistractors(allWords,{tr:w[1]},'tr',3).map(x=>x.tr);if(ds.length===3)items.push({type:'choice',prompt:w[0],options:shuffleArr([w[1],...ds]),answer:w[1],en:w[0],tr:w[1],skill:'Kelime'});});
+ // 2) Meaningful blanks: only a structure or a complete natural chunk.
+ items.push(...structureQuestionsForLesson(l),...collocationQuestionsForLesson(l));
+ // 3) Production: full sentence recall/production; never delete a random word from a memorised sentence.
+ shuffleArr(l.sentences.slice()).forEach(s=>items.push({type:'production',prompt:s[1],answer:s[0],en:s[0],tr:s[1],skill:'Cümle Kurma'}));
+ // balanced selection: roughly 20% recognition, 30% structure/chunk, 50% production when pool permits.
+ const rec=shuffleArr(items.filter(x=>x.type==='choice')), controlled=shuffleArr(items.filter(x=>x.type==='structure'||x.type==='chunk')), prod=shuffleArr(items.filter(x=>x.type==='production'));
+ let out=[];const take=(a,n)=>{while(a.length&&n-->0)out.push(a.shift())};take(rec,Math.max(2,Math.round(count*.2)));take(controlled,Math.max(2,Math.round(count*.3)));take(prod,count-out.length);const rest=shuffleArr([...rec,...controlled,...prod]);while(out.length<count&&rest.length)out.push(rest.shift());return shuffleArr(out).slice(0,count);
+}
+
+function productionPracticeHtml(l){const picks=shuffleArr(l.sentences.slice()).slice(0,3);return `<div id="lesson-production" class="card lesson-stage-card"><h3 class="section-title" style="margin-top:0">✍️ Üret · Yeni Cümleyi Sen Kur</h3><p class="hint">Burada amaç cümleyi ezberlemek değil. Türkçe fikri gör, İngilizceyi kendin üret. Kontrolden sonra doğal örneği karşılaştır.</p><div class="production-grid">${picks.map((s,i)=>`<div class="production-task"><b>${esc(s[1])}</b><input id="prod-${l.no}-${i}" class="quiz-input" placeholder="İngilizce cümleni kur…"><button class="pill" onclick="checkProduction(${l.no},${i},'${escJs(s[0])}','${escJs(s[1])}')">Kontrol Et</button><div id="prod-fb-${l.no}-${i}" class="quiz-feedback"></div></div>`).join('')}</div></div>`}
+function checkProduction(no,i,target,tr){const el=document.getElementById(`prod-${no}-${i}`),fb=document.getElementById(`prod-fb-${no}-${i}`);if(!el||!el.value.trim())return;const pct=wordMatchScore(normSpeech(target),normSpeech(el.value));if(pct>=72){fb.innerHTML=`✓ Anlam ve yapı iyi. <span class="hint">Doğal örnek: ${esc(target)}</span>`;fb.className='quiz-feedback ok';removeMistake(target)}else{fb.innerHTML=`Bir daha dene. <b>Doğal örnek:</b> ${esc(target)}`;fb.className='quiz-feedback bad';addMistake(target,tr,'cümle kurma')}saveFlow(no,'produce');saveProgress(progress);updateMistakeBadge();}
+
+// Rebuild lesson page as an actual guided flow. Manual "Ders Bitti" is removed; completion comes after the test.
+viewLesson=function(l){
+ if(!l)return _baseLesson(l);
+ let base=_baseLesson(l);
+ base=base.replace(/<button class="pill[^>]*" onclick="toggleDone\([^)]*\); navigate\('lesson', [^)]*\);">[\s\S]*?<\/button>/,'');
+ base=base.replace('<div class="cols">','<div id="lesson-study-material" class="cols lesson-stage-card">');
+ const analysis=cleanAnalysisHtml(lessonAnalysis(l)).replace('<details class="card"','<details id="lesson-analysis" class="card lesson-stage-card"');
+ const speak=`<div id="lesson-speaking" class="card lesson-stage-card"><h3 class="section-title" style="margin-top:0">🎤 Konuş · Bağlam İçinde Kullan</h3><p class="hint">Role Play / Abroad mantığı: hazır cümleyi okumak yerine soruya doğal cevap ver. Tarayıcının tek bir kelimeyi yanlış duyması otomatik olarak telaffuz hatası sayılmaz.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="pill primary" onclick="saveFlow(${l.no},'speak');window.location.href='./speaking.html'">Ares Speaking'i Aç</button><button class="pill" onclick="saveFlow(${l.no},'speak');navigate('lessontest',${l.no});setTimeout(()=>setLessonTestMode('voice'),0)">Bu Dersi Sesli Çalış</button></div></div>`;
+ const launch=`<div id="lesson-test-launch" class="card lesson-stage-card"><h3 class="section-title" style="margin-top:0">📝 Test · Ölç</h3><p class="hint">Rastgele kelime silinen ezber soruları yok. Test; kelime anlamı, hedef yapı/chunk ve tam cümle üretimini ölçer. Yanlışların Akıllı Yanlış Havuzu'na gider.</p><button class="pill primary" onclick="saveFlow(${l.no},'test');navigate('lessontest',${l.no})">${l.no}. Ders Testine Başla</button></div>`;
+ return guidedPath(l)+base.replace('</div>\n  <div class="card">\n    <h3 class="section-title" style="margin-top:0;">Notlarım</h3>',`</div>${analysis}${productionPracticeHtml(l)}${speak}${launch}<div class="card"><h3 class="section-title" style="margin-top:0;">Notlarım</h3>`);
+};
+
+// Render new test question types.
+const _guidedViewLessonTest=viewLessonTest;
+viewLessonTest=function(lessonNo){
+ const l=DATA.lessons.find(x=>x.no===lessonNo);if(!l)return '<div class="card">Ders bulunamadı.</div>';
+ if(lessonTestState.lesson===lessonNo&&lessonTestState.questions.length&&lessonTestState.index>=lessonTestState.questions.length){
+   const total=lessonTestState.questions.length,pct=total?Math.round(100*lessonTestState.correct/total):0;const f=flowState(lessonNo);f.test=true;if(!isDone(lessonNo)){progress.lessonsDone.push(lessonNo);progress.lessonDoneDates[lessonNo]=todayStr()}saveProgress(progress);renderLessonList();
+   return `<div class="quiz-box card"><h3 class="section-title" style="margin-top:0">Test Bitti 🎉</h3><div class="score-row"><div class="score-item"><b>${lessonTestState.correct}</b>Doğru</div><div class="score-item"><b>${total}</b>Toplam</div><div class="score-item"><b>${pct}%</b>Başarı</div></div><div class="lesson-complete-note"><b>✓ ${lessonNo}. ders tamamlandı.</b><br>Yanlışların varsa Yanlış Havuzu'nda tekrar çalışabilirsin.</div><div class="btns" style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap"><button class="pill primary" onclick="restartLessonTest(${lessonNo})">Yeni Test</button><button class="pill" onclick="navigate('mistakes')">Yanlış Havuzu</button><button class="pill" onclick="navigate('lesson',${lessonNo})">Derse Dön</button></div></div>`;
+ }
+ let html=_guidedViewLessonTest(lessonNo);
+ if(lessonTestState.lesson===lessonNo&&lessonTestState.questions.length&&lessonTestState.index<lessonTestState.questions.length){const q=lessonTestState.questions[lessonTestState.index];if(q.type==='structure'||q.type==='chunk'){const body=`<div class="test-kind">${esc(q.skill||'Yapı')}</div><div class="quiz-sentence">${q.blanked}</div><input id="lt-input" class="quiz-input" placeholder="Hedef yapı veya kalıbı yaz…" onkeydown="if(event.key==='Enter') checkLessonTestAnswer()"><div class="btns"><button class="pill primary" id="lt-check" onclick="checkLessonTestAnswer()">Kontrol Et</button></div>`;html=html.replace(/<div class="quiz-sentence">[\s\S]*?<div class="quiz-feedback" id="lt-feedback"><\/div>/,body+'<div class="quiz-feedback" id="lt-feedback"></div>')}else if(q.type==='production'){const body=`<div class="test-kind">Cümle Kurma</div><div class="hint">Türkçe fikri İngilizce olarak kendin üret:</div><div class="quiz-sentence">${esc(q.prompt)}</div><textarea id="lt-input" class="quiz-input" placeholder="Tam İngilizce cümleni yaz…"></textarea><div class="btns"><button class="pill primary" id="lt-check" onclick="checkLessonTestAnswer()">Kontrol Et</button></div>`;html=html.replace(/<div class="quiz-sentence">[\s\S]*?<div class="quiz-feedback" id="lt-feedback"><\/div>/,body+'<div class="quiz-feedback" id="lt-feedback"></div>')}
+ }
+ return html;
+};
+checkLessonTestAnswer=function(){const st=lessonTestState,q=st.questions[st.index],el=document.getElementById('lt-input'),fb=document.getElementById('lt-feedback');if(!el||!el.value.trim())return;let ok=false,pct=null;if(q.type==='production'){pct=wordMatchScore(normSpeech(q.answer),normSpeech(el.value));ok=pct>=72}else{const v=normSpeech(el.value);ok=v===normSpeech(q.answer)}if(ok){st.correct++;fb.innerHTML=`✓ Doğru.${q.type==='production'?` <span class="hint">Doğal örnek: ${esc(q.answer)}</span>`:''}`;fb.className='quiz-feedback ok';removeMistake(q.en)}else{fb.innerHTML=`✕ Tekrar çalışalım. <b>Doğal cevap:</b> ${esc(q.answer)}${q.type==='production'?`<div class="hint">Senin cevabın: ${esc(el.value)}</div>`:''}`;fb.className='quiz-feedback bad';addMistake(q.en,q.tr,q.type==='production'?'cümle kurma':(q.type==='chunk'?'kalıp':'yapı'))}recordLessonStat(st.lesson,ok);recordDailyStat(ok);saveProgress(progress);updateMistakeBadge();el.disabled=true;const b=document.getElementById('lt-check');if(b)b.disabled=true;document.getElementById('lt-next').style.display='inline-flex'};
+</script>
