@@ -3453,8 +3453,8 @@ function viewLessonTest(lessonNo){
          <button class="pill primary" id="lt-voice-btn" onclick="checkLessonTestVoice()">🎤 Şimdi Söyle</button>
        </div>`;
   } else if(q.type==='blank' || q.type==='structure' || q.type==='chunk'){
-    body = `<div class="test-kind">${esc(q.skill || (q.type==='chunk'?'Kalıp / Chunk':'Yapı'))}</div><div class="quiz-sentence">${q.blanked}</div>
-       <input id="lt-input" class="quiz-input" placeholder="Hedef yapı veya kalıbı yaz…" onkeydown="if(event.key==='Enter') checkLessonTestAnswer()">
+    body = `<div class="test-kind">${esc(q.skill || (q.type==='chunk'?'Kalıp / Chunk':'Yapı'))}</div>${q.type==='chunk'&&q.tr?`<div class="hint" style="margin:8px 0 10px"><b>Hedef anlam:</b> ${esc(q.tr)}</div>`:''}<div class="quiz-sentence">${q.blanked}</div>
+       <input id="lt-input" class="quiz-input" placeholder="${q.type==='chunk'?'Hedef kalıbı yaz…':'Hedef yapıyı yaz…'}" onkeydown="if(event.key==='Enter') checkLessonTestAnswer()">
        <div class="btns" style="display:flex; gap:8px;">
          <button class="pill primary" id="lt-check" onclick="checkLessonTestAnswer()">Kontrol Et</button>
        </div>`;
@@ -7997,7 +7997,7 @@ const NOVEL_STRUCTURE_BANK={
  'should have':[['I ___ booked the hotel earlier.','should have','Oteli daha erken ayırtmalıydım.']]
 };
 function structureQuestionsForLesson(l){const text=l.sentences.map(x=>x[0]).join(' '),out=[];Object.keys(NOVEL_STRUCTURE_BANK).forEach(k=>{const re=new RegExp('\\b'+k.replace(/ /g,'\\s+')+'\\b','i');if(re.test(text)){NOVEL_STRUCTURE_BANK[k].forEach(x=>out.push({type:'structure',blanked:esc(x[0]).replace('___','<span class="quiz-blank">…….</span>'),answer:x[1].toLowerCase(),en:x[0].replace('___',x[1]),tr:x[2],skill:'Yapı'}))}});return out;}
-function collocationQuestionsForLesson(l){const text=l.sentences.map(x=>x[0]).join(' ').toLowerCase(),fixed=(typeof getStudyCollocations==='function'?getStudyCollocations():[]),out=[];fixed.forEach(c=>{const phrase=String(c.phrase||'').trim();if(!phrase||!text.includes(phrase.toLowerCase()))return;const ex=(c.examples||[]).find(e=>!text.includes(String(e).toLowerCase()));if(!ex)return;const re=new RegExp(phrase.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'i');if(!re.test(ex))return;out.push({type:'chunk',blanked:esc(ex).replace(re,'<span class="quiz-blank">…….</span>'),answer:phrase.toLowerCase(),en:ex,tr:c.meaning||'',skill:'Kalıp / Chunk'})});return out;}
+function collocationQuestionsForLesson(l){const text=l.sentences.map(x=>x[0]).join(' ').toLowerCase(),fixed=(typeof getStudyCollocations==='function'?getStudyCollocations():[]),out=[];fixed.forEach(c=>{const phrase=String(c.phrase||'').trim();if(!phrase||!text.includes(phrase.toLowerCase()))return;const ex=(c.examples||[]).find(e=>!text.includes(String(e).toLowerCase()));if(!ex)return;const re=new RegExp(phrase.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'i');if(!re.test(ex))return;out.push({type:'chunk',blanked:esc(ex).replace(re,'<span class="quiz-blank">…….</span>'),answer:phrase.toLowerCase(),en:ex,tr:c.meaning||'',skill:'Kalıp / Chunk',constrained:true})});return out;}
 function buildLessonTestQuestions(l,count){
  const allWords=getAllWords(),items=[];
  // 1) Recognition: vocabulary meaning, not arbitrary missing words.
