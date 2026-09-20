@@ -3415,7 +3415,7 @@ function viewLessonTest(lessonNo){
   if(lessonTestState.lesson!==lessonNo || !lessonTestState.questions.length){
     return `<div class="quiz-box card">
       <h3 class="section-title" style="margin-top:0;">${lessonNo}. Ders Testi</h3>
-      <p class="hint">Bu derste geçen cümle ve kelimelerden karışık bir test oluşturulur. Sesli modda, Türkçesini görüp İngilizcesini mikrofona söylersin — gerçek konuşma pratiği için önerilir.</p>
+      <p class="hint">Bu test, derste öğrendiğin kelime, kalıp ve yapıları yeni bağlamlarda kullanıp kullanamadığını ölçer. Ders cümlelerini ezberlemen gerekmez. Sesli modda amaç anlaşılır ve doğal üretimdir.</p>
       <div class="tab-row">
         <button class="tab-btn ${lessonTestState.mode==='text'?'active':''}" onclick="setLessonTestMode('text')">✍️ Yazarak</button>
         <button class="tab-btn ${lessonTestState.mode==='voice'?'active':''}" onclick="setLessonTestMode('voice')">🎤 Sesli</button>
@@ -3452,9 +3452,15 @@ function viewLessonTest(lessonNo){
        <div class="btns" style="display:flex; gap:8px; flex-wrap:wrap;">
          <button class="pill primary" id="lt-voice-btn" onclick="checkLessonTestVoice()">🎤 Şimdi Söyle</button>
        </div>`;
-  } else if(q.type==='blank'){
-    body = `<div class="quiz-sentence">${q.blanked}</div>
-       <input id="lt-input" class="quiz-input" placeholder="Boşluğa gelecek kelimeyi yaz…" onkeydown="if(event.key==='Enter') checkLessonTestAnswer()">
+  } else if(q.type==='blank' || q.type==='structure' || q.type==='chunk'){
+    body = `<div class="test-kind">${esc(q.skill || (q.type==='chunk'?'Kalıp / Chunk':'Yapı'))}</div><div class="quiz-sentence">${q.blanked}</div>
+       <input id="lt-input" class="quiz-input" placeholder="Hedef yapı veya kalıbı yaz…" onkeydown="if(event.key==='Enter') checkLessonTestAnswer()">
+       <div class="btns" style="display:flex; gap:8px;">
+         <button class="pill primary" id="lt-check" onclick="checkLessonTestAnswer()">Kontrol Et</button>
+       </div>`;
+  } else if(q.type==='production'){
+    body = `<div class="test-kind">Cümle Kurma</div><div class="hint">Türkçe fikri İngilizce olarak kendin üret:</div><div class="quiz-sentence">${esc(q.prompt)}</div>
+       <textarea id="lt-input" class="quiz-input" placeholder="Tam İngilizce cümleni yaz…"></textarea>
        <div class="btns" style="display:flex; gap:8px;">
          <button class="pill primary" id="lt-check" onclick="checkLessonTestAnswer()">Kontrol Et</button>
        </div>`;
@@ -7907,7 +7913,7 @@ const _baseViewLessonTest=viewLessonTest;
 viewLessonTest=function(lessonNo){
   let html=_baseViewLessonTest(lessonNo);
   if(lessonTestState.mode==='voice'){
-    html=html.replace('Bu derste geçen cümle ve kelimelerden karışık bir test oluşturulur. Sesli modda, Türkçesini görüp İngilizcesini mikrofona söylersin — gerçek konuşma pratiği için önerilir.','Sesli mod artık tek kelime telaffuz sınavı değildir. Dersteki anlamı bağlam içinde İngilizce cümleyle üretirsin; tarayıcının yanlış duyması otomatik olarak hata sayılmaz.')
+    html=html.replace('Bu test, derste öğrendiğin kelime, kalıp ve yapıları yeni bağlamlarda kullanıp kullanamadığını ölçer. Ders cümlelerini ezberlemen gerekmez. Sesli modda amaç anlaşılır ve doğal üretimdir.','Sesli mod artık tek kelime telaffuz sınavı değildir. Dersteki anlamı bağlam içinde İngilizce cümleyle üretirsin; tarayıcının yanlış duyması otomatik olarak hata sayılmaz.')
       .replace('Türkçesini söyle: (İngilizcesini yüksek sesle mikrofona söyle)','Anlamı İngilizce bir cümleyle söyle. Hazır olduğunda mikrofona bas; akıcılık önce.');
   }
   return html;
