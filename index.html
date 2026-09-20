@@ -8036,5 +8036,84 @@ viewLessonTest=function(lessonNo){
  }
  return _guidedViewLessonTest(lessonNo);
 };
-checkLessonTestAnswer=function(){const st=lessonTestState,q=st.questions[st.index],el=document.getElementById('lt-input'),fb=document.getElementById('lt-feedback');if(!el||!el.value.trim())return;let ok=false,pct=null;if(q.type==='production'){pct=wordMatchScore(normSpeech(q.answer),normSpeech(el.value));ok=pct>=72}else{const v=normSpeech(el.value);ok=v===normSpeech(q.answer)}if(ok){st.correct++;const same=q.type==='production'&&normSpeech(el.value)===normSpeech(q.answer);if(q.type==='production'){if(same||pct>=92){fb.innerHTML=same?`✓ <b>Doğru ve doğal.</b>`:`✓ <b>Doğru ve doğal.</b><div class="hint"><b>Alternatif:</b> ${esc(q.answer)}</div>`;fb.className='quiz-feedback ok';removeMistake(q.en)}else{fb.innerHTML=`◐ <b>Anlam doğru.</b> Cümlen iletişim kuruyor; ancak doğallık açısından örnekle karşılaştır.<div class="hint"><b>Daha doğal örnek:</b> ${esc(q.answer)}</div><div class="hint"><b>Senin cevabın:</b> ${esc(el.value)}</div>`;fb.className='quiz-feedback';removeMistake(q.en)}}else{fb.innerHTML=`✓ Doğru.`;fb.className='quiz-feedback ok';removeMistake(q.en)}}else{fb.innerHTML=`✕ Tekrar çalışalım. <b>Doğal cevap:</b> ${esc(q.answer)}${q.type==='production'?`<div class="hint">Senin cevabın: ${esc(el.value)}</div>`:''}`;fb.className='quiz-feedback bad';addMistake(q.en,q.tr,q.type==='production'?'cümle kurma':(q.type==='chunk'?'kalıp':'yapı'))}recordLessonStat(st.lesson,ok);recordDailyStat(ok);saveProgress(progress);updateMistakeBadge();el.disabled=true;const b=document.getElementById('lt-check');if(b)b.disabled=true;document.getElementById('lt-next').style.display='inline-flex'};
+function semanticLocalVariant(user,target){
+  const n=x=>normSpeech(String(x||'')).replace(/\b(a|an|the)\b/g,' ').replace(/\s+/g,' ').trim();
+  let u=n(user),t=n(target);
+  if(u===t)return {level:'natural',reason:'same'};
+  const canon=x=>x
+    .replace(/\bin the mornings\b/g,'in morning')
+    .replace(/\bin the morning\b/g,'in morning')
+    .replace(/\bhave black coffee\b/g,'drink black coffee')
+    .replace(/\bhave coffee\b/g,'drink coffee')
+    .replace(/\bhave a black coffee\b/g,'drink black coffee')
+    .replace(/\bhave a coffee\b/g,'drink coffee')
+    .replace(/\bget to work\b/g,'go to work')
+    .replace(/\busually do not\b/g,'do not usually')
+    .replace(/\busually dont\b/g,'dont usually')
+    .replace(/\s+/g,' ').trim();
+  if(canon(u)===canon(t))return {level:'natural',reason:'known-natural-variant'};
+  const score=wordMatchScore(canon(t),canon(u));
+  if(score>=88)return {level:'natural',reason:'high-match'};
+  if(score>=72)return {level:'meaning',reason:'close-match'};
+  return {level:'uncertain',reason:'needs-semantic-check'};
+}
+async function semanticAiJudge(user,target,tr){
+  if(!restoreApiKeyPersistent())return null;
+  try{
+    const sys=`You are evaluating an A2-B1 English learner. Judge meaning, grammar and naturalness, not exact wording. Accept natural alternatives such as have/drink coffee, go/get to work, frequency-adverb variants, articles or singular/plural time expressions when meaning remains correct. Return ONLY compact JSON: {"level":"natural"|"meaning"|"wrong","note":"short Turkish feedback","natural":"one natural English example"}. natural = correct and natural; meaning = intended meaning is clear but wording/grammar should be improved; wrong = meaning or core structure is materially wrong.`;
+    const msg=`Turkish prompt: ${tr}\nReference example: ${target}\nLearner answer: ${user}`;
+    const raw=await callClaudeAPI(sys,msg,220);
+    const m=String(raw).match(/\{[\s\S]*\}/);if(!m)return null;
+    const j=JSON.parse(m[0]);if(!['natural','meaning','wrong'].includes(j.level))return null;return j;
+  }catch(e){return null;}
+}
+checkLessonTestAnswer=async function(){
+  const st=lessonTestState,q=st.questions[st.index],el=document.getElementById('lt-input'),fb=document.getElementById('lt-feedback');
+  if(!el||!el.value.trim())return;
+  const user=el.value.trim();let ok=false,level='wrong',note='',natural=q.answer;
+  const b=document.getElementById('lt-check');if(b)b.disabled=true;
+  if(q.type==='production'){
+    const local=semanticLocalVariant(user,q.answer);level=local.level;
+    if(level==='uncertain'){
+      fb.innerHTML='Değerlendiriliyor…';fb.className='quiz-feedback';
+      const ai=await semanticAiJudge(user,q.answer,q.tr);
+      if(ai){level=ai.level;note=ai.note||'';natural=ai.natural||q.answer;}
+      else level='wrong';
+    }
+    ok=level!=='wrong';
+    if(level==='natural'){
+      st.correct++;fb.innerHTML=`✓ <b>Doğru ve doğal.</b>${normSpeech(user)!==normSpeech(q.answer)?`<div class="hint"><b>Alternatif:</b> ${esc(q.answer)}</div>`:''}`;fb.className='quiz-feedback ok';removeMistake(q.en);
+    }else if(level==='meaning'){
+      st.correct++;fb.innerHTML=`◐ <b>Anlam doğru.</b> ${esc(note||'Cümlen iletişim kuruyor; küçük bir doğallık veya yapı iyileştirmesi yapılabilir.')}<div class="hint"><b>Daha doğal örnek:</b> ${esc(natural)}</div><div class="hint"><b>Senin cevabın:</b> ${esc(user)}</div>`;fb.className='quiz-feedback';removeMistake(q.en);
+    }else{
+      fb.innerHTML=`✕ <b>Tekrar çalışalım.</b>${note?` ${esc(note)}`:''}<div class="hint"><b>Doğal cevap:</b> ${esc(natural)}</div><div class="hint"><b>Senin cevabın:</b> ${esc(user)}</div>`;fb.className='quiz-feedback bad';addMistake(q.en,q.tr,'cümle kurma');
+    }
+  }else{
+    ok=normSpeech(user)===normSpeech(q.answer);level=ok?'natural':'wrong';
+    if(ok){st.correct++;fb.innerHTML='✓ Doğru.';fb.className='quiz-feedback ok';removeMistake(q.en)}
+    else{fb.innerHTML=`✕ Tekrar çalışalım. <b>Doğal cevap:</b> ${esc(q.answer)}`;fb.className='quiz-feedback bad';addMistake(q.en,q.tr,q.type==='chunk'?'kalıp':'yapı')}
+  }
+  recordLessonStat(st.lesson,ok);recordDailyStat(ok);saveProgress(progress);updateMistakeBadge();el.disabled=true;if(b)b.disabled=true;const nx=document.getElementById('lt-next');if(nx)nx.style.display='inline-flex';
+};
 </script>
+
+<style id="ares-learning-palette-v1">
+:root{
+ --paper:#F4F1E8;--paper-dark:#E7E3D8;--ink:#1E2A38;--ink-soft:#5C6874;
+ --line:#D2CEC3;--accent:#3F6473;--accent-soft:#6F8D99;
+ --leaf:#587568;--leaf-soft:#819A8D;--gold:#B86A45;--card:#FCFAF5;--panel-dark:#1E2A38;
+}
+::selection{background:#3F6473;color:#fff}
+.navitem.active{background:#3F6473!important;color:#fff}
+.navitem .dot{background:#6F8D99}.navitem.done .dot{background:#819A8D}
+button.pill.primary{background:#3F6473!important;border-color:#3F6473!important;color:#fff!important}
+button.pill.primary:hover{background:#355866!important;border-color:#355866!important}
+.quiz-feedback.bad{color:#A84A3F!important}.quiz-feedback.ok{color:#587568!important}
+.learning-step{border-top:3px solid transparent}
+.learning-step:nth-child(1){border-top-color:#3F6473}.learning-step:nth-child(2){border-top-color:#64869A}.learning-step:nth-child(3){border-top-color:#66708E}.learning-step:nth-child(4){border-top-color:#4F7C78}.learning-step:nth-child(5){border-top-color:#B86A45}
+.learning-step.active-step{outline:2px solid #587568!important;background:rgba(88,117,104,.08)!important}
+.lesson-chip:hover{border-color:#6F8D99!important}.lesson-chip.done{background:#587568!important;border-color:#587568!important}
+.progressbar span,.progress-fill{background:#587568!important}
+/* Warm action color is reserved for explicit test/attention actions, not general navigation. */
+#lesson-test-launch button.pill.primary{background:#B86A45!important;border-color:#B86A45!important}
+</style>
