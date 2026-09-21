@@ -752,6 +752,7 @@ progress.wordQuizScore = progress.wordQuizScore || {correct:0,total:0};
 progress.translateScore = progress.translateScore || {correct:0,total:0};
 progress.knownWords = progress.knownWords || [];
 progress.notes = progress.notes || {};
+progress.lessonChunks = progress.lessonChunks || {}; // {lessonNo:[{chunk,meaning,example}]} 
 progress.customZor = progress.customZor || [];
 progress.customWords = progress.customWords || [];
 progress.customYeniKelimeler = progress.customYeniKelimeler || [];
@@ -2110,19 +2111,6 @@ function navigate(view, lessonNo, sentenceIdx){
   document.querySelectorAll('.custom-topic-item').forEach(el=> el.classList.remove('active'));
   if(window.innerWidth<=820) document.getElementById('sidebar').classList.remove('open');
   render();
-  // Soldaki ders listesi / Önceki-Sonraki ile yeni bir ders açıldığında
-  // önceki dersin scroll konumunu taşıma; yeni dersi en üstten başlat.
-  if(view === 'lesson' && lessonNo && (highlightSentenceIdx === null || highlightSentenceIdx === undefined)){
-    requestAnimationFrame(()=>{
-      requestAnimationFrame(()=>{
-        window.scrollTo({top:0, left:0, behavior:'auto'});
-        const mainEl=document.getElementById('main');
-        if(mainEl && mainEl.scrollTop) mainEl.scrollTop=0;
-        document.documentElement.scrollTop=0;
-        document.body.scrollTop=0;
-      });
-    });
-  }
 }
 // Ders görünümü çizildikten sonra, aranan/işaretli cümleye kaydırıp kısa süreliğine vurgular.
 function scrollToHighlightedSentence(){
@@ -3362,6 +3350,44 @@ function saveLessonNote(no, val){
   progress.notes[no] = val;
   clearTimeout(noteTimer);
   noteTimer = setTimeout(()=>saveProgress(progress), 400);
+}
+
+function getLessonChunks(no){
+  progress.lessonChunks = progress.lessonChunks || {};
+  return progress.lessonChunks[no] || [];
+}
+function addLessonChunk(no){
+  const chunkEl=document.getElementById(`chunk-en-${no}`);
+  const meaningEl=document.getElementById(`chunk-tr-${no}`);
+  const exampleEl=document.getElementById(`chunk-ex-${no}`);
+  if(!chunkEl) return;
+  const chunk=chunkEl.value.trim(), meaning=(meaningEl?.value||'').trim(), example=(exampleEl?.value||'').trim();
+  if(!chunk){ chunkEl.focus(); return; }
+  progress.lessonChunks = progress.lessonChunks || {};
+  progress.lessonChunks[no] = progress.lessonChunks[no] || [];
+  progress.lessonChunks[no].push({chunk,meaning,example});
+  saveProgress(progress);
+  render();
+}
+function deleteLessonChunk(no,idx){
+  const arr=getLessonChunks(no); if(!arr[idx]) return;
+  arr.splice(idx,1); saveProgress(progress); render();
+}
+function lessonChunksHtml(no){
+  const arr=getLessonChunks(no);
+  return `<div id="lesson-my-chunks" class="card lesson-stage-card">
+    <h3 class="section-title" style="margin-top:0;">🎯 Benim Kalıplarım</h3>
+    <p class="hint">Cümlede kendin yakaladığın, konuşurken kullanmak istediğin kalıpları buraya ekle. Her şeyi değil; yeni olanı, aklına geç geleni veya Türkçeden birebir çevirince hata yapabileceğin yapıları seç.</p>
+    <div style="display:grid;grid-template-columns:minmax(150px,1fr) minmax(150px,1fr);gap:8px;margin:12px 0 8px;">
+      <input id="chunk-en-${no}" class="quiz-input" placeholder="Kalıp: get home">
+      <input id="chunk-tr-${no}" class="quiz-input" placeholder="Anlamı: eve gelmek / varmak">
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <input id="chunk-ex-${no}" class="quiz-input" style="flex:1;min-width:220px" placeholder="Kendi örneğin (isteğe bağlı): I usually get home at 6.">
+      <button class="pill primary" onclick="addLessonChunk(${no})">＋ Kalıbı Ekle</button>
+    </div>
+    ${arr.length?`<div style="margin-top:14px;display:grid;gap:8px;">${arr.map((x,i)=>`<div style="border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;justify-content:space-between;gap:12px;align-items:flex-start;"><div><b>${esc(x.chunk)}</b>${x.meaning?` <span class="hint">→ ${esc(x.meaning)}</span>`:''}${x.example?`<div style="margin-top:5px">${esc(x.example)}</div>`:''}</div><button class="spk row-remove" title="Kalıbı sil" onclick="deleteLessonChunk(${no},${i})">🗑️</button></div>`).join('')}</div>`:`<div class="hint" style="margin-top:12px;">Henüz kalıp eklemedin. Bir cümleden değerli bir yapı yakaladığında buraya kaydet.</div>`}
+  </div>`;
 }
 
 function viewLesson(l){
@@ -8075,7 +8101,7 @@ function gaChooseOption(btn,e){
 <!-- v65 BUILDER & WRITING PRO: builder fallback explanations + 3/5/10 guided journal + teacher assessment/export -->
 
 <style id="ares-guided-lesson-v2">
-.learning-step{cursor:pointer;transition:.15s;position:relative}.learning-step:hover{transform:translateY(-1px);border-color:var(--leaf)}.learning-step.active-step{outline:2px solid var(--leaf);background:rgba(91,115,97,.08)}.learning-step .step-kicker{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);display:block;margin-bottom:3px}.lesson-stage-card{scroll-margin-top:18px}.production-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px}.production-task{border:1px solid var(--line);border-radius:12px;padding:13px;background:var(--paper)}.production-task .quiz-input{margin:9px 0 5px}.stage-done{font-size:11px;color:var(--leaf);font-weight:700;margin-top:6px}.test-kind{display:inline-flex;padding:4px 8px;border-radius:999px;background:var(--paper-dark);font-size:11px;color:var(--ink-soft);margin-bottom:8px}.lesson-complete-note{padding:12px;border-left:4px solid var(--leaf);background:rgba(91,115,97,.08);border-radius:8px;margin-top:12px}
+.learning-step{cursor:pointer;transition:.15s;position:relative}.learning-step:hover{transform:translateY(-1px);border-color:var(--leaf)}.learning-step.active-step{outline:2px solid var(--leaf);background:rgba(91,115,97,.08)}.learning-step .step-kicker{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);display:block;margin-bottom:3px}.lesson-stage-card{scroll-margin-top:18px}.lesson-stage-card.active-step-target{outline:2px solid var(--leaf);outline-offset:3px;transition:outline .2s}.production-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px}.production-task{border:1px solid var(--line);border-radius:12px;padding:13px;background:var(--paper)}.production-task .quiz-input{margin:9px 0 5px}.stage-done{font-size:11px;color:var(--leaf);font-weight:700;margin-top:6px}.test-kind{display:inline-flex;padding:4px 8px;border-radius:999px;background:var(--paper-dark);font-size:11px;color:var(--ink-soft);margin-bottom:8px}.lesson-complete-note{padding:12px;border-left:4px solid var(--leaf);background:rgba(91,115,97,.08);border-radius:8px;margin-top:12px}
 </style>
 <script id="ares-guided-lesson-v2">
 // Guided lesson flow v2: learn -> analyse -> produce -> speak -> test.
@@ -8084,36 +8110,16 @@ function flowState(no){return progress.lessonFlow[no]||(progress.lessonFlow[no]=
 function saveFlow(no,key){const f=flowState(no);f[key]=true;saveProgress(progress);}
 function scrollLessonStage(id,no,key){
   saveFlow(no,key);
-
-  // ANLA için ayrı ve güvenli yol. Diğer dört adımın mevcut davranışına dokunma.
-  if(id==='lesson-analysis'){
-    const jumpToAnalysis=()=>{
-      let el=document.getElementById('lesson-analysis');
-      // ID herhangi bir nedenle oluşmadıysa başlıktan gerçek analiz kartını bul.
-      if(!el){
-        const summaries=[...document.querySelectorAll('details > summary')];
-        const summary=summaries.find(x=>/Kalıp\s*&\s*Yapı\s*Analizi/i.test(x.textContent||''));
-        if(summary) el=summary.parentElement;
-      }
-      if(!el)return;
-      if(el.tagName==='DETAILS') el.open=true;
-      const y=el.getBoundingClientRect().top + window.pageYOffset - 18;
-      window.scrollTo({top:Math.max(0,y),behavior:'auto'});
-    };
-    // Tablet/Chrome'da layout tamamen oturduktan sonra ikinci kez konumu sabitle.
-    requestAnimationFrame(()=>{
-      jumpToAnalysis();
-      setTimeout(jumpToAnalysis,120);
-    });
-    return;
-  }
-
-  const el=document.getElementById(id);
-  if(!el)return;
-  if(el.tagName==='DETAILS') el.open=true;
-  requestAnimationFrame(()=>{
-    el.scrollIntoView({behavior:'smooth',block:'start'});
-  });
+  const go=()=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    if(el.tagName==='DETAILS') el.open=true;
+    const y=el.getBoundingClientRect().top + window.pageYOffset - 150;
+    window.scrollTo({top:Math.max(0,y),behavior:'smooth'});
+    el.classList.add('active-step-target');
+    setTimeout(()=>el.classList.remove('active-step-target'),900);
+  };
+  requestAnimationFrame(()=>requestAnimationFrame(go));
 }
 function guidedPath(l){const f=flowState(l.no);const steps=[['learn','lesson-study-material','Kelime & İfadeler','ÖĞREN','Anlamı tanı'],['analyse','lesson-analysis','Analiz','ANLA','Kalıbı fark et'],['produce','lesson-production','Üret','KULLAN','Yeni cümle kur'],['speak','lesson-speaking','Konuş','KONUŞ','Bağlam içinde kullan'],['test','lesson-test-launch','Test','ÖLÇ','Ölç ve yanlışları kaydet']];return `<div class="learning-path">${steps.map((x,i)=>`<div class="learning-step ${f[x[0]]?'active-step':''}" onclick="scrollLessonStage('${x[1]}',${l.no},'${x[0]}')"><span class="step-kicker">${x[3]}</span><b>${i+1} · ${x[2]}</b><span class="hint">${x[4]}</span>${f[x[0]]?'<div class="stage-done">✓ çalışıldı</div>':''}</div>`).join('')}</div>`}
 
@@ -8230,7 +8236,7 @@ viewLesson=function(l){
  const analysis=cleanAnalysisHtml(lessonAnalysis(l)).replace('<details class="card"','<details id="lesson-analysis" class="card lesson-stage-card"');
  const speak=`<div id="lesson-speaking" class="card lesson-stage-card"><h3 class="section-title" style="margin-top:0">🎤 Konuş · Bağlam İçinde Kullan</h3><p class="hint">Role Play / Abroad mantığı: hazır cümleyi okumak yerine soruya doğal cevap ver. Tarayıcının tek bir kelimeyi yanlış duyması otomatik olarak telaffuz hatası sayılmaz.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="pill primary" onclick="saveFlow(${l.no},'speak');window.location.href='./speaking.html'">Ares Speaking'i Aç</button><button class="pill" onclick="saveFlow(${l.no},'speak');navigate('lessontest',${l.no});setTimeout(()=>setLessonTestMode('voice'),0)">Bu Dersi Sesli Çalış</button></div></div>`;
  const launch=`<div id="lesson-test-launch" class="card lesson-stage-card"><h3 class="section-title" style="margin-top:0">📝 Test · Ölç</h3><p class="hint">Rastgele kelime silinen ezber soruları yok. Test; kelime anlamı, hedef yapı/chunk ve tam cümle üretimini ölçer. Yanlışların Akıllı Yanlış Havuzu'na gider.</p><button class="pill primary" onclick="saveFlow(${l.no},'test');navigate('lessontest',${l.no})">${l.no}. Ders Testine Başla</button></div>`;
- return guidedPath(l)+base.replace('</div>\n  <div class="card">\n    <h3 class="section-title" style="margin-top:0;">Notlarım</h3>',`</div>${analysis}${productionPracticeHtml(l)}${speak}${launch}<div class="card"><h3 class="section-title" style="margin-top:0;">Notlarım</h3>`);
+ return guidedPath(l)+base.replace('</div>\n  <div class="card">\n    <h3 class="section-title" style="margin-top:0;">Notlarım</h3>',`</div>${lessonChunksHtml(l.no)}${analysis}${productionPracticeHtml(l)}${speak}${launch}<div class="card"><h3 class="section-title" style="margin-top:0;">Notlarım</h3>`);
 };
 
 // Render new test question types.
