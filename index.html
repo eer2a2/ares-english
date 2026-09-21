@@ -3369,6 +3369,20 @@ function addLessonChunk(no){
   saveProgress(progress);
   render();
 }
+function editLessonChunk(no,idx){
+  const arr=getLessonChunks(no); if(!arr[idx]) return;
+  const item=arr[idx];
+  const chunk=prompt('Kalıbı düzenle:', item.chunk||'');
+  if(chunk===null) return;
+  const cleanChunk=chunk.trim();
+  if(!cleanChunk){ alert('Kalıp boş bırakılamaz.'); return; }
+  const meaning=prompt('Anlamını düzenle:', item.meaning||'');
+  if(meaning===null) return;
+  const example=prompt('Kendi örneğini düzenle (isteğe bağlı):', item.example||'');
+  if(example===null) return;
+  arr[idx]={chunk:cleanChunk,meaning:meaning.trim(),example:example.trim()};
+  saveProgress(progress); render();
+}
 function deleteLessonChunk(no,idx){
   const arr=getLessonChunks(no); if(!arr[idx]) return;
   arr.splice(idx,1); saveProgress(progress); render();
@@ -3386,7 +3400,7 @@ function lessonChunksHtml(no){
       <input id="chunk-ex-${no}" class="quiz-input" style="flex:1;min-width:220px" placeholder="Kendi örneğin (isteğe bağlı): I usually get home at 6.">
       <button class="pill primary" onclick="addLessonChunk(${no})">＋ Kalıbı Ekle</button>
     </div>
-    ${arr.length?`<div style="margin-top:14px;display:grid;gap:8px;">${arr.map((x,i)=>`<div style="border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;justify-content:space-between;gap:12px;align-items:flex-start;"><div><b>${esc(x.chunk)}</b>${x.meaning?` <span class="hint">→ ${esc(x.meaning)}</span>`:''}${x.example?`<div style="margin-top:5px">${esc(x.example)}</div>`:''}</div><button class="spk row-remove" title="Kalıbı sil" onclick="deleteLessonChunk(${no},${i})">🗑️</button></div>`).join('')}</div>`:`<div class="hint" style="margin-top:12px;">Henüz kalıp eklemedin. Bir cümleden değerli bir yapı yakaladığında buraya kaydet.</div>`}
+    ${arr.length?`<div style="margin-top:14px;display:grid;gap:8px;">${arr.map((x,i)=>`<div style="border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;justify-content:space-between;gap:12px;align-items:flex-start;"><div><b>${esc(x.chunk)}</b>${x.meaning?` <span class="hint">→ ${esc(x.meaning)}</span>`:''}${x.example?`<div style="margin-top:5px">${esc(x.example)}</div>`:''}</div><div style="display:flex;gap:6px;white-space:nowrap;"><button class="spk" title="Kalıbı düzenle" onclick="editLessonChunk(${no},${i})">✏️</button><button class="spk row-remove" title="Kalıbı sil" onclick="deleteLessonChunk(${no},${i})">🗑️</button></div></div>`).join('')}</div>`:`<div class="hint" style="margin-top:12px;">Henüz kalıp eklemedin. Bir cümleden değerli bir yapı yakaladığında buraya kaydet.</div>`}
   </div>`;
 }
 
