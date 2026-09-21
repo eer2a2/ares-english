@@ -564,7 +564,7 @@
     <div class="brand">
       <h1>İngilizce Defterim</h1>
       <div class="sub">Kişisel çalışma günlüğü · 42 çekirdek ders</div>
-      <div class="sub" style="margin-top:2px; font-weight:600; opacity:0.85;">Erhan E.</div>
+      <div class="sub" style="margin-top:2px; font-weight:600; opacity:0.85;">Erhan ERBAB</div>
     </div>
     <input id="search-mini" placeholder="Kelime / cümle ara…" oninput="handleGlobalSearchInput(this.value)">
     <div class="navgroup">
@@ -645,7 +645,7 @@
       <input id="global-search" placeholder="Tüm derslerde ara (kelime veya cümle)…" oninput="handleGlobalSearchInput(this.value)">
       <button id="offline-badge" class="pill" onclick="toggleOfflineMode()">🌐 Online</button>
       <button id="voice-nav-btn" class="pill" onclick="voiceNavigate(this)" title="Sesli komutla gez (örn. &quot;quiz aç&quot;, &quot;5. derse git&quot;)">🎙️ Sesli Komut</button>
-      <button id="close-app-btn" class="pill" onclick="closeStudyApp()" title="Çalışmanı kaydet ve oturumu kapat">💾 Kaydet ve Kapat</button>
+      <button id="close-app-btn" class="pill" onclick="closeStudyApp()" title="Çalışma ilerlemeni kaydet">💾 Kaydet</button>
     </div>
     <div id="content"></div>
   </main>
@@ -7544,16 +7544,13 @@ function doSearch(q){
 function closeStudyApp(){
   saveProgress(progress);
   try{ localStorage.setItem('ares_last_saved_at', new Date().toISOString()); }catch(e){}
-  const c=document.getElementById('content');
-  if(c){
-    c.innerHTML=`<div class="card" style="max-width:620px;margin:36px auto;text-align:center;padding:32px 22px">
-      <div style="font-size:46px;margin-bottom:10px">✓</div>
-      <h2 style="margin:0 0 8px">Değişiklikler kaydedildi</h2>
-      <p class="hint" style="margin-bottom:18px">Çalışma oturumu kapatıldı. Bu sekmeyi güvenle kapatabilirsin.</p>
-      <button class="pill" onclick="navigate('dashboard')">⌂ Ana Sayfaya Dön</button>
-    </div>`;
+  const btn=document.getElementById('close-app-btn');
+  if(btn){
+    const old=btn.innerHTML;
+    btn.innerHTML='✓ Kaydedildi';
+    btn.disabled=true;
+    setTimeout(()=>{ btn.innerHTML=old; btn.disabled=false; },1400);
   }
-  window.scrollTo({top:0,behavior:'smooth'});
 }
 
 // ---------- init ----------
