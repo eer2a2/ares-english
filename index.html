@@ -2110,6 +2110,19 @@ function navigate(view, lessonNo, sentenceIdx){
   document.querySelectorAll('.custom-topic-item').forEach(el=> el.classList.remove('active'));
   if(window.innerWidth<=820) document.getElementById('sidebar').classList.remove('open');
   render();
+  // Soldaki ders listesi / Önceki-Sonraki ile yeni bir ders açıldığında
+  // önceki dersin scroll konumunu taşıma; yeni dersi en üstten başlat.
+  if(view === 'lesson' && lessonNo && (highlightSentenceIdx === null || highlightSentenceIdx === undefined)){
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        window.scrollTo({top:0, left:0, behavior:'auto'});
+        const mainEl=document.getElementById('main');
+        if(mainEl && mainEl.scrollTop) mainEl.scrollTop=0;
+        document.documentElement.scrollTop=0;
+        document.body.scrollTop=0;
+      });
+    });
+  }
 }
 // Ders görünümü çizildikten sonra, aranan/işaretli cümleye kaydırıp kısa süreliğine vurgular.
 function scrollToHighlightedSentence(){
