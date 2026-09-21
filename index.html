@@ -8062,7 +8062,7 @@ function gaChooseOption(btn,e){
 <!-- v65 BUILDER & WRITING PRO: builder fallback explanations + 3/5/10 guided journal + teacher assessment/export -->
 
 <style id="ares-guided-lesson-v2">
-.learning-step{cursor:pointer;transition:.15s;position:relative}.learning-step:hover{transform:translateY(-1px);border-color:var(--leaf)}.learning-step.active-step{outline:2px solid var(--leaf);background:rgba(91,115,97,.08)}.learning-step .step-kicker{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);display:block;margin-bottom:3px}.lesson-stage-card{scroll-margin-top:18px}.production-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px}.production-task{border:1px solid var(--line);border-radius:12px;padding:13px;background:var(--paper)}.production-task .quiz-input{margin:9px 0 5px}.stage-done{font-size:11px;color:var(--leaf);font-weight:700;margin-top:6px}.test-kind{display:inline-flex;padding:4px 8px;border-radius:999px;background:var(--paper-dark);font-size:11px;color:var(--ink-soft);margin-bottom:8px}.lesson-complete-note{padding:12px;border-left:4px solid var(--leaf);background:rgba(91,115,97,.08);border-radius:8px;margin-top:12px}
+.learning-step{cursor:pointer;transition:.15s;position:relative}.learning-step:hover{transform:translateY(-1px);border-color:var(--leaf)}.learning-step.active-step{outline:2px solid var(--leaf);background:rgba(91,115,97,.08)}.learning-step .step-kicker{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);display:block;margin-bottom:3px}.lesson-stage-card{scroll-margin-top:18px}.lesson-stage-card.active-step-target{outline:2px solid var(--leaf);outline-offset:3px;transition:outline .2s}.production-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px}.production-task{border:1px solid var(--line);border-radius:12px;padding:13px;background:var(--paper)}.production-task .quiz-input{margin:9px 0 5px}.stage-done{font-size:11px;color:var(--leaf);font-weight:700;margin-top:6px}.test-kind{display:inline-flex;padding:4px 8px;border-radius:999px;background:var(--paper-dark);font-size:11px;color:var(--ink-soft);margin-bottom:8px}.lesson-complete-note{padding:12px;border-left:4px solid var(--leaf);background:rgba(91,115,97,.08);border-radius:8px;margin-top:12px}
 </style>
 <script id="ares-guided-lesson-v2">
 // Guided lesson flow v2: learn -> analyse -> produce -> speak -> test.
@@ -8071,14 +8071,16 @@ function flowState(no){return progress.lessonFlow[no]||(progress.lessonFlow[no]=
 function saveFlow(no,key){const f=flowState(no);f[key]=true;saveProgress(progress);}
 function scrollLessonStage(id,no,key){
   saveFlow(no,key);
-  const el=document.getElementById(id);
-  if(!el)return;
-  // Analiz bölümü <details> olduğu için kapalıyken scroll görünür bir reaksiyon vermiyordu.
-  // ANLA'ya basıldığında önce bölümü aç, sonra başına kaydır.
-  if(el.tagName==='DETAILS') el.open=true;
-  requestAnimationFrame(()=>{
-    el.scrollIntoView({behavior:'smooth',block:'start'});
-  });
+  const go=()=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    if(el.tagName==='DETAILS') el.open=true;
+    const y=el.getBoundingClientRect().top + window.pageYOffset - 150;
+    window.scrollTo({top:Math.max(0,y),behavior:'smooth'});
+    el.classList.add('active-step-target');
+    setTimeout(()=>el.classList.remove('active-step-target'),900);
+  };
+  requestAnimationFrame(()=>requestAnimationFrame(go));
 }
 function guidedPath(l){const f=flowState(l.no);const steps=[['learn','lesson-study-material','Kelime & İfadeler','ÖĞREN','Anlamı tanı'],['analyse','lesson-analysis','Analiz','ANLA','Kalıbı fark et'],['produce','lesson-production','Üret','KULLAN','Yeni cümle kur'],['speak','lesson-speaking','Konuş','KONUŞ','Bağlam içinde kullan'],['test','lesson-test-launch','Test','ÖLÇ','Ölç ve yanlışları kaydet']];return `<div class="learning-path">${steps.map((x,i)=>`<div class="learning-step ${f[x[0]]?'active-step':''}" onclick="scrollLessonStage('${x[1]}',${l.no},'${x[0]}')"><span class="step-kicker">${x[3]}</span><b>${i+1} · ${x[2]}</b><span class="hint">${x[4]}</span>${f[x[0]]?'<div class="stage-done">✓ çalışıldı</div>':''}</div>`).join('')}</div>`}
 
