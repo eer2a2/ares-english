@@ -8071,28 +8071,38 @@ function flowState(no){return progress.lessonFlow[no]||(progress.lessonFlow[no]=
 function saveFlow(no,key){const f=flowState(no);f[key]=true;saveProgress(progress);}
 function scrollLessonStage(id,no,key){
   saveFlow(no,key);
+
+  // ANLA için ayrı ve güvenli yol. Diğer dört adımın mevcut davranışına dokunma.
+  if(id==='lesson-analysis'){
+    const jumpToAnalysis=()=>{
+      let el=document.getElementById('lesson-analysis');
+      // ID herhangi bir nedenle oluşmadıysa başlıktan gerçek analiz kartını bul.
+      if(!el){
+        const summaries=[...document.querySelectorAll('details > summary')];
+        const summary=summaries.find(x=>/Kalıp\s*&\s*Yapı\s*Analizi/i.test(x.textContent||''));
+        if(summary) el=summary.parentElement;
+      }
+      if(!el)return;
+      if(el.tagName==='DETAILS') el.open=true;
+      const y=el.getBoundingClientRect().top + window.pageYOffset - 18;
+      window.scrollTo({top:Math.max(0,y),behavior:'auto'});
+    };
+    // Tablet/Chrome'da layout tamamen oturduktan sonra ikinci kez konumu sabitle.
+    requestAnimationFrame(()=>{
+      jumpToAnalysis();
+      setTimeout(jumpToAnalysis,120);
+    });
+    return;
+  }
+
   const el=document.getElementById(id);
   if(!el)return;
-  // Analiz bölümü <details> olduğu için kapalıyken scroll görünür bir reaksiyon vermiyordu.
-  // ANLA'ya basıldığında önce bölümü aç, sonra başına kaydır.
   if(el.tagName==='DETAILS') el.open=true;
   requestAnimationFrame(()=>{
     el.scrollIntoView({behavior:'smooth',block:'start'});
   });
 }
-
-// ANLA only: isolated navigation. Other four lesson cards keep their existing handler unchanged.
-function scrollOnlyAnalysis(no){
-  saveFlow(no,'analyse');
-  const el=document.getElementById('lesson-analysis');
-  if(!el)return;
-  if(el.tagName==='DETAILS') el.open=true;
-  setTimeout(function(){
-    const top=el.getBoundingClientRect().top + window.pageYOffset - 18;
-    window.scrollTo({top:Math.max(0,top),behavior:'smooth'});
-  },80);
-}
-function guidedPath(l){const f=flowState(l.no);const steps=[['learn','lesson-study-material','Kelime & İfadeler','ÖĞREN','Anlamı tanı'],['analyse','lesson-analysis','Analiz','ANLA','Kalıbı fark et'],['produce','lesson-production','Üret','KULLAN','Yeni cümle kur'],['speak','lesson-speaking','Konuş','KONUŞ','Bağlam içinde kullan'],['test','lesson-test-launch','Test','ÖLÇ','Ölç ve yanlışları kaydet']];return `<div class="learning-path">${steps.map((x,i)=>`<div class="learning-step ${f[x[0]]?'active-step':''}" onclick="${x[0]==='analyse'?`scrollOnlyAnalysis(${l.no})`:`scrollLessonStage('${x[1]}',${l.no},'${x[0]}')`}"><span class="step-kicker">${x[3]}</span><b>${i+1} · ${x[2]}</b><span class="hint">${x[4]}</span>${f[x[0]]?'<div class="stage-done">✓ çalışıldı</div>':''}</div>`).join('')}</div>`}
+function guidedPath(l){const f=flowState(l.no);const steps=[['learn','lesson-study-material','Kelime & İfadeler','ÖĞREN','Anlamı tanı'],['analyse','lesson-analysis','Analiz','ANLA','Kalıbı fark et'],['produce','lesson-production','Üret','KULLAN','Yeni cümle kur'],['speak','lesson-speaking','Konuş','KONUŞ','Bağlam içinde kullan'],['test','lesson-test-launch','Test','ÖLÇ','Ölç ve yanlışları kaydet']];return `<div class="learning-path">${steps.map((x,i)=>`<div class="learning-step ${f[x[0]]?'active-step':''}" onclick="scrollLessonStage('${x[1]}',${l.no},'${x[0]}')"><span class="step-kicker">${x[3]}</span><b>${i+1} · ${x[2]}</b><span class="hint">${x[4]}</span>${f[x[0]]?'<div class="stage-done">✓ çalışıldı</div>':''}</div>`).join('')}</div>`}
 
 // Fix duplicated labels such as "duringduring + ..." in analysis cards.
 function cleanAnalysisHtml(html){
