@@ -8080,7 +8080,19 @@ function scrollLessonStage(id,no,key){
     el.scrollIntoView({behavior:'smooth',block:'start'});
   });
 }
-function guidedPath(l){const f=flowState(l.no);const steps=[['learn','lesson-study-material','Kelime & İfadeler','ÖĞREN','Anlamı tanı'],['analyse','lesson-analysis','Analiz','ANLA','Kalıbı fark et'],['produce','lesson-production','Üret','KULLAN','Yeni cümle kur'],['speak','lesson-speaking','Konuş','KONUŞ','Bağlam içinde kullan'],['test','lesson-test-launch','Test','ÖLÇ','Ölç ve yanlışları kaydet']];return `<div class="learning-path">${steps.map((x,i)=>`<div class="learning-step ${f[x[0]]?'active-step':''}" onclick="scrollLessonStage('${x[1]}',${l.no},'${x[0]}')"><span class="step-kicker">${x[3]}</span><b>${i+1} · ${x[2]}</b><span class="hint">${x[4]}</span>${f[x[0]]?'<div class="stage-done">✓ çalışıldı</div>':''}</div>`).join('')}</div>`}
+
+// ANLA only: isolated navigation. Other four lesson cards keep their existing handler unchanged.
+function scrollOnlyAnalysis(no){
+  saveFlow(no,'analyse');
+  const el=document.getElementById('lesson-analysis');
+  if(!el)return;
+  if(el.tagName==='DETAILS') el.open=true;
+  setTimeout(function(){
+    const top=el.getBoundingClientRect().top + window.pageYOffset - 18;
+    window.scrollTo({top:Math.max(0,top),behavior:'smooth'});
+  },80);
+}
+function guidedPath(l){const f=flowState(l.no);const steps=[['learn','lesson-study-material','Kelime & İfadeler','ÖĞREN','Anlamı tanı'],['analyse','lesson-analysis','Analiz','ANLA','Kalıbı fark et'],['produce','lesson-production','Üret','KULLAN','Yeni cümle kur'],['speak','lesson-speaking','Konuş','KONUŞ','Bağlam içinde kullan'],['test','lesson-test-launch','Test','ÖLÇ','Ölç ve yanlışları kaydet']];return `<div class="learning-path">${steps.map((x,i)=>`<div class="learning-step ${f[x[0]]?'active-step':''}" onclick="${x[0]==='analyse'?`scrollOnlyAnalysis(${l.no})`:`scrollLessonStage('${x[1]}',${l.no},'${x[0]}')`}"><span class="step-kicker">${x[3]}</span><b>${i+1} · ${x[2]}</b><span class="hint">${x[4]}</span>${f[x[0]]?'<div class="stage-done">✓ çalışıldı</div>':''}</div>`).join('')}</div>`}
 
 // Fix duplicated labels such as "duringduring + ..." in analysis cards.
 function cleanAnalysisHtml(html){
