@@ -645,7 +645,7 @@
       <input id="global-search" placeholder="Tüm derslerde ara (kelime veya cümle)…" oninput="handleGlobalSearchInput(this.value)">
       <button id="offline-badge" class="pill" onclick="toggleOfflineMode()">🌐 Online</button>
       <button id="voice-nav-btn" class="pill" onclick="voiceNavigate(this)" title="Sesli komutla gez (örn. &quot;quiz aç&quot;, &quot;5. derse git&quot;)">🎙️ Sesli Komut</button>
-      <button id="close-app-btn" class="pill" onclick="closeStudyApp()" title="Çalışma ilerlemeni kaydet">💾 Kaydet</button>
+      <button id="close-app-btn" class="pill" onclick="handleTopAction()">💾 Kaydet</button>
     </div>
     <div id="content"></div>
   </main>
@@ -2098,6 +2098,7 @@ let customTopicSubFilter = {}; // { [customTopicId]: { [categoryName]: selectedS
 
 function navigate(view, lessonNo, sentenceIdx){
   currentView = view;
+  updateTopActionButton();
   currentLesson = lessonNo || null;
   highlightSentenceIdx = (sentenceIdx===undefined || sentenceIdx===null) ? null : sentenceIdx;
   document.querySelectorAll('.navitem[data-view]').forEach(el=>{
@@ -7541,6 +7542,17 @@ function doSearch(q){
 }
 
 // ---------- kapatma ----------
+function updateTopActionButton(){
+  const btn=document.getElementById('close-app-btn');
+  if(!btn) return;
+  const isHome=(currentView==='dashboard');
+  btn.innerHTML=isHome?'💾 Kaydet':'⌂ Ana Sayfa';
+  btn.title=isHome?'Çalışma ilerlemeni kaydet':'Ana sayfaya dön';
+}
+function handleTopAction(){
+  if(currentView==='dashboard') closeStudyApp();
+  else navigate('dashboard');
+}
 function closeStudyApp(){
   saveProgress(progress);
   try{ localStorage.setItem('ares_last_saved_at', new Date().toISOString()); }catch(e){}
@@ -8248,6 +8260,7 @@ checkLessonTestAnswer=async function(){
   }
   recordLessonStat(st.lesson,ok);recordDailyStat(ok);saveProgress(progress);updateMistakeBadge();el.disabled=true;if(b)b.disabled=true;const nx=document.getElementById('lt-next');if(nx)nx.style.display='inline-flex';
 };
+document.addEventListener('DOMContentLoaded',()=>setTimeout(updateTopActionButton,0));
 </script>
 
 <style id="ares-learning-palette-v1">
