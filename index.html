@@ -512,10 +512,15 @@
  const SB_URL='https://yedpdbsosaisalcnwcqv.supabase.co', SB_KEY='sb_publishable_jtT-XD3Ge97HkRNaUQydgw_VqSQdHt7';
  const sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{storageKey:"ares-main-auth",persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
  const DEVICE_KEY="ares-device-token-v1";
+ const APPROVED_KEY="ares-device-approved-v1";
  let DEVICE_TOKEN=localStorage.getItem(DEVICE_KEY);
  if(!DEVICE_TOKEN){
    DEVICE_TOKEN=(crypto.randomUUID?crypto.randomUUID():("ares-"+Date.now()+"-"+Math.random().toString(36).slice(2)+"-"+Math.random().toString(36).slice(2)));
    localStorage.setItem(DEVICE_KEY,DEVICE_TOKEN);
+ }
+ if(localStorage.getItem(APPROVED_KEY)==="1"){
+   const existingLock=document.getElementById("ares-app-lock");
+   if(existingLock) existingLock.remove();
  }
  const lock=document.getElementById("ares-app-lock"), msg=document.getElementById("ares-lock-msg"), form=document.getElementById("ares-lock-form");
  const req=document.getElementById("ares-lock-request"), chk=document.getElementById("ares-lock-check");
@@ -531,7 +536,7 @@
      if(q.error) throw q.error;
      const status=q.data;
      if(status==="unregistered"){msg.textContent="Bu cihaz henüz kayıtlı değil. Bir kez erişim talebi gönderin.";form.style.display="block";chk.style.display="none";return;}
-     if(status==="approved"){lock.remove();return;}
+     if(status==="approved"){localStorage.setItem(APPROVED_KEY,"1");lock.remove();return;}
      if(status==="blocked"){msg.textContent="Bu cihazın erişimi engellenmiş.";form.style.display="none";chk.style.display="none";return;}
      msg.textContent="Erişim talebiniz gönderildi. Yönetici onayı bekleniyor.";form.style.display="none";chk.style.display="block";
    }catch(e){msg.textContent="Bağlantı kurulamadı: "+(e?.message||e);form.style.display="none";chk.style.display="block";}
@@ -544,7 +549,7 @@
    try{
      const ins=await sb.rpc("ares_request_device",{p_token:DEVICE_TOKEN,p_name:name,p_device:device});
      if(ins.error) throw ins.error;
-     if(ins.data==="approved"){lock.remove();return;}
+     if(ins.data==="approved"){localStorage.setItem(APPROVED_KEY,"1");lock.remove();return;}
      msg.textContent="Erişim talebiniz gönderildi. Yönetici onayı bekleniyor.";
      form.style.display="none";
      chk.style.display="block";
