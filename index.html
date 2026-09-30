@@ -633,7 +633,7 @@
       <div class="navgroup-title">Ayarlar</div>
       <div class="navitem" onclick="toggleDark()"><span class="dot"></span> <span id="dark-label">Koyu Tema</span></div>
       <div class="navitem" onclick="toggleSpeechRate()"><span class="dot"></span> <span id="rate-label">Konuşma Hızı: Normal</span></div>
-      <div class="navitem" onclick="setMaltaDate()"><span class="dot"></span> 🗓️ Malta Tarihini Ayarla</div>
+      <div class="navitem" data-view="trips" onclick="navigate('trips')"><span class="dot"></span> ✈️ Seyahatlerim</div>
       <div class="navitem" onclick="showHomeScreenInstructions()"><span class="dot"></span> 📱 Ana Ekrana Ekle</div>
       <div class="navitem" onclick="setApiKey()"><span class="dot"></span> 🔑 AI API Anahtarı</div>
       <div class="navitem" onclick="exportProgress()"><span class="dot"></span> İlerlemeyi Dışa Aktar</div>
@@ -919,6 +919,14 @@ progress.dailyStats = progress.dailyStats || {};
 progress.knownWordDates = progress.knownWordDates || {};
 progress.quizDifficulty = progress.quizDifficulty || 'all';
 progress.maltaDate = progress.maltaDate || null;
+progress.trips = Array.isArray(progress.trips) ? progress.trips : [];
+progress.travelLogs = progress.travelLogs || {};
+progress.travelTasks = progress.travelTasks || {};
+// İlk kurulum: mevcut Malta yolculuğunu Seyahatlerim sistemine taşı.
+if(!progress.trips.length){
+  progress.trips.push({id:'malta-2026',country:'Malta',code:'MT',city:'Malta',start:'2026-10-02',end:'2026-10-23'});
+  saveProgress(progress);
+}
 progress.speaking = progress.speaking || {history:[], askedDates:{}};
 progress.pronScore = progress.pronScore || {sum:0, count:0};
 progress.sentenceEdits = progress.sentenceEdits || {};
@@ -3047,6 +3055,7 @@ function render(){
   if(currentView==='dashboard'){ crumbEl.textContent='Genel Bakış'; titleEl.textContent='Ana Sayfa'; c.innerHTML = viewDashboard(); }
   else if(currentView==='dailyplan'){ crumbEl.textContent='Günlük Akış'; titleEl.textContent='▶️ Bugünkü Çalışmam'; c.innerHTML = viewDailyPlan(); }
   else if(currentView==='weekly'){ crumbEl.textContent='Genel Bakış'; titleEl.textContent='Bu Hafta'; c.innerHTML = viewWeeklySummary(); }
+  else if(currentView==='trips'){ crumbEl.textContent='Seyahat'; titleEl.textContent='✈️ Seyahatlerim'; c.innerHTML = viewTrips(); }
   else if(currentView==='lesson'){ const l = DATA.lessons.find(x=>x.no===currentLesson); crumbEl.textContent='Ders'; titleEl.textContent = currentLesson+'. Ders'; c.innerHTML = viewLesson(l); scrollToHighlightedSentence(); }
   else if(currentView==='tenses'){ crumbEl.textContent='Gramer'; titleEl.textContent='Tenses (Zamanlar)'; c.innerHTML = viewTenses(); }
   else if(currentView==='prefixsuffix'){ crumbEl.textContent='Gramer'; titleEl.textContent='Prefix / Suffix'; c.innerHTML = viewPrefixSuffix(); }
@@ -5773,38 +5782,180 @@ function downloadJournalRecord(){
 }
 function copyJournalText(btn){ const val=document.getElementById('journal-input')?.value||'';if(!val)return;navigator.clipboard?.writeText(val); }
 
-// ---------- Malta Geri Sayımı ----------
-function setMaltaDate(){
-  const current = progress.maltaDate || '';
-  const val = prompt('Malta gidiş tarihini gir (YYYY-AA-GG formatında, örn. 2026-09-15):', current);
-  if(val===null) return;
-  const trimmed = val.trim();
-  if(!trimmed){ progress.maltaDate = null; saveProgress(progress); if(currentView==='dashboard') render(); return; }
-  if(!/^\d{4}-\d{2}-\d{2}$/.test(trimmed)){ alert('Tarih formatı hatalı. Örnek: 2026-09-15'); return; }
-  progress.maltaDate = trimmed;
-  saveProgress(progress);
-  if(currentView==='dashboard') render();
+// ---------- Seyahatlerim · Dinamik Geri Sayım / Seyahat Modu ----------
+const TRAVEL_COUNTRIES = [
+ ['AL','Arnavutluk'],['AT','Avusturya'],['BE','Belçika'],['BA','Bosna-Hersek'],['BG','Bulgaristan'],
+ ['HR','Hırvatistan'],['CZ','Çekya'],['DK','Danimarka'],['FI','Finlandiya'],['FR','Fransa'],
+ ['DE','Almanya'],['GR','Yunanistan'],['HU','Macaristan'],['IS','İzlanda'],['IE','İrlanda'],
+ ['IT','İtalya'],['MT','Malta'],['ME','Karadağ'],['NL','Hollanda'],['MK','Kuzey Makedonya'],
+ ['NO','Norveç'],['PL','Polonya'],['PT','Portekiz'],['RO','Romanya'],['RS','Sırbistan'],
+ ['SK','Slovakya'],['SI','Slovenya'],['ES','İspanya'],['SE','İsveç'],['CH','İsviçre'],
+ ['TR','Türkiye'],['GB','Birleşik Krallık'],['US','ABD'],['CA','Kanada'],['JP','Japonya'],
+ ['KR','Güney Kore'],['TH','Tayland'],['AE','Birleşik Arap Emirlikleri'],['GE','Gürcistan']
+];
+function travelFlag(code){
+  code=String(code||'').toUpperCase();
+  if(!/^[A-Z]{2}$/.test(code)) return '🌍';
+  return String.fromCodePoint(...[...code].map(c=>127397+c.charCodeAt()));
 }
-function maltaCountdownBanner(){
-  if(!progress.maltaDate){
-    return `<div class="card" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
-      <div>🇲🇹 <b>Malta tarihini henüz ayarlamadın.</b> <span class="hint">Geri sayımı görmek için tarihi ekle.</span></div>
-      <button class="pill primary" onclick="setMaltaDate()">Tarih Ekle</button>
+function travelDate(s){ const d=new Date(String(s||'')+'T00:00:00'); return isNaN(d)?null:d; }
+function travelToday(){ const d=new Date(); d.setHours(0,0,0,0); return d; }
+function travelDays(a,b){ return Math.round((b-a)/86400000); }
+function sortedTrips(){
+  return (progress.trips||[]).slice().sort((a,b)=>String(a.start).localeCompare(String(b.start)));
+}
+function activeTrip(){
+  const now=travelToday();
+  return sortedTrips().find(t=>{const s=travelDate(t.start),e=travelDate(t.end||t.start);return s&&e&&now>=s&&now<=e;})||null;
+}
+function nextTrip(){
+  const now=travelToday();
+  return sortedTrips().find(t=>{const s=travelDate(t.start);return s&&s>now;})||null;
+}
+function lastTrip(){
+  const now=travelToday();
+  return sortedTrips().filter(t=>{const e=travelDate(t.end||t.start);return e&&e<now;}).pop()||null;
+}
+const TRAVEL_DAILY_TASKS = [
+ 'Bir kafede siparişini tamamen İngilizce ver.',
+ 'Birine en az iki takip sorusu sor.',
+ 'Bir görevliye yol veya ulaşım hakkında soru sor.',
+ 'Bugün yeni tanıştığın biriyle en az 5 dakika İngilizce konuş.',
+ 'Bir mağazada veya kafede çalışanla kısa bir sohbet başlat.',
+ 'Bugün “Could you…?” yapısını gerçek hayatta en az bir kez kullan.',
+ 'Birinden öneri iste: “What do you recommend?”',
+ 'Bugün duyduğun yeni bir kalıbı Seyahat Günlüğü’ne yaz.',
+ 'Bir yere nasıl gideceğini İngilizce sor.',
+ 'Bir konuşmada “Let me think…” kullanıp kendine zaman kazandır.'
+];
+function travelTaskFor(trip){
+  const s=travelDate(trip.start), now=travelToday();
+  const day=Math.max(1,travelDays(s,now)+1);
+  return TRAVEL_DAILY_TASKS[(day-1)%TRAVEL_DAILY_TASKS.length];
+}
+function tripStatus(t){
+  const now=travelToday(),s=travelDate(t.start),e=travelDate(t.end||t.start);
+  if(!s||!e) return {type:'invalid',label:'Tarih eksik'};
+  if(now<s){const d=travelDays(now,s);return {type:'future',days:d,label:d===1?'Yarın':`${d} gün kaldı`};}
+  if(now<=e){const day=travelDays(s,now)+1,total=travelDays(s,e)+1;return {type:'active',day,total,label:`Gün ${day} / ${total}`};}
+  return {type:'past',label:'Tamamlandı'};
+}
+function formatTravelDate(s){
+  const d=travelDate(s); return d?d.toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'}):'—';
+}
+function travelHeroBanner(){
+  const active=activeTrip(), upcoming=nextTrip();
+  if(active){
+    const st=tripStatus(active), flag=travelFlag(active.code), task=travelTaskFor(active);
+    return `<div class="card" style="border-left:4px solid var(--leaf);background:linear-gradient(135deg,var(--card),#eef5f0)">
+      <div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap">
+        <div style="flex:1;min-width:240px">
+          <div class="hint" style="font-weight:800;letter-spacing:.08em">SEYAHAT MODU · ${esc(st.label)}</div>
+          <div style="font-size:25px;font-weight:800;margin:5px 0">${flag} ${esc(active.city||active.country)} · ${esc(active.country)}</div>
+          <div style="margin-top:12px;padding:11px 13px;border-radius:10px;background:rgba(255,255,255,.65)"><b>🎯 Bugünün İngilizce görevi</b><br>${esc(task)}</div>
+        </div>
+        <button class="pill primary" onclick="navigate('trips')">Seyahat Günlüğü →</button>
+      </div>
     </div>`;
   }
-  const target = new Date(progress.maltaDate+'T00:00:00');
-  const now = new Date(); now.setHours(0,0,0,0);
-  const diffDays = Math.round((target-now)/86400000);
-  let msg;
-  if(diffDays>1) msg = `Malta'ya <b>${diffDays} gün</b> kaldı!`;
-  else if(diffDays===1) msg = `Malta'ya <b>yarın</b> gidiyorsun!`;
-  else if(diffDays===0) msg = `Bugün Malta günü! İyi yolculuklar 🇲🇹`;
-  else msg = `Malta gezin ${Math.abs(diffDays)} gün önce gerçekleşti.`;
-  return `<div class="card" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
-    <div>🇲🇹 ${msg}</div>
-    <button class="pill" onclick="setMaltaDate()">Tarihi Değiştir</button>
+  if(upcoming){
+    const st=tripStatus(upcoming),flag=travelFlag(upcoming.code);
+    return `<div class="card" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;border-left:4px solid #3f6473">
+      <div><div class="hint" style="font-weight:800;letter-spacing:.08em">✈️ SIRADAKİ YOLCULUK</div>
+      <div style="font-size:23px;font-weight:800;margin:3px 0">${flag} ${esc(upcoming.city||upcoming.country)} · ${esc(upcoming.country)}</div>
+      <div><b>${esc(st.label)}</b> · ${formatTravelDate(upcoming.start)}</div></div>
+      <button class="pill" onclick="navigate('trips')">Seyahatlerim</button>
+    </div>`;
+  }
+  return `<div class="card" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+    <div>✈️ <b>Sıradaki yolculuğunu ekle.</b> <span class="hint">Ülkeyi seç; bayrak ve geri sayım otomatik gelsin.</span></div>
+    <button class="pill primary" onclick="navigate('trips')">Seyahat Ekle</button>
   </div>`;
 }
+// Eski çağrıyı koruyoruz; ana sayfa artık genel seyahat kartını gösterir.
+function maltaCountdownBanner(){ return travelHeroBanner(); }
+
+function countryOptions(selected){
+  return TRAVEL_COUNTRIES.map(([code,name])=>`<option value="${code}" ${code===selected?'selected':''}>${travelFlag(code)} ${esc(name)}</option>`).join('');
+}
+function viewTrips(){
+  const trips=sortedTrips(), active=activeTrip();
+  let html=`<div class="card" style="border-left:4px solid #3f6473">
+    <h3 class="section-title" style="margin-top:0">✈️ Yeni Seyahat Ekle</h3>
+    <p class="hint">Ülkeyi seçtiğinde bayrak otomatik gelir. Ana sayfada en yakın seyahat gösterilir; seyahat başlayınca kart otomatik Seyahat Modu'na geçer.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px">
+      <div><label class="hint">Ülke</label><select id="trip-country" class="quiz-input" style="margin-top:5px">${countryOptions('ES')}</select></div>
+      <div><label class="hint">Şehir / Bölge</label><input id="trip-city" class="quiz-input" placeholder="Örn. Sevilla" style="margin-top:5px"></div>
+      <div><label class="hint">Gidiş</label><input id="trip-start" type="date" class="quiz-input" style="margin-top:5px"></div>
+      <div><label class="hint">Dönüş</label><input id="trip-end" type="date" class="quiz-input" style="margin-top:5px"></div>
+    </div>
+    <button class="pill primary" onclick="addTrip()">＋ Seyahat Ekle</button>
+  </div>`;
+  if(active){
+    const st=tripStatus(active),key=active.id,log=(progress.travelLogs||{})[key]||{};
+    html+=`<div class="card" style="border-left:4px solid var(--leaf)">
+      <div class="hint" style="font-weight:800">SEYAHAT MODU · ${esc(st.label)}</div>
+      <h3 style="font-size:24px;margin:6px 0">${travelFlag(active.code)} ${esc(active.city||active.country)} · ${esc(active.country)}</h3>
+      <div style="padding:12px;border-radius:10px;background:var(--paper-dark);margin:12px 0"><b>🎯 Bugünün görevi:</b> ${esc(travelTaskFor(active))}</div>
+      <h3 class="section-title">📓 Bugünün Seyahat Günlüğü</h3>
+      <label class="hint">Bugün nerede İngilizce konuştun?</label>
+      <select id="travel-log-place" class="quiz-input"><option>Kafe</option><option>Okul</option><option>Restoran</option><option>Ulaşım</option><option>Sosyal</option><option>Mağaza</option><option>Diğer</option></select>
+      <label class="hint">Bugün kullandığın bir İngilizce cümle</label>
+      <input id="travel-log-used" class="quiz-input" value="${esc(log.used||'')}" placeholder="Örn. Could I have the bill, please?">
+      <label class="hint">Söylemek isteyip söyleyemediğin bir şey</label>
+      <input id="travel-log-missed" class="quiz-input" value="${esc(log.missed||'')}" placeholder="Türkçe veya İngilizce yazabilirsin">
+      <button class="pill primary" onclick="saveTravelLog('${esc(key)}')">💾 Bugünü Kaydet</button>
+    </div>`;
+  }
+  html+=`<div class="card"><h3 class="section-title" style="margin-top:0">🌍 Seyahatlerim</h3>`;
+  if(!trips.length) html+=`<p class="hint">Henüz seyahat eklenmedi.</p>`;
+  trips.forEach(t=>{
+    const st=tripStatus(t);
+    html+=`<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0;border-bottom:1px solid var(--line);flex-wrap:wrap">
+      <div><div style="font-size:19px;font-weight:800">${travelFlag(t.code)} ${esc(t.city||t.country)} · ${esc(t.country)}</div>
+      <div class="hint">${formatTravelDate(t.start)} — ${formatTravelDate(t.end||t.start)} · <b>${esc(st.label)}</b></div></div>
+      <div style="display:flex;gap:7px"><button class="pill" onclick="editTrip('${esc(t.id)}')">✎ Düzenle</button><button class="pill bad" onclick="removeTrip('${esc(t.id)}')">Sil</button></div>
+    </div>`;
+  });
+  html+=`</div>`;
+  return html;
+}
+function addTrip(){
+  const code=document.getElementById('trip-country').value;
+  const country=(TRAVEL_COUNTRIES.find(x=>x[0]===code)||[code,code])[1];
+  const city=document.getElementById('trip-city').value.trim();
+  const start=document.getElementById('trip-start').value, end=document.getElementById('trip-end').value;
+  if(!start||!end){alert('Gidiş ve dönüş tarihini seç.');return;}
+  if(end<start){alert('Dönüş tarihi gidiş tarihinden önce olamaz.');return;}
+  const id='trip-'+Date.now();
+  progress.trips.push({id,country,code,city:city||country,start,end});
+  saveProgress(progress); render();
+}
+function removeTrip(id){
+  const t=(progress.trips||[]).find(x=>x.id===id); if(!t)return;
+  if(!confirm(`${t.city||t.country} seyahatini silmek istiyor musun?`))return;
+  progress.trips=progress.trips.filter(x=>x.id!==id);
+  saveProgress(progress); render();
+}
+function editTrip(id){
+  const t=(progress.trips||[]).find(x=>x.id===id); if(!t)return;
+  const city=prompt('Şehir / Bölge:',t.city||''); if(city===null)return;
+  const start=prompt('Gidiş tarihi (YYYY-AA-GG):',t.start); if(start===null)return;
+  const end=prompt('Dönüş tarihi (YYYY-AA-GG):',t.end||t.start); if(end===null)return;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(start)||!/^\d{4}-\d{2}-\d{2}$/.test(end)||end<start){alert('Tarihleri kontrol et.');return;}
+  t.city=city.trim()||t.country;t.start=start;t.end=end;saveProgress(progress);render();
+}
+function saveTravelLog(id){
+  progress.travelLogs=progress.travelLogs||{};
+  progress.travelLogs[id]={
+    date:new Date().toISOString().slice(0,10),
+    place:document.getElementById('travel-log-place')?.value||'',
+    used:document.getElementById('travel-log-used')?.value.trim()||'',
+    missed:document.getElementById('travel-log-missed')?.value.trim()||''
+  };
+  saveProgress(progress); alert('Seyahat günlüğü kaydedildi ✓');
+}
+function setMaltaDate(){ navigate('trips'); }
 
 // ---------- Malta Survival English ----------
 const MALTA_SURVIVAL = [
@@ -8133,9 +8284,14 @@ function saveFlow(no,key){const f=flowState(no);f[key]=true;saveProgress(progres
 function scrollLessonStage(id,no,key){
   saveFlow(no,key);
   const go=()=>{
-    const el=document.getElementById(id);
-    if(!el)return;
-    if(el.tagName==='DETAILS') el.open=true;
+    let el=document.getElementById(id);
+    // Analiz bölümü eski/yeni ders şablonlarında farklı üretilebildiği için güvenli fallback.
+    if(!el && key==='analyse') el=document.querySelector('#content .pro-analysis-wrap, #content details.card');
+    if(!el) return;
+    if(el.tagName==='DETAILS'){
+      el.open=true;
+      el.setAttribute('open','');
+    }
     const y=el.getBoundingClientRect().top + window.pageYOffset - 150;
     window.scrollTo({top:Math.max(0,y),behavior:'smooth'});
     el.classList.add('active-step-target');
@@ -8255,7 +8411,11 @@ viewLesson=function(l){
  // Keep the original manual lesson-completion control.
  // It remains independent from test scores so Erhan decides when a lesson is genuinely finished.
  base=base.replace('<div class="cols">','<div id="lesson-study-material" class="cols lesson-stage-card">');
- const analysis=cleanAnalysisHtml(lessonAnalysis(l)).replace('<details class="card"','<details id="lesson-analysis" class="card lesson-stage-card"');
+ let analysis=cleanAnalysisHtml(lessonAnalysis(l));
+ if(!/id=["']lesson-analysis["']/.test(analysis)){
+   analysis=analysis.replace(/<details\b([^>]*)>/i,(m,attrs)=>`<details id="lesson-analysis"${attrs}>`);
+ }
+ analysis=analysis.replace('class="card','class="card lesson-stage-card');
  const speak=`<div id="lesson-speaking" class="card lesson-stage-card"><h3 class="section-title" style="margin-top:0">🎤 Konuş · Bağlam İçinde Kullan</h3><p class="hint">Role Play / Abroad mantığı: hazır cümleyi okumak yerine soruya doğal cevap ver. Tarayıcının tek bir kelimeyi yanlış duyması otomatik olarak telaffuz hatası sayılmaz.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="pill primary" onclick="saveFlow(${l.no},'speak');window.location.href='./speaking.html'">Ares Speaking'i Aç</button><button class="pill" onclick="saveFlow(${l.no},'speak');navigate('lessontest',${l.no});setTimeout(()=>setLessonTestMode('voice'),0)">Bu Dersi Sesli Çalış</button></div></div>`;
  const launch=`<div id="lesson-test-launch" class="card lesson-stage-card"><h3 class="section-title" style="margin-top:0">📝 Test · Ölç</h3><p class="hint">Rastgele kelime silinen ezber soruları yok. Test; kelime anlamı, hedef yapı/chunk ve tam cümle üretimini ölçer. Yanlışların Akıllı Yanlış Havuzu'na gider.</p><button class="pill primary" onclick="saveFlow(${l.no},'test');navigate('lessontest',${l.no})">${l.no}. Ders Testine Başla</button></div>`;
  return guidedPath(l)+base.replace('</div>\n  <div class="card">\n    <h3 class="section-title" style="margin-top:0;">Notlarım</h3>',`</div>${lessonChunksHtml(l.no)}${analysis}${productionPracticeHtml(l)}${speak}${launch}<div class="card"><h3 class="section-title" style="margin-top:0;">Notlarım</h3>`);
