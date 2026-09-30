@@ -30,7 +30,7 @@ button{border:0;border-radius:13px;padding:13px 15px;font-size:15px;font-weight:
   <div id="msg"></div>
 </div>
 <div id="app">
- <div class="card top"><div><b id="count">Talepler</b><div class="meta" style="margin:3px 0 0">Otomatik yenilenir</div></div><div class="row"><button id="activateHome" class="primary">📱 ANA EKRANI ETKİNLEŞTİR</button><button id="notify" class="primary">🔔 BİLDİRİMLERİ AÇ</button><button id="refresh" class="primary">YENİLE</button><button id="logout" class="logout">ÇIKIŞ</button></div></div>
+ <div class="card top"><div><b id="count">Talepler</b><div class="meta" style="margin:3px 0 0">Otomatik yenilenir</div></div><div class="row"><button id="activateHome" class="primary">📱 ANA EKRANI ETKİNLEŞTİR</button><button id="notify" class="primary">🔔 BİLDİRİMLERİ AÇ</button><button id="testNotify" class="primary">🧪 TEST BİLDİRİMİ</button><button id="refresh" class="primary">YENİLE</button><button id="logout" class="logout">ÇIKIŞ</button></div></div>
  <div id="list"></div>
 </div></div>
 <script>
@@ -60,6 +60,26 @@ async function enableNotifications(){
   if(error) throw error;
   $('notify').textContent='🔔 BİLDİRİMLER AÇIK'; $('notify').disabled=true;
   alert('Ares English erişim bildirimleri açıldı.');
+ }catch(e){alert(e.message||String(e))}
+}
+
+
+async function sendTestNotification(){
+ try{
+   const {data:{session}}=await sb.auth.getSession();
+   if(!session) throw new Error('Önce yönetici girişi gerekli.');
+   const res=await fetch(U+'/functions/v1/ares-push',{
+     method:'POST',
+     headers:{
+       'Content-Type':'application/json',
+       'Authorization':'Bearer '+session.access_token,
+       'apikey':K
+     },
+     body:JSON.stringify({test:true})
+   });
+   const out=await res.json().catch(()=>({}));
+   if(!res.ok) throw new Error(out.error||('Test gönderilemedi ('+res.status+')'));
+   alert('Test bildirimi gönderildi. iPhone kilit ekranını kontrol et.');
  }catch(e){alert(e.message||String(e))}
 }
 
@@ -116,6 +136,6 @@ sb.auth.onAuthStateChange((event,session)=>{
    if(location.hash || location.search.includes("code=")) history.replaceState({},document.title,location.pathname);
  }
 });
-$("activateHome").onclick=activateHomeScreen;$("pinLoginBtn").onclick=pinLogin;$("notify").onclick=enableNotifications;$("refresh").onclick=load;$("logout").onclick=async()=>{await sb.auth.signOut();show()}
+$("activateHome").onclick=activateHomeScreen;$("testNotify").onclick=sendTestNotification;$("pinLoginBtn").onclick=pinLogin;$("notify").onclick=enableNotifications;$("refresh").onclick=load;$("logout").onclick=async()=>{await sb.auth.signOut();show()}
 show();setInterval(()=>{if(app.style.display!=="none")load()},5000);
 </script></body></html>
