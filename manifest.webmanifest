@@ -1,7 +1,7 @@
 {
   "name": "Ares English",
   "short_name": "Ares English",
-  "start_url": "/",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#06162f",
   "theme_color": "#06162f",
