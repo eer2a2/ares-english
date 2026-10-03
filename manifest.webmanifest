@@ -1,21 +1,17 @@
 {
-  "name": "Ares English",
-  "short_name": "Ares English",
-  "start_url": "/ares-english/",
-  "scope": "/ares-english/",
+  "id": "./",
+  "name": "Erhan English",
+  "short_name": "Erhan English",
+  "description": "Kişisel İngilizce çalışma uygulaması",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
+  "orientation": "any",
   "background_color": "#06162f",
   "theme_color": "#06162f",
   "icons": [
-    {
-      "src": "/ares-english/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "/ares-english/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
+    {"src":"./icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
+    {"src":"./icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"},
+    {"src":"./icon-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}
   ]
 }
