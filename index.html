@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
 <!-- Erhan English PWA / App Icon -->
 <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
@@ -573,14 +573,14 @@
 <div id="app">
   <nav id="sidebar">
     <div class="brand">
-      <h1>İngilizce Defterim</h1>
-      <div class="sub">Kişisel çalışma günlüğü · 42 çekirdek ders</div>
+      <h1>Erhan English</h1>
+      <div class="sub">Personal English workspace · 42 core lessons</div>
       <div class="sub" style="margin-top:2px; font-weight:600; opacity:0.85;">Erhan ERBAB</div>
     </div>
-    <input id="search-mini" placeholder="Kelime / cümle ara…" oninput="handleGlobalSearchInput(this.value)">
+    <input id="search-mini" placeholder="Search words / sentences…" oninput="handleGlobalSearchInput(this.value)">
     <div class="navgroup">
       <div class="navitem" data-view="dailyplan" onclick="startDailyPlan()" style="background:var(--accent); color:#fff; font-weight:700; margin-bottom:6px;">
-        <span class="dot" style="background:#fff;"></span> ▶️ Bugünkü Çalışmam
+        <span class="dot" style="background:#fff;"></span> ▶️ Today’s Study
       </div>
       <div class="navitem" data-view="dashboard" onclick="navigate('dashboard')">
         <span class="dot"></span> Ana Sayfa
@@ -592,71 +592,71 @@
         <span class="dot"></span> Genel Değerlendirme
       </div>
       <div class="navitem" data-view="placementtest" onclick="navigate('placementtest')" style="background:var(--leaf); color:#fff;">
-        <span class="dot" style="background:#fff;"></span> 🎯 Seviye Tespit Sınavı
+        <span class="dot" style="background:#fff;"></span> 🎯 Level Test
       </div>
       <div class="navitem" id="lessons-toggle" onclick="toggleLessons()">
-        <span style="display:flex;align-items:center;gap:10px;"><span class="dot"></span> Dersler · 42 Çekirdek</span>
+        <span style="display:flex;align-items:center;gap:10px;"><span class="dot"></span> Lessons · 42 Core</span>
         <span class="chev">›</span>
       </div>
       <div id="lesson-list"></div>
     </div>
     <div class="navgroup">
-      <div class="navgroup-title">Konuşma & İngilizce</div>
+      <div class="navgroup-title">Speaking & English</div>
       <div class="navitem" onclick="window.location.href='./speaking.html'" style="background:var(--accent); color:#fff; font-weight:700; margin-bottom:6px;"><span class="dot" style="background:#fff;"></span> 🎤 Ares Speaking</div>
-      <div class="navitem" data-view="chunks" onclick="navigate('chunks')"><span class="dot"></span> 🧩 Kalıp Cümleler</div>
+      <div class="navitem" data-view="chunks" onclick="navigate('chunks')"><span class="dot"></span> 🧩 Sentence Patterns</div>
       <div class="navitem" data-view="collocations" onclick="navigate('collocations')"><span class="dot"></span> 🎯 Collocations</div>
       <div class="navitem" data-view="phrasalhome" onclick="navigate('phrasalhome')"><span class="dot"></span> 🔗 Phrasal Verbs</div>
       <div class="navitem" data-view="shadowing" onclick="navigate('shadowing')"><span class="dot"></span> 🎧 Shadowing</div>
     </div>
     <div class="navgroup">
-      <div class="navgroup-title">Gramer</div>
+      <div class="navgroup-title">Grammar</div>
       <div class="navitem" data-view="tenses" onclick="navigate('tenses')"><span class="dot"></span> ⏱️ Tenses</div>
       <div class="navitem" data-view="irregular" onclick="navigate('irregular')"><span class="dot"></span> 🔄 Irregular Verbs</div>
-      <div class="navitem" data-view="aciklamalar" onclick="navigate('aciklamalar')"><span class="dot"></span> 📖 Açıklamalar</div>
+      <div class="navitem" data-view="aciklamalar" onclick="navigate('aciklamalar')"><span class="dot"></span> 📖 Grammar Notes</div>
     </div>
     <div class="navgroup">
-      <div class="navgroup-title">Kelime & Tekrar</div>
-      <div class="navitem" data-view="wordbook" onclick="navigate('wordbook')"><span class="dot"></span> 📚 Kelime Defterim</div>
-      <div class="navitem with-badge" data-view="repeatcenter" onclick="navigate('repeatcenter')"><span style="display:flex;align-items:center;gap:10px;"><span class="dot"></span> 🔁 Tekrar Merkezi</span><span class="badge-count" id="due-badge">0</span></div>
-      <div class="navitem" data-view="flashcards" onclick="navigate('flashcards')"><span class="dot"></span> 🃏 Kelime Kartları</div>
+      <div class="navgroup-title">Vocabulary & Review</div>
+      <div class="navitem" data-view="wordbook" onclick="navigate('wordbook')"><span class="dot"></span> 📚 My Vocabulary</div>
+      <div class="navitem with-badge" data-view="repeatcenter" onclick="navigate('repeatcenter')"><span style="display:flex;align-items:center;gap:10px;"><span class="dot"></span> 🔁 Review Center</span><span class="badge-count" id="due-badge">0</span></div>
+      <div class="navitem" data-view="flashcards" onclick="navigate('flashcards')"><span class="dot"></span> 🃏 Flashcards</div>
     </div>
     <div class="navgroup">
-      <div class="navgroup-title">Pratik</div>
-      <div class="navitem" data-view="quizcenter" onclick="navigate('quizcenter')"><span class="dot"></span> 🧠 Quizler</div>
-      <div class="navitem" data-view="dictation" onclick="navigate('dictation')"><span class="dot"></span> 🎧 Dikte</div>
-      <div class="navitem" data-view="builder" onclick="navigate('builder')"><span class="dot"></span> 🧱 Cümle Kur</div>
-      <div class="navitem" data-view="journal" onclick="navigate('journal')"><span class="dot"></span> ✍️ Yazma Günlüğü</div>
+      <div class="navgroup-title">Practice</div>
+      <div class="navitem" data-view="quizcenter" onclick="navigate('quizcenter')"><span class="dot"></span> 🧠 Quizzes</div>
+      <div class="navitem" data-view="dictation" onclick="navigate('dictation')"><span class="dot"></span> 🎧 Dictation</div>
+      <div class="navitem" data-view="builder" onclick="navigate('builder')"><span class="dot"></span> 🧱 Sentence Builder</div>
+      <div class="navitem" data-view="journal" onclick="navigate('journal')"><span class="dot"></span> ✍️ Writing Journal</div>
     </div>
     <div class="navgroup">
-      <div class="navgroup-title">Kendi Başlıklarım</div>
+      <div class="navgroup-title">My Topics</div>
       <div id="custom-topics-list"></div>
-      <div class="navitem" onclick="addCustomTopic()"><span class="dot"></span> ➕ Yeni Başlık Ekle</div>
+      <div class="navitem" onclick="addCustomTopic()"><span class="dot"></span> ➕ Add Topic</div>
     </div>
     <div class="navgroup">
-      <div class="navgroup-title">Ayarlar</div>
-      <div class="navitem" onclick="toggleDark()"><span class="dot"></span> <span id="dark-label">Koyu Tema</span></div>
-      <div class="navitem" onclick="toggleSpeechRate()"><span class="dot"></span> <span id="rate-label">Konuşma Hızı: Normal</span></div>
-      <div class="navitem" data-view="trips" onclick="navigate('trips')"><span class="dot"></span> ✈️ Seyahatlerim</div>
-      <div class="navitem" onclick="showHomeScreenInstructions()"><span class="dot"></span> 📱 Ana Ekrana Ekle</div>
-      <div class="navitem" onclick="setApiKey()"><span class="dot"></span> 🔑 AI API Anahtarı</div>
-      <div class="navitem" onclick="exportProgress()"><span class="dot"></span> İlerlemeyi Dışa Aktar</div>
-      <div class="navitem" onclick="document.getElementById('import-file').click()"><span class="dot"></span> İlerlemeyi İçe Aktar</div>
+      <div class="navgroup-title">Settings</div>
+      <div class="navitem" onclick="toggleDark()"><span class="dot"></span> <span id="dark-label">Dark Mode</span></div>
+      <div class="navitem" onclick="toggleSpeechRate()"><span class="dot"></span> <span id="rate-label">Speech Speed: Normal</span></div>
+      <div class="navitem" data-view="trips" onclick="navigate('trips')"><span class="dot"></span> ✈️ My Trips</div>
+      <div class="navitem" onclick="showHomeScreenInstructions()"><span class="dot"></span> 📱 Add to Home Screen</div>
+      <div class="navitem" onclick="setApiKey()"><span class="dot"></span> 🔑 AI API Key</div>
+      <div class="navitem" onclick="exportProgress()"><span class="dot"></span> Export Progress</div>
+      <div class="navitem" onclick="document.getElementById('import-file').click()"><span class="dot"></span> Import Progress</div>
       <input type="file" id="import-file" accept="application/json" style="display:none" onchange="importProgress(this.files[0])">
     </div>
     <div style="flex:1"></div>
   </nav>
 
   <main id="main">
-    <button id="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰ Menü</button>
+    <button id="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰ Menu</button>
     <div class="topbar">
       <div>
         <div class="crumb" id="crumb"></div>
-        <h2 id="page-title">Ana Sayfa</h2>
+        <h2 id="page-title">Home</h2>
       </div>
-      <input id="global-search" placeholder="Tüm derslerde ara (kelime veya cümle)…" oninput="handleGlobalSearchInput(this.value)">
+      <input id="global-search" placeholder="Search all lessons (word or sentence)…" oninput="handleGlobalSearchInput(this.value)">
       <button id="offline-badge" class="pill" onclick="toggleOfflineMode()">🌐 Online</button>
-      <button id="voice-nav-btn" class="pill" onclick="voiceNavigate(this)" title="Sesli komutla gez (örn. &quot;quiz aç&quot;, &quot;5. derse git&quot;)">🎙️ Sesli Komut</button>
-      <button id="close-app-btn" class="pill" onclick="handleTopAction()">💾 Kaydet</button>
+      <button id="voice-nav-btn" class="pill" onclick="voiceNavigate(this)" title="Sesli komutla gez (örn. &quot;quiz aç&quot;, &quot;5. derse git&quot;)">🎙️ Voice Command</button>
+      <button id="close-app-btn" class="pill" onclick="handleTopAction()">💾 Save</button>
     </div>
     <div id="content"></div>
   </main>
@@ -952,7 +952,7 @@ progress.chunkTraining = progress.chunkTraining || {}; // {chunkId:{correct,wron
 progress.microTask = progress.microTask || {date:null, doneIdx:[]};
 progress.customTopics = progress.customTopics || []; // [{id, title, type:'sentences'|'note', items:[[en,tr]], content:''}]
 if(!progress.customTopics.length){
-  // Önceki sürümde eklenen "Kendi Başlıklarım" içeriği (kullanıcı tarafından girilmiş) — ilk açılışta otomatik yüklenir.
+  // Önceki sürümde eklenen "My Topics" içeriği (kullanıcı tarafından girilmiş) — ilk açılışta otomatik yüklenir.
   progress.customTopics = [{"id": "ct_1787580442902_584", "title": "100 Essential English Phrases", "type": "sentences", "items": [["How's it going?", "nasıl gidiyor?"], ["Long time no see!", "uzun zamandır görüşemedik"], ["What have you been up to?", "son zamanlarda neler yapıyorsun"], ["How do you know each other?", "birbirinizi nereden tanıyorsunuz"], ["What do you do for a living?", "ne iş yapıyorsunuz"], ["Keep in touch!", "irtibatı koparmayalım/haberleşelim"], ["Could you do me a favor?", "bana bir iyilik yapabilir misin"], ["Would you mind helping me?", "bana yardım edebilir misiniz"], ["Could you speak a bit slower, please?", "biraz daha yavaş konuşabilir misiniz"], ["Could you repeat that, please?", "onu tekrar edebilir misiniz lütfen"], ["What do you mean by that?", "bununla ne demek istiyorsun"], ["Do you need any help?", "yardıma ihtiyacın var mı"], ["Is it okay if I use this?", "bunu kullanmamın bir sakıncası var mı"], ["Could you give me a hand?", "bana bir el atabilir misin"], ["Let me know if you need anything", "bir şeye ihtiyacın olursa bana haber ver"], ["Thanks in advance!", "şimdiden teşekkürler"], ["In my opinion, ...", "benim fikrime göre / bence, ..."], ["to be honest, ...", "dürüst olmak gerekirse, ..."], ["If you ask me, ...", "bana sorarsan, ..."], ["that sounds like a great idea!", "kulağa harika bir fikir gibi geliyor!"], ["I agree with you", "sana katılıyorum"], ["I don't think so", "ben öyle düşünmüyorum"], ["As far as I'm concerned, ...", "bana kalırsa / benim gördüğüm kadarıyla, ..."], ["That makes sense", "bu mantıklı geliyor"], ["I’m not sure about that", "bu konuda emin değilim"], ["What do you think about this?", "bunun hakkında ne düşünüyorsun"], ["Are you free this weekend?", "bu haftasonu boş musun"], ["Let's catch up soon", "en yakın zamanda buluşup konuşalım / hasret giderelim!"], ["Something has come up", "son dakika bir işim çıktı / aniden bir şey gelişti."], ["Can we reschedule for another time?", "başka bir zamana erteleyebilir miyiz"], ["I’m running a bit late", "biraz gecikiyorum"], ["It depends on my schedule", "programıma/takvimime bağlı"], ["Let's call it a day", "bugünlük bu kadar yeter / çalışmayı sonlandıralım"], ["I have to run now", "şimdi kaçmam / gitmem gerekiyor"], ["What time works for you?", "saat kaç senin için uygun"], ["I'll get back to you later", "sana daha sonra geri döneceğim / haber vereceğim"], ["How much does this cost?", "bunun fiyatı ne kadar"]], "content": ""}];
   saveProgress(progress);
 }
@@ -980,7 +980,7 @@ function backupReminderCard(){
         <b>💾 Yedekleme Hatırlatması</b>
         <p class="hint" style="margin:4px 0 0 0;">${msg} Tüm ilerleme (bilinen kelimeler, quiz skorları, düzeltmeler) sadece bu tarayıcıda saklanıyor — cihaz değişirse veya tarayıcı verileri temizlenirse kaybolur.</p>
       </div>
-      <button class="pill primary" onclick="exportProgress(); render();">İlerlemeyi Dışa Aktar</button>
+      <button class="pill primary" onclick="exportProgress(); render();">Export Progress</button>
     </div>
   </div>`;
 }
@@ -1496,7 +1496,7 @@ function computeStreak(){
 function applyDark(){
   document.body.classList.toggle('dark', !!progress.darkMode);
   const lbl = document.getElementById('dark-label');
-  if(lbl) lbl.textContent = progress.darkMode ? 'Açık Tema' : 'Koyu Tema';
+  if(lbl) lbl.textContent = progress.darkMode ? 'Açık Tema' : 'Dark Mode';
 }
 function toggleDark(){
   progress.darkMode = !progress.darkMode;
@@ -1618,7 +1618,7 @@ async function geminiGenerate(system, contents, maxTokens, temperature){
   const text=parts.map(p=>p.text||'').join('').trim(); if(!text) throw new Error('EMPTY_RESPONSE'); return text;
 }
 async function callClaudeAPI(system,userMsg,maxTokens){ return geminiGenerate(system,[{role:'user',parts:[{text:userMsg}]}],maxTokens||1000,0.3); }
-function apiKeyMissingMessage(){ return '<div class="card hint" style="border-left:4px solid var(--accent);">🤖 Bu özellik için bir Google Gemini API anahtarı girmelisin.<br><br>Sol menüden <b>Ayarlar → 🔑 AI API Anahtarı</b> ile ekleyebilirsin.</div>'; }
+function apiKeyMissingMessage(){ return '<div class="card hint" style="border-left:4px solid var(--accent);">🤖 Bu özellik için bir Google Gemini API anahtarı girmelisin.<br><br>Sol menüden <b>Ayarlar → 🔑 AI API Key</b> ile ekleyebilirsin.</div>'; }
 async function callClaudeAPIChat(system, messages, maxTokens){
   if(isAppOffline()) throw new Error('OFFLINE_MODE');
   const key = restoreApiKeyPersistent();
@@ -2008,7 +2008,7 @@ async function sendAIChatMessage(){
 function friendlyApiErrorMessage(err){
   if(String((err&&err.message)||err||'').includes('OFFLINE_MODE')) return offlineAIMessage();
   const raw=String((err&&err.message)||err||'');
-  if(raw.includes('NO_API_KEY')) return 'API anahtarı bulunamadı. Ayarlar → 🔑 AI API Anahtarı üzerinden ekle.';
+  if(raw.includes('NO_API_KEY')) return 'API anahtarı bulunamadı. Ayarlar → 🔑 AI API Key üzerinden ekle.';
   if(raw.includes('Failed to fetch')||raw.includes('NetworkError')||raw.includes('Load failed')) return 'Tarayıcı Google API isteğine erişemedi. İnternet bağlantısını kontrol et. content:// üzerinden açıyorsan Chrome bazı cihazlarda dış isteği engelleyebilir.';
   if(raw.includes('401')) return 'Google 401: API anahtarı doğrulanamadı. AI Studio’dan yeni bir Gemini auth key oluşturup tekrar kaydet.';
   if(raw.includes('403')) return 'Google 403: Anahtarın veya projen bu isteğe yetkili değil. AI Studio’da anahtarın Gemini API için etkin olduğunu kontrol et.';
@@ -2161,7 +2161,7 @@ function renderLessonList(){
   }).join('');
 }
 
-// ---------- Kendi Başlıklarım (kullanıcının sol menüye eklediği özel başlıklar) ----------
+// ---------- My Topics (kullanıcının sol menüye eklediği özel başlıklar) ----------
 function renderCustomTopicsNav(){
   const wrap = document.getElementById('custom-topics-list');
   if(!wrap) return;
@@ -3037,28 +3037,28 @@ function handleVoiceCommand(said){
 // ---------- views ----------
 
 function viewWordBook(){
-  return `<div class="card"><h3 class="section-title">📚 Kelime Defterim</h3><p class="hint">Yeni kelimelerin ve kendi kelime listen tek yerde.</p><div class="row"><button class="pill primary" onclick="navigate('yenikelimeler')">Yeni Kelimeler</button><button class="pill" onclick="navigate('kelimelerim')">Kelimelerim</button></div></div>`;
+  return `<div class="card"><h3 class="section-title">📚 My Vocabulary</h3><p class="hint">Yeni kelimelerin ve kendi kelime listen tek yerde.</p><div class="row"><button class="pill primary" onclick="navigate('yenikelimeler')">Yeni Kelimeler</button><button class="pill" onclick="navigate('kelimelerim')">Kelimelerim</button></div></div>`;
 }
 function viewRepeatCenter(){
   const due=getDueWords().length, mistakes=(progress.mistakes||[]).length, hard=(progress.customZor||[]).length;
-  return `<div class="card"><h3 class="section-title">🔁 Tekrar Merkezi</h3><p class="hint">Tekrar, önemli hatalar ve zor cümleler tek merkezde.</p><div class="grid"><div class="stat" onclick="navigate('review')" style="cursor:pointer"><div class="num">${due}</div><div class="label">Bugün Tekrar Et</div></div><div class="stat" onclick="navigate('mistakes')" style="cursor:pointer"><div class="num">${mistakes}</div><div class="label">Hatalarım</div></div><div class="stat" onclick="navigate('zorcumleler')" style="cursor:pointer"><div class="num">${hard}</div><div class="label">Zor Cümleler</div></div></div></div>`;
+  return `<div class="card"><h3 class="section-title">🔁 Review Center</h3><p class="hint">Tekrar, önemli hatalar ve zor cümleler tek merkezde.</p><div class="grid"><div class="stat" onclick="navigate('review')" style="cursor:pointer"><div class="num">${due}</div><div class="label">Bugün Tekrar Et</div></div><div class="stat" onclick="navigate('mistakes')" style="cursor:pointer"><div class="num">${mistakes}</div><div class="label">Hatalarım</div></div><div class="stat" onclick="navigate('zorcumleler')" style="cursor:pointer"><div class="num">${hard}</div><div class="label">Zor Cümleler</div></div></div></div>`;
 }
 function viewQuizCenter(){
-  return `<div class="card"><h3 class="section-title">🧠 Quizler</h3><p class="hint">Testleri ayrı menüler yerine buradan seç.</p><div class="row"><button class="pill primary" onclick="navigate('quiz')">Genel Quiz</button><button class="pill" onclick="navigate('tensequiz')">Tenses</button><button class="pill" onclick="navigate('irregular')">Irregular Verbs</button><button class="pill" onclick="navigatePhrasalMixedMC()">Phrasal Verbs</button></div></div>`;
+  return `<div class="card"><h3 class="section-title">🧠 Quizzes</h3><p class="hint">Testleri ayrı menüler yerine buradan seç.</p><div class="row"><button class="pill primary" onclick="navigate('quiz')">Genel Quiz</button><button class="pill" onclick="navigate('tensequiz')">Tenses</button><button class="pill" onclick="navigate('irregular')">Irregular Verbs</button><button class="pill" onclick="navigatePhrasalMixedMC()">Phrasal Verbs</button></div></div>`;
 }
 function render(){
   const c = document.getElementById('content');
   const titleEl = document.getElementById('page-title');
   const crumbEl = document.getElementById('crumb');
-  if(currentView==='wordbook'){ crumbEl.textContent='Kelime & Tekrar'; titleEl.textContent='Kelime Defterim'; c.innerHTML=viewWordBook(); return; }
-  if(currentView==='repeatcenter'){ crumbEl.textContent='Kelime & Tekrar'; titleEl.textContent='Tekrar Merkezi'; c.innerHTML=viewRepeatCenter(); return; }
+  if(currentView==='wordbook'){ crumbEl.textContent='Vocabulary & Review'; titleEl.textContent='Kelime Defterim'; c.innerHTML=viewWordBook(); return; }
+  if(currentView==='repeatcenter'){ crumbEl.textContent='Vocabulary & Review'; titleEl.textContent='Tekrar Merkezi'; c.innerHTML=viewRepeatCenter(); return; }
   if(currentView==='quizcenter'){ crumbEl.textContent='Pratik'; titleEl.textContent='Quizler'; c.innerHTML=viewQuizCenter(); return; }
   updateDueBadge();
   updateMistakeBadge();
   if(currentView==='dashboard'){ crumbEl.textContent='Genel Bakış'; titleEl.textContent='Ana Sayfa'; c.innerHTML = viewDashboard(); }
-  else if(currentView==='dailyplan'){ crumbEl.textContent='Günlük Akış'; titleEl.textContent='▶️ Bugünkü Çalışmam'; c.innerHTML = viewDailyPlan(); }
+  else if(currentView==='dailyplan'){ crumbEl.textContent='Günlük Akış'; titleEl.textContent='▶️ Today’s Study'; c.innerHTML = viewDailyPlan(); }
   else if(currentView==='weekly'){ crumbEl.textContent='Genel Bakış'; titleEl.textContent='Bu Hafta'; c.innerHTML = viewWeeklySummary(); }
-  else if(currentView==='trips'){ crumbEl.textContent='Seyahat'; titleEl.textContent='✈️ Seyahatlerim'; c.innerHTML = viewTrips(); }
+  else if(currentView==='trips'){ crumbEl.textContent='Seyahat'; titleEl.textContent='✈️ My Trips'; c.innerHTML = viewTrips(); }
   else if(currentView==='lesson'){ const l = DATA.lessons.find(x=>x.no===currentLesson); crumbEl.textContent='Ders'; titleEl.textContent = currentLesson+'. Ders'; c.innerHTML = viewLesson(l); scrollToHighlightedSentence(); }
   else if(currentView==='tenses'){ crumbEl.textContent='Gramer'; titleEl.textContent='Tenses (Zamanlar)'; c.innerHTML = viewTenses(); }
   else if(currentView==='prefixsuffix'){ crumbEl.textContent='Gramer'; titleEl.textContent='Prefix / Suffix'; c.innerHTML = viewPrefixSuffix(); }
@@ -3079,7 +3079,7 @@ function render(){
   else if(currentView==='builder'){ crumbEl.textContent='Pratik'; titleEl.textContent='Cümle Kur'; c.innerHTML = viewBuilder(); nextBuilder(); }
   else if(currentView==='journal'){ crumbEl.textContent='Pratik'; titleEl.textContent='Yazma Günlüğü'; c.innerHTML = viewJournal(); }
   else if(currentView==='tensequiz'){ crumbEl.textContent='Pratik'; titleEl.textContent='Zaman Testi (Tenses)'; c.innerHTML = viewTenseQuiz(); nextTenseQuiz(); }
-  else if(currentView==='customtopic'){ const t = progress.customTopics.find(x=>x.id===currentCustomTopicId); crumbEl.textContent='Kendi Başlıklarım'; titleEl.textContent = t ? t.title : 'Başlık'; c.innerHTML = viewCustomTopic(currentCustomTopicId); }
+  else if(currentView==='customtopic'){ const t = progress.customTopics.find(x=>x.id===currentCustomTopicId); crumbEl.textContent='My Topics'; titleEl.textContent = t ? t.title : 'Başlık'; c.innerHTML = viewCustomTopic(currentCustomTopicId); }
   else if(currentView==='aichat'){ crumbEl.textContent='Pratik'; titleEl.textContent='Ares — English Coach'; c.innerHTML = viewAIChat(); scrollAIChatToBottom(); }
   else if(currentView==='search'){ crumbEl.textContent='Arama'; titleEl.textContent='Arama Sonuçları'; }
   else if(currentView==='lessontest'){ crumbEl.textContent='Ders'; titleEl.textContent = currentLesson+'. Ders Testi'; c.innerHTML = viewLessonTest(currentLesson); }
@@ -3087,7 +3087,7 @@ function render(){
   else if(currentView==='speaking'){ crumbEl.textContent='Malta Hazırlığı'; titleEl.textContent='Konuşma Challenge'; c.innerHTML = viewSpeaking(); }
   else if(currentView==='shadowing'){ crumbEl.textContent='Pratik'; titleEl.textContent='Shadowing'; c.innerHTML = viewShadowing(); nextShadow(); }
   else if(currentView==='generalassessment'){ crumbEl.textContent='Değerlendirme'; titleEl.textContent='Genel Değerlendirme'; c.innerHTML = viewGeneralAssessment(); }
-  else if(currentView==='placementtest'){ crumbEl.textContent='Seviye Tespiti'; titleEl.textContent='🎯 Seviye Tespit Sınavı'; c.innerHTML = viewPlacementTest(); }
+  else if(currentView==='placementtest'){ crumbEl.textContent='Seviye Tespiti'; titleEl.textContent='🎯 Level Test'; c.innerHTML = viewPlacementTest(); }
   else if(currentView==='freetalk'){ crumbEl.textContent='Akıcılık Pratiği'; titleEl.textContent='⏱️ Serbest Konuşma'; c.innerHTML = viewFreeTalk(); }
   else if(currentView==='chunks'){ crumbEl.textContent='Akıcılık Pratiği'; titleEl.textContent='🧩 Kalıp Cümle Bankası'; c.innerHTML = viewChunks(); }
   else if(currentView==='phrasalhome'){ crumbEl.textContent='Gramer'; titleEl.textContent='Phrasal Verbs'; c.innerHTML = viewPhrasalHome(); }
@@ -3119,7 +3119,7 @@ function viewDashboard(){
   let html = `<div class="card" style="border-left:4px solid var(--accent); background:linear-gradient(135deg, var(--card), var(--paper-dark));">
     <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px;">
       <div>
-        <h3 class="section-title" style="margin:0 0 6px 0; border:none; padding:0;">▶️ Bugünkü Çalışmam</h3>
+        <h3 class="section-title" style="margin:0 0 6px 0; border:none; padding:0;">▶️ Today’s Study</h3>
         <p class="hint" style="margin:0;">Bugün ne çalışmalıyım? Bas, gerisini sistem sırayla açsın: önceki ders tekrarı → bugünkü ders → 5 kelime → 5 pratik soru → Ares Speaking → günün hataları → kısa tekrar.</p>
       </div>
       <button class="pill primary" style="white-space:nowrap; font-size:15px; padding:12px 20px;" onclick="startDailyPlan()">▶️ Başla</button>
@@ -5787,14 +5787,14 @@ function copyJournalText(btn){ const val=document.getElementById('journal-input'
 
 // ---------- Seyahatlerim · Dinamik Geri Sayım / Seyahat Modu ----------
 const TRAVEL_COUNTRIES = [
- ['AL','Arnavutluk'],['AT','Avusturya'],['BE','Belçika'],['BA','Bosna-Hersek'],['BG','Bulgaristan'],
- ['HR','Hırvatistan'],['CZ','Çekya'],['DK','Danimarka'],['FI','Finlandiya'],['FR','Fransa'],
- ['DE','Almanya'],['GR','Yunanistan'],['HU','Macaristan'],['IS','İzlanda'],['IE','İrlanda'],
- ['IT','İtalya'],['MT','Malta'],['ME','Karadağ'],['NL','Hollanda'],['MK','Kuzey Makedonya'],
- ['NO','Norveç'],['PL','Polonya'],['PT','Portekiz'],['RO','Romanya'],['RS','Sırbistan'],
- ['SK','Slovakya'],['SI','Slovenya'],['ES','İspanya'],['SE','İsveç'],['CH','İsviçre'],
- ['TR','Türkiye'],['GB','Birleşik Krallık'],['US','ABD'],['CA','Kanada'],['JP','Japonya'],
- ['KR','Güney Kore'],['TH','Tayland'],['AE','Birleşik Arap Emirlikleri'],['GE','Gürcistan']
+ ['AL','Albania'],['AT','Austria'],['BE','Belgium'],['BA','Bosnia and Herzegovina'],['BG','Bulgaria'],
+ ['HR','Croatia'],['CZ','Czechia'],['DK','Denmark'],['FI','Finland'],['FR','France'],
+ ['DE','Germany'],['GR','Greece'],['HU','Hungary'],['IS','Iceland'],['IE','Ireland'],
+ ['IT','Italy'],['MT','Malta'],['ME','Montenegro'],['NL','Netherlands'],['MK','North Macedonia'],
+ ['NO','Norway'],['PL','Poland'],['PT','Portugal'],['RO','Romania'],['RS','Serbia'],
+ ['SK','Slovakia'],['SI','Slovenia'],['ES','Spain'],['SE','Sweden'],['CH','Switzerland'],
+ ['TR','Türkiye'],['GB','United Kingdom'],['US','United States'],['CA','Canada'],['JP','Japan'],
+ ['KR','South Korea'],['TH','Thailand'],['AE','United Arab Emirates'],['GE','Georgia']
 ];
 function travelFlag(code){
   code=String(code||'').toUpperCase();
@@ -7761,7 +7761,7 @@ function updateTopActionButton(){
   const btn=document.getElementById('close-app-btn');
   if(!btn) return;
   const isHome=(currentView==='dashboard');
-  btn.innerHTML=isHome?'💾 Kaydet':'⌂ Ana Sayfa';
+  btn.innerHTML=isHome?'💾 Save':'⌂ Ana Sayfa';
   btn.title=isHome?'Çalışma ilerlemeni kaydet':'Ana sayfaya dön';
 }
 function handleTopAction(){
@@ -8268,6 +8268,57 @@ function gaChooseOption(btn,e){
  gaOptionLocked=true;document.querySelectorAll('.ga-option').forEach(x=>{x.disabled=true;x.classList.remove('ga-selected')});btn.classList.add('ga-selected');
  const raw=btn.getAttribute('data-ga-option');const answer=decodeURIComponent(raw||'');setTimeout(()=>{try{gaSubmit(answer)}finally{gaOptionLocked=false}},120);return false;
 }
+</script>
+
+
+<style id="ares-20261009-professional-ui">
+.travel-pro{max-width:980px;margin:0 auto}.travel-hero-pro{padding:26px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(135deg,var(--card),#eef5f0);box-shadow:var(--shadow)}
+.travel-kicker{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)}.travel-place{font-family:var(--serif);font-size:30px;font-weight:700;margin:6px 0}.travel-dates{color:var(--ink-soft);font-size:13px}.travel-mission{margin-top:18px;padding:15px 16px;border:1px solid rgba(91,115,97,.22);border-radius:13px;background:rgba(255,255,255,.66);line-height:1.5}
+.travel-journal{padding:25px}.travel-field{margin:0 0 15px}.travel-field label{display:block;font-size:12px;font-weight:750;color:var(--ink-soft);margin-bottom:7px}.travel-actions{display:flex;justify-content:flex-end;gap:9px;flex-wrap:wrap}.travel-list-row{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:15px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}.travel-add-panel{display:none;margin-top:14px}.travel-add-panel.open{display:block}
+.micro-pro{border-left:4px solid var(--gold);padding:23px 24px}.micro-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.micro-progress{font-size:12px;font-weight:800;color:var(--ink-soft);white-space:nowrap}.micro-item{padding:16px 0;border-top:1px solid var(--line)}.micro-item:first-of-type{border-top:0}.micro-tr{font-family:var(--serif);font-size:20px;line-height:1.45;margin:4px 0 12px}.micro-actions{display:flex;gap:8px;flex-wrap:wrap}.micro-hint{margin-top:10px;padding:10px 12px;border-radius:10px;background:var(--paper-dark);font-size:13px;display:none}.micro-hint.show{display:block}.micro-answer{margin-top:10px;padding:11px 12px;border-left:3px solid var(--leaf);background:#eef5f0;border-radius:8px}.micro-done{opacity:.72}
+@media(max-width:700px){.travel-place{font-size:25px}.micro-head{flex-direction:column}.travel-journal,.travel-hero-pro,.micro-pro{padding:18px}}
+</style>
+<script id="ares-20261009-learning-upgrade">
+// Active-recall micro task: Turkish prompt first; English stays hidden until needed.
+window.pickMicroTaskSentences=function(){
+ const t=todayKey(),contentVersion='active-recall-v1';
+ const fixed=[
+  {tr:'Nereden bilet alabilirim?',en:'Where can I buy a ticket?',hint1:'Where + can I …?',hint2:'Where can I b_____ a ticket?',focus:'can I / can I buy'},
+  {tr:'Hava güzel olursa dışarı çıkabilirim.',en:'I might go out if the weather is nice.',hint1:'might + verb + if …',hint2:'I m_____ go out if …',focus:'might + if'},
+  {tr:'Wi-Fi şifresini alabilir miyim?',en:'Could I have the Wi-Fi password?',hint1:'Could I have …?',hint2:'Could I h_____ the Wi-Fi password?',focus:'Could I have …?'}
+ ];
+ if(!progress.microTask||progress.microTask.date!==t||progress.microTask.contentVersion!==contentVersion){progress.microTask={date:t,contentVersion,sentences:fixed,doneIdx:[],hints:{}};saveProgress(progress)}
+ progress.microTask.hints=progress.microTask.hints||{};return progress.microTask;
+};
+window.microTaskCard=function(){
+ const mt=pickMicroTaskSentences(),done=mt.doneIdx.length;
+ let h=`<div class="card micro-pro"><div class="micro-head"><div><div class="travel-kicker">🐢 MICRO TASK · ACTIVE RECALL</div><h3 style="margin:5px 0 4px">Build & Speak 3 Sentences</h3><p class="hint" style="margin:0">Read the Turkish prompt, build the English sentence yourself, then say it. The answer stays hidden.</p></div><div class="micro-progress">${done}/3 complete</div></div>`;
+ mt.sentences.forEach((x,i)=>{const ok=mt.doneIdx.includes(i),level=mt.hints[i]||0;h+=`<div class="micro-item ${ok?'micro-done':''}"><div class="travel-kicker">${i+1} / 3 · Translate & Speak</div><div class="micro-tr">🇹🇷 ${esc(x.tr)}</div><div class="micro-actions"><button class="pill ${ok?'good':'primary'}" ${ok?'disabled':''} onclick="startMicroTaskSpeech(${i})">${ok?'✓ Completed':'🎤 Speak in English'}</button><button class="pill" ${ok?'disabled':''} onclick="microTaskTypeFallback(${i})">⌨️ Type answer</button><button class="pill" ${ok?'disabled':''} onclick="microTaskHint(${i})">💡 Hint</button></div><div id="micro-hint-${i}" class="micro-hint ${level?'show':''}">${level===1?esc(x.hint1):level===2?esc(x.hint2):level>=3?`Target: <b>${esc(x.en)}</b>`:''}</div><div id="micro-fb-${i}" class="hint" style="margin-top:8px"></div></div>`});
+ if(done===3)h+=`<div class="micro-answer"><b>🎉 Micro task complete.</b><br><span class="hint">Today: can I…? · might · could I…? — Try to use one of them in real life today.</span></div>`;
+ return h+'</div>';
+};
+window.microTaskHint=function(i){const mt=pickMicroTaskSentences();mt.hints[i]=Math.min(3,(mt.hints[i]||0)+1);saveProgress(progress);const box=document.getElementById('micro-hint-'+i),x=mt.sentences[i],n=mt.hints[i];if(box){box.classList.add('show');box.innerHTML=n===1?esc(x.hint1):n===2?esc(x.hint2):`Target: <b>${esc(x.en)}</b>`}};
+function microMeaningScore(target,heard){const stop=new Set(['a','an','the','to','of']);const words=v=>normalizeAnswer(v).split(' ').filter(w=>w&&!stop.has(w));const a=words(target),b=words(heard);if(!a.length||!b.length)return 0;const hit=a.filter(w=>b.includes(w)).length;return hit/Math.max(a.length,b.length)}
+window.startMicroTaskSpeech=function(i){
+ const mt=pickMicroTaskSentences(),target=mt.sentences[i]?.en,fb=document.getElementById('micro-fb-'+i),SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!target)return;if(!SR){fb.textContent='I couldn’t access speech recognition. Use Type answer instead.';return}
+ try{if(microRecognition)microRecognition.abort()}catch(e){} const r=new SR();microRecognition=r;r.lang='en-US';r.interimResults=false;r.continuous=false;r.maxAlternatives=3;let got=false;const timer=setTimeout(()=>{try{r.stop()}catch(e){}},8000);
+ r.onresult=e=>{got=true;const alts=[...e.results[0]].map(x=>x.transcript||'');const heard=alts[0]||'';const score=Math.max(...alts.map(v=>Math.max(orderedWordScore(target,v),microMeaningScore(target,v))));if(score>=.68){fb.innerHTML=`I heard: <b>${esc(heard)}</b> — ✅ Meaning is clear.`;setTimeout(()=>completeMicroTask(i),550)}else{fb.innerHTML=`I heard: <b>${esc(heard)}</b><br>🔁 I may not have captured that correctly. Try again, use a hint, or type your answer.`}};
+ r.onerror=e=>{if(e.error==='not-allowed'||e.error==='service-not-allowed')fb.textContent='I couldn’t access the microphone. Try again or type your answer.';else if(e.error!=='aborted')fb.textContent='I couldn’t process the audio clearly. Try again or type your answer.'};
+ r.onend=()=>{clearTimeout(timer);if(!got&&!fb.textContent)fb.textContent='I couldn’t process the audio clearly. Try again or type your answer.';if(microRecognition===r)microRecognition=null};r.start();fb.textContent='🎤 Listening…';
+};
+window.microTaskTypeFallback=function(i){const mt=pickMicroTaskSentences(),target=mt.sentences[i]?.en;if(!target)return;const val=prompt('Write the English sentence from the Turkish prompt (the answer is still hidden):');if(val===null)return;const score=Math.max(orderedWordScore(target,val),microMeaningScore(target,val));const fb=document.getElementById('micro-fb-'+i);if(score>=.72){if(fb)fb.innerHTML=`Your answer: <b>${esc(val)}</b> — ✅ Meaning is clear.`;setTimeout(()=>completeMicroTask(i),450)}else if(fb)fb.innerHTML=`Your answer: <b>${esc(val)}</b><br>🔁 Not quite yet. Try a hint or another natural version.`};
+
+// English-first Travel Mode. Turkish remains only where it has a learning purpose.
+window.tripStatus=function(t){const now=travelToday(),s=travelDate(t.start),e=travelDate(t.end||t.start);if(!s||!e)return{type:'invalid',label:'Date missing'};if(now<s){const d=travelDays(now,s);return{type:'future',days:d,label:d===1?'Tomorrow':`${d} days to go`}}if(now<=e){const day=travelDays(s,now)+1,total=travelDays(s,e)+1;return{type:'active',day,total,label:`Day ${day} of ${total}`}}return{type:'past',label:'Completed'}};
+window.formatTravelDate=function(v){const d=travelDate(v);return d?d.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}):'—'};
+function travelDisplay(t){const city=String(t.city||'').trim(),country=String(t.country||'').trim();return city&&city.toLowerCase()!==country.toLowerCase()?`${city}, ${country}`:(city||country)}
+window.travelHeroBanner=function(){const active=activeTrip(),upcoming=nextTrip();if(active){const st=tripStatus(active),task=travelTaskFor(active);return `<div class="travel-pro"><div class="travel-hero-pro"><div class="travel-kicker">TRAVEL MODE <span style="float:right">${esc(st.label)}</span></div><div class="travel-place">${travelFlag(active.code)} ${esc(travelDisplay(active))}</div><div class="travel-dates">${formatTravelDate(active.start)} — ${formatTravelDate(active.end||active.start)}</div><div class="travel-mission"><b>🎯 TODAY'S MISSION</b><br>${esc(task)}</div><div class="travel-actions" style="margin-top:14px"><button class="pill primary" onclick="navigate('trips')">View Travel Journal →</button></div></div></div>`}if(upcoming){const st=tripStatus(upcoming);return `<div class="card"><div class="travel-kicker">✈️ NEXT TRIP</div><div class="travel-place" style="font-size:24px">${travelFlag(upcoming.code)} ${esc(travelDisplay(upcoming))}</div><div class="travel-dates"><b>${esc(st.label)}</b> · ${formatTravelDate(upcoming.start)}</div><div class="travel-actions"><button class="pill" onclick="navigate('trips')">My Trips</button></div></div>`}return `<div class="card"><b>✈️ Add your next trip.</b> <span class="hint">Country flag and countdown are automatic.</span> <button class="pill primary" style="float:right" onclick="navigate('trips')">+ Add Trip</button></div>`};
+window.maltaCountdownBanner=function(){return travelHeroBanner()};
+window.toggleTripForm=function(){document.getElementById('travel-add-panel')?.classList.toggle('open')};
+window.viewTrips=function(){const trips=sortedTrips(),active=activeTrip();let html=`<div class="travel-pro">`;
+ if(active){const st=tripStatus(active),key=active.id,log=(progress.travelLogs||{})[key]||{};html+=`<div class="travel-hero-pro"><div class="travel-kicker">TRAVEL MODE <span style="float:right">${esc(st.label)}</span></div><div class="travel-place">${travelFlag(active.code)} ${esc(travelDisplay(active))}</div><div class="travel-dates">${formatTravelDate(active.start)} — ${formatTravelDate(active.end||active.start)}</div><div class="travel-mission"><b>🎯 TODAY'S MISSION</b><br>${esc(travelTaskFor(active))}</div></div><div class="card travel-journal"><div class="travel-kicker">TODAY'S TRAVEL JOURNAL</div><h3 style="margin:5px 0 20px">Practice from real life</h3><div class="travel-field"><label>Where did you use English today?</label><select id="travel-log-place" class="quiz-input"><option>Café</option><option>School</option><option>Restaurant</option><option>Transport</option><option>Social</option><option>Shop</option><option>Other</option></select></div><div class="travel-field"><label>What did you say?</label><input id="travel-log-used" class="quiz-input" value="${esc(log.used||'')}" placeholder="e.g. Could I have the bill, please?"></div><div class="travel-field"><label>Anything you wanted to say but couldn't?</label><input id="travel-log-missed" class="quiz-input" value="${esc(log.missed||'')}" placeholder="Write it in English or Turkish…"></div><div class="travel-actions"><button class="pill primary" onclick="saveTravelLog('${esc(key)}')">Save Entry</button></div></div>`}
+ html+=`<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div><div class="travel-kicker">YOUR TRIPS</div><h3 style="margin:4px 0">Trips & plans</h3></div><button class="pill primary" onclick="toggleTripForm()">+ Add Trip</button></div><div id="travel-add-panel" class="travel-add-panel"><p class="hint">Choose a country and dates. The flag, countdown and Travel Mode switch automatically.</p><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px"><div><label class="hint">Country</label><select id="trip-country" class="quiz-input">${countryOptions('ES')}</select></div><div><label class="hint">City / Region</label><input id="trip-city" class="quiz-input" placeholder="e.g. Seville"></div><div><label class="hint">Departure</label><input id="trip-start" type="date" class="quiz-input"></div><div><label class="hint">Return</label><input id="trip-end" type="date" class="quiz-input"></div></div><div class="travel-actions"><button class="pill primary" onclick="addTrip()">Add Trip</button></div></div>`;
+ if(!trips.length)html+=`<p class="hint">No trips added yet.</p>`;trips.forEach(t=>{const st=tripStatus(t);html+=`<div class="travel-list-row"><div><div style="font-size:18px;font-weight:800">${travelFlag(t.code)} ${esc(travelDisplay(t))}</div><div class="hint">${formatTravelDate(t.start)} — ${formatTravelDate(t.end||t.start)} · <b>${esc(st.label)}</b></div></div><div><button class="pill" onclick="editTrip('${esc(t.id)}')">Edit</button> <button class="pill bad" onclick="removeTrip('${esc(t.id)}')">Delete</button></div></div>`});return html+'</div></div>'};
 </script>
 
 </body>

@@ -19,9 +19,10 @@
 .abroad-category-card.active{outline:2px solid #56728f;background:#f1f6fb}
 .abroad-category-icon{font-size:27px;margin-bottom:8px}.abroad-category-title{font-weight:700;font-size:16px;margin-bottom:4px}.abroad-category-desc{font-size:12px;color:var(--soft);line-height:1.35}
 
-</style></head><body>
+</style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head><body>
 <div class="app"><aside class="side"><div class="brand"><h1>🐾 Ares Speaking</h1><p>Study less. Speak more. · FINAL</p></div><div class="nav" id="nav">
-<a class="navlink" href="./sentence-builder.html">🧩 Sentence Builder</a><button class="active" data-view="mission">🎯 Today's Mission</button><button data-view="coach">🎤 Speaking Coach</button><button data-view="quick">⚡ Quick Response</button><button data-view="role">🎭 Role Play</button><button data-view="abroad">🌍 Abroad Simulation</button><button data-view="surprise">🎲 Surprise Me</button><button data-view="mistakes">🧠 My Mistakes</button><button data-view="progress">📈 Speaking Progress</button></div><a class="legacy" href="./index.html" aria-label="Ana Sayfaya dön"><span class="home-icon">⌂</span><span class="home-copy">Ana Sayfa<small>İngilizce Defterim</small></span></a></aside>
+<a class="navlink" href="./sentence-builder.html">🧩 Sentence Builder</a><button class="active" data-view="mission">🎯 Today's Mission</button><button data-view="coach">🎤 Speaking Coach</button><button data-view="quick">⚡ Quick Response</button><button data-view="role">🎭 Role Play</button><button data-view="abroad">🌍 Abroad Simulation</button><button id="privateNav" data-view="private" style="display:none">🔒 Personal Practice</button><button data-view="surprise">🎲 Surprise Me</button><button data-view="mistakes">🧠 My Mistakes</button><button data-view="progress">📈 Speaking Progress</button></div><a class="legacy" href="./index.html" aria-label="Ana Sayfaya dön"><span class="home-icon">⌂</span><span class="home-copy">Home<small>Erhan English</small></span></a></aside>
 <main class="main">
 
 <section class="view active" id="mission"><div class="top"><div><h1>Today's Mission</h1><div class="sub">15 dakikalık yoğun konuşma antrenmanı</div></div><button class="pill" onclick="setKey()">🔑 API</button></div>
@@ -45,6 +46,9 @@
 <div class="card"><div class="tiny">ABROAD SIMULATION CATEGORIES</div><div class="abroad-category-grid" id="abroadTopics"></div><div class="row" style="margin-top:12px"><button class="pill" onclick="newAbroad()">🎲 Rastgele senaryo</button><button class="pill" onclick="resetAbroad()">↺ Baştan</button><button class="pill" onclick="clearScenarioChat('abroad')">🧹 Sohbet geçmişini temizle</button><button class="pill" onclick="showSampleDialogue('abroad')">📖 Örnek Sohbet</button></div><div id="abroadSample" style="display:none"></div></div>
 <div class="card"><div class="scenario"><div class="tiny" id="abroadMeta"></div><div class="prompt" id="abroadSituation"></div><div class="sub" id="abroadRole"></div></div><div class="chat" id="abroadChat" style="margin-top:12px"></div><textarea class="answerbox" id="abroadText"></textarea><div class="speechbar"><button class="pill" onclick="listenScenario('abroad')">🔊 Sesli Dinle</button><button class="pill" id="abroadMicBtn" onclick="startVoice('abroadText','abroadMicBtn','abroadSpeechStatus')">🎤 Konuş</button><button class="pill" onclick="stopVoice('abroadMicBtn','abroadSpeechStatus')">⏹️ Durdur</button><button class="pill primary" onclick="sendScenario('abroad')">Gönder</button><button class="pill good" onclick="finishScenario('abroad')">📊 Değerlendir</button><button class="pill" onclick="saveScenarioRecord('abroad')">💾 Konuşmayı Kaydet</button></div><div class="speech-status" id="abroadSpeechStatus"></div><div id="abroadFeedback" class="feedback" style="display:none"></div></div></section>
 
+<section class="view" id="private"><div class="top"><div><h1>🔒 Personal Practice</h1><div class="sub">Private real-life conversation practice · owner only.</div></div></div>
+<div class="card"><div class="tiny">PRIVATE PRACTICE</div><div class="topicgrid" id="privateTopics"></div><div class="row" style="margin-top:12px"><button class="pill" onclick="newPrivate()">🎲 New scenario</button><button class="pill" onclick="resetPrivate()">↺ Restart</button><button class="pill" onclick="clearScenarioChat('private')">🧹 Clear chat</button></div></div>
+<div class="card"><div class="scenario"><div class="tiny" id="privateMeta"></div><div class="prompt" id="privateSituation"></div><div class="sub" id="privateRole"></div></div><div class="chat" id="privateChat" style="margin-top:12px"></div><textarea class="answerbox" id="privateText" placeholder="Type or speak in English…"></textarea><div class="speechbar"><button class="pill" onclick="listenScenario('private')">🔊 Listen</button><button class="pill" id="privateMicBtn" onclick="startVoice('privateText','privateMicBtn','privateSpeechStatus')">🎤 Speak</button><button class="pill primary" onclick="sendScenario('private')">Send</button><button class="pill good" onclick="finishScenario('private')">📊 Review</button></div><div class="speech-status" id="privateSpeechStatus"></div><div id="privateFeedback" class="feedback" style="display:none"></div></div></section>
 <section class="view" id="surprise"><div class="top"><div><h1>🎲 Surprise Me</h1><div class="sub">Hazırlıksız konuşma refleksi.</div></div><button class="pill" onclick="newSurprise()">🎲 Yeni sürpriz</button></div><div class="card"><div class="prompt" id="surprisePrompt"></div><textarea class="answerbox" id="surpriseText"></textarea><div class="speechbar"><button class="pill" id="surpriseMicBtn" onclick="startVoice('surpriseText','surpriseMicBtn','surpriseSpeechStatus')">🎤 Konuş</button><button class="pill" onclick="stopVoice('surpriseMicBtn','surpriseSpeechStatus')">⏹️ Durdur</button><button class="pill primary" onclick="evalSurprise()">📊 Değerlendir</button><button class="pill" onclick="savePracticeRecord('surprise')">💾 Konuşmayı Kaydet</button></div><div class="speech-status" id="surpriseSpeechStatus"></div><div id="surpriseFeedback" class="feedback" style="display:none"></div></div></section>
 
 <section class="view" id="mistakes"><div class="top"><div><h1>🧠 My Mistakes</h1><div class="sub">Sadece konuşmayı gerçekten etkileyen düzeltmeler.</div></div><button class="pill" onclick="clearMistakes()">🧹 Temizle</button></div><div class="card" id="mistakeList"></div></section>
@@ -52,8 +56,8 @@
 </main></div>
 <script>
 (()=>{'use strict';const $=id=>document.getElementById(id);const KEY='ares_v36';let rec=null,listening=false,timerId=null,micSessionId=0,micRestartTimer=null;
-let state={turns:0,minutes:0,mistakes:[],partner:'silhouette',emoji:'🙂',photo:'',mode:'guided',role:null,abroad:null,roleChat:[],abroadChat:[],dailyStats:{},scenarioStats:{role:{},abroad:{}},lastReports:{},lastEvalSignature:{}};try{Object.assign(state,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){}
-state.dailyStats=state.dailyStats||{};state.scenarioStats=state.scenarioStats||{role:{},abroad:{}};state.scenarioStats.role=state.scenarioStats.role||{};state.scenarioStats.abroad=state.scenarioStats.abroad||{};state.lastReports=state.lastReports||{};state.lastEvalSignature=state.lastEvalSignature||{};state.mistakes=(state.mistakes||[]).filter(m=>m&&typeof m==='object'&&m.a&&m.b);
+let state={turns:0,minutes:0,mistakes:[],partner:'silhouette',emoji:'🙂',photo:'',mode:'guided',role:null,abroad:null,private:null,roleChat:[],abroadChat:[],privateChat:[],dailyStats:{},scenarioStats:{role:{},abroad:{},private:{}},lastReports:{},lastEvalSignature:{}};try{Object.assign(state,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){}
+state.dailyStats=state.dailyStats||{};state.scenarioStats=state.scenarioStats||{role:{},abroad:{},private:{}};state.scenarioStats.role=state.scenarioStats.role||{};state.scenarioStats.abroad=state.scenarioStats.abroad||{};state.scenarioStats.private=state.scenarioStats.private||{};state.lastReports=state.lastReports||{};state.lastEvalSignature=state.lastEvalSignature||{};state.mistakes=(state.mistakes||[]).filter(m=>m&&typeof m==='object'&&m.a&&m.b);
 const roles=[{"cat":"Restaurant","place":"Barcelona","role":"waiter","p":"You ordered grilled fish but received pasta.","starter":"Is everything okay with your meal?"},{"cat":"Restaurant","place":"Rome","role":"waiter","p":"You want a recommendation for a local dish.","starter":"Would you like some help choosing from the menu?"},{"cat":"Restaurant","place":"Athens","role":"waiter","p":"Your food is taking too long and you want to ask politely.","starter":"Is there anything I can help you with?"},{"cat":"Restaurant","place":"Lisbon","role":"waiter","p":"You want a table outside but only indoor tables are available.","starter":"Good evening. A table for one?"},{"cat":"Restaurant","place":"Palermo","role":"waiter","p":"You need to ask whether a dish contains nuts.","starter":"Are you ready to order?"},{"cat":"Restaurant","place":"Vienna","role":"waiter","p":"You want to split the bill with your friend.","starter":"Would you like the bill together or separately?"},{"cat":"Restaurant","place":"Madrid","role":"waiter","p":"You received cold food and want it replaced.","starter":"How is everything with your meal?"},{"cat":"Restaurant","place":"Prague","role":"waiter","p":"You want to order dessert but are not sure what to choose.","starter":"Would you like to see the dessert menu?"},{"cat":"Hotel","place":"Rome","role":"receptionist","p":"The receptionist cannot find your reservation.","starter":"I'm sorry, but I can't find a reservation under your name."},{"cat":"Hotel","place":"Paris","role":"receptionist","p":"Your room is too noisy at night.","starter":"Good evening. Reception. How can I help?"},{"cat":"Hotel","place":"Vienna","role":"receptionist","p":"You want a late checkout tomorrow.","starter":"Of course. What time would you like to check out?"},{"cat":"Hotel","place":"Berlin","role":"receptionist","p":"The air conditioning in your room is not working.","starter":"Hello, reception. What seems to be the problem?"},{"cat":"Hotel","place":"Brussels","role":"receptionist","p":"You want to leave your luggage after checkout.","starter":"Good morning. How can I help you?"},{"cat":"Hotel","place":"Amsterdam","role":"receptionist","p":"You were given a twin room but booked a double room.","starter":"Is everything all right with your room?"},{"cat":"Hotel","place":"Budapest","role":"receptionist","p":"You need an extra towel and another pillow.","starter":"Reception. What can I bring to your room?"},{"cat":"Hotel","place":"Florence","role":"receptionist","p":"You want to ask what time breakfast starts.","starter":"Good evening. Do you need anything?"},{"cat":"Café","place":"Paris","role":"barista","p":"Your coffee order is wrong.","starter":"Here's your latte. Anything else?"},{"cat":"Café","place":"Dublin","role":"barista","p":"You want a black coffee and something small to eat.","starter":"Hi! What can I get for you?"},{"cat":"Café","place":"Vienna","role":"barista","p":"You want to know if there is free Wi-Fi.","starter":"Hello. What would you like today?"},{"cat":"Café","place":"Prague","role":"barista","p":"You want your coffee to take away.","starter":"For here or to go?"},{"cat":"Café","place":"Amsterdam","role":"barista","p":"You want to know which cake is most popular.","starter":"Would you like something sweet with your coffee?"},{"cat":"Café","place":"Rome","role":"barista","p":"You want a stronger coffee than the one you ordered.","starter":"Is your coffee okay?"},{"cat":"Café","place":"Brussels","role":"barista","p":"You want to pay by card but the card machine is not working.","starter":"I'm sorry, our card machine is temporarily down."},{"cat":"Café","place":"Malta","role":"barista","p":"You want to sit outside but the tables are full.","starter":"Hi! Are you looking for a table?"},{"cat":"Shopping","place":"Milan","role":"shop assistant","p":"You want to return a shirt because it is the wrong size.","starter":"Hello. How can I help you today?"},{"cat":"Shopping","place":"London","role":"shop assistant","p":"You want to try on a jacket in a larger size.","starter":"Can I help you find something?"},{"cat":"Shopping","place":"Madrid","role":"shop assistant","p":"You want to know whether an item is on sale.","starter":"Hi! Let me know if you need any help."},{"cat":"Shopping","place":"Berlin","role":"shop assistant","p":"You bought something yesterday and want a refund.","starter":"Do you have the receipt with you?"},{"cat":"Shopping","place":"Athens","role":"shop assistant","p":"You want a cheaper alternative to a bag you like.","starter":"That bag is one of our most popular models."},{"cat":"Shopping","place":"Paris","role":"shop assistant","p":"You want to ask if the shop can deliver to your hotel.","starter":"Would you like to take it with you today?"},{"cat":"Shopping","place":"Brussels","role":"shop assistant","p":"You are looking for a gift for a friend.","starter":"Are you shopping for yourself or for someone else?"},{"cat":"Shopping","place":"Prague","role":"shop assistant","p":"You want to exchange shoes because they are uncomfortable.","starter":"What seems to be the problem with the shoes?"},{"cat":"Socialising","place":"Dublin","role":"traveller","p":"You meet someone at breakfast and start a conversation.","starter":"Hi! Are you travelling alone?"},{"cat":"Socialising","place":"Malta","role":"classmate","p":"You meet a classmate before class and want to get to know them.","starter":"Hi, is this your first week here?"},{"cat":"Socialising","place":"Barcelona","role":"traveller","p":"You meet someone on a walking tour.","starter":"Have you been to Barcelona before?"},{"cat":"Socialising","place":"Berlin","role":"local person","p":"You start a conversation while waiting for a train.","starter":"This train is always a little late, isn't it?"},{"cat":"Socialising","place":"Rome","role":"traveller","p":"You sit next to someone in a café and start chatting.","starter":"Is that your first coffee today?"},{"cat":"Socialising","place":"Amsterdam","role":"traveller","p":"You meet someone at your hotel lounge.","starter":"How long are you staying here?"},{"cat":"Socialising","place":"Prague","role":"tourist","p":"Someone asks where you are from and what brought you here.","starter":"Where are you visiting from?"},{"cat":"Socialising","place":"Vienna","role":"traveller","p":"You meet someone after a concert and talk about music.","starter":"Did you enjoy the concert?"},{"cat":"Pharmacy","place":"Malta","role":"pharmacist","p":"You need something for a headache and want advice.","starter":"Hello. What can I help you with?"},{"cat":"Pharmacy","place":"Rome","role":"pharmacist","p":"You have a sore throat and want something mild.","starter":"What symptoms do you have?"},{"cat":"Pharmacy","place":"Paris","role":"pharmacist","p":"You need sunscreen for sensitive skin.","starter":"Are you looking for a particular type of sunscreen?"},{"cat":"Pharmacy","place":"Berlin","role":"pharmacist","p":"You need a small bandage and antiseptic.","starter":"Hello. What do you need today?"},{"cat":"Pharmacy","place":"Athens","role":"pharmacist","p":"You want something for an upset stomach.","starter":"How long have you had the problem?"},{"cat":"Pharmacy","place":"Madrid","role":"pharmacist","p":"You want to ask how often to use an over-the-counter cream.","starter":"Have you used this kind of cream before?"},{"cat":"Pharmacy","place":"Vienna","role":"pharmacist","p":"You need allergy tablets and want to know if they cause drowsiness.","starter":"What kind of allergy symptoms do you have?"},{"cat":"Pharmacy","place":"Prague","role":"pharmacist","p":"You want to buy a thermometer.","starter":"Of course. Digital or standard?"}];
 const abroad=[
 {cat:'Airport & Passport',place:'London',role:'immigration officer',p:'Explain your visit purpose and how long you will stay.',starter:'Good afternoon. May I see your passport? What is the purpose of your visit?'},
@@ -255,107 +259,25 @@ function setUniversalMicUI(live,message){
 }
 window.startVoice=(id,btnId,statusId)=>{
  const R=window.SpeechRecognition||window.webkitSpeechRecognition;
- if(!R){alert('Bu tarayıcı ses tanımayı desteklemiyor.');return}
- stopVoice();
- try{if('speechSynthesis' in window)window.speechSynthesis.cancel()}catch(e){}
- const out=$(id); if(!out)return;
- const session=++micSessionId;
- universalMic={targetId:id,buttonId:btnId,statusId:statusId,base:(out.value||'').trim(),finalText:'',interimText:'',session,restarts:0};
- listening=true;
- activeMicBtn=btnId?$(btnId):null;
- activeSpeechStatus=statusId?$(statusId):null;
- setUniversalMicUI(true,'Seni dinliyorum… Konuşman bitince Durdur’a bas.');
-
- const stillActive=()=>listening&&session===micSessionId;
- const scheduleRestart=(delay=450)=>{
-   if(!stillActive())return;
-   clearTimeout(micRestartTimer);
-   micRestartTimer=setTimeout(()=>{
-     if(!stillActive())return;
-     try{rec=buildRecognition();rec.start()}
-     catch(e){if(stillActive())scheduleRestart(650)}
-   },delay);
- };
- const buildRecognition=()=>{
-   const r=new R();
-   r.lang='en-US';
-   r.continuous=true;
-   r.interimResults=true;
-   r.maxAlternatives=5;
-
-   r.onstart=()=>{
-     if(stillActive())setUniversalMicUI(true,'Seni dinliyorum… Konuşman bitince Durdur’a bas.');
-   };
-   r.onresult=e=>{
-     if(!stillActive())return;
-     let interim='', finals=[];
-     for(let i=e.resultIndex;i<e.results.length;i++){
-       const res=e.results[i];
-       if(!res||!res[0])continue;
-       const phrase=String(res[0].transcript||'').trim();
-       if(!phrase)continue;
-       if(res.isFinal)finals.push(phrase);
-       else interim=phrase;
-     }
-     for(const phrase of finals)universalMic.finalText=mergeSpeechText(universalMic.finalText,phrase);
-     universalMic.interimText=interim;
-     renderUniversalTranscript();
-   };
-   r.onerror=e=>{
-     if(!stillActive())return;
-     if(e.error==='not-allowed'||e.error==='service-not-allowed'){
-       listening=false;micSessionId++;
-       setUniversalMicUI(false,'Mikrofon izni gerekiyor.');
-       return;
-     }
-     if(e.error==='audio-capture'){
-       listening=false;micSessionId++;
-       setUniversalMicUI(false,'Mikrofon kullanılamıyor.');
-       return;
-     }
-     if(e.error==='network'){
-       setUniversalMicUI(true,'Ses tanıma bağlantısı kısa süre kesildi; yeniden bağlanıyorum…');
-     }
-     // no-speech and aborted are normal on Android; onend restarts the same mic session.
-   };
-   r.onend=()=>{
-     if(!stillActive())return;
-     // Commit any visible interim words before Chrome drops the recognition session.
-     if(universalMic.interimText){
-       universalMic.finalText=mergeSpeechText(universalMic.finalText,universalMic.interimText);
-       universalMic.interimText='';
-       renderUniversalTranscript();
-     }
-     universalMic.restarts++;
-     setUniversalMicUI(true,'Dinliyorum… kısa sessizlikte otomatik devam eder.');
-     scheduleRestart(universalMic.restarts<3?450:600);
-   };
-   return r;
- };
- rec=buildRecognition();
- try{rec.start()}catch(e){scheduleRestart(600)}
+ if(!R){const st=statusId?$(statusId):null;if(st)st.textContent='Speech recognition is not supported in this browser.';return}
+ stopVoice();try{if('speechSynthesis' in window)window.speechSynthesis.cancel()}catch(e){}
+ const out=$(id);if(!out)return;const session=++micSessionId;
+ universalMic={targetId:id,buttonId:btnId,statusId:statusId,base:(out.value||'').trim(),finalText:'',interimText:'',session,restarts:0};listening=true;activeMicBtn=btnId?$(btnId):null;activeSpeechStatus=statusId?$(statusId):null;
+ let silenceTimer=null,maxTimer=null,gotAudio=false;
+ const finish=(message)=>{if(session!==micSessionId)return;clearTimeout(silenceTimer);clearTimeout(maxTimer);if(universalMic.interimText){universalMic.finalText=mergeSpeechText(universalMic.finalText,universalMic.interimText);universalMic.interimText='';renderUniversalTranscript()}listening=false;micSessionId++;const old=rec;rec=null;if(old){try{old.onend=null;old.stop()}catch(e){try{old.abort()}catch(_){}}}setUniversalMicUI(false,message||'Ready.');};
+ const armSilence=()=>{clearTimeout(silenceTimer);silenceTimer=setTimeout(()=>finish(gotAudio?'✓ Captured. You can edit the text before sending.':'I couldn’t process the audio clearly. Try again or type your answer.'),1500)};
+ const r=new R();rec=r;r.lang='en-US';r.continuous=true;r.interimResults=true;r.maxAlternatives=5;
+ r.onstart=()=>{setUniversalMicUI(true,'Listening… I’ll stop automatically after a short silence.');maxTimer=setTimeout(()=>finish(gotAudio?'✓ Captured.':'Listening ended. Try again or type your answer.'),8000)};
+ r.onresult=e=>{if(!listening||session!==micSessionId)return;gotAudio=true;let interim='',finals=[];for(let i=e.resultIndex;i<e.results.length;i++){const res=e.results[i];if(!res||!res[0])continue;const phrase=String(res[0].transcript||'').trim();if(!phrase)continue;if(res.isFinal)finals.push(phrase);else interim=phrase}for(const phrase of finals)universalMic.finalText=mergeSpeechText(universalMic.finalText,phrase);universalMic.interimText=interim;renderUniversalTranscript();armSilence()};
+ r.onerror=e=>{if(session!==micSessionId)return;if(e.error==='not-allowed'||e.error==='service-not-allowed')finish('I couldn’t access the microphone.');else if(e.error==='audio-capture')finish('The microphone is unavailable.');else if(e.error!=='aborted'&&e.error!=='no-speech')finish('I couldn’t process the audio clearly. Try again or type your answer.')};
+ r.onend=()=>{if(listening&&session===micSessionId)finish(gotAudio?'✓ Captured. You can edit the text before sending.':'I couldn’t process the audio clearly. Try again or type your answer.')};
+ try{r.start()}catch(e){finish('I couldn’t start the microphone. Try again or type your answer.')}
 };
 
 window.stopVoice=(btnId,statusId)=>{
- if(universalMic.interimText){
-   universalMic.finalText=mergeSpeechText(universalMic.finalText,universalMic.interimText);
-   universalMic.interimText='';
-   renderUniversalTranscript();
- }
- listening=false;
- micSessionId++;
- clearTimeout(micRestartTimer);micRestartTimer=null;
- const old=rec;rec=null;
- if(old){
-   try{old.onend=null;old.onerror=null;old.onresult=null;old.stop()}
-   catch(e){try{old.abort()}catch(_){}}
- }
- const b=btnId?$(btnId):activeMicBtn;
- if(b){b.classList.remove('mic-live');b.textContent='🎤 Konuş'}
- const st=statusId?$(statusId):activeSpeechStatus;
- if(st)st.textContent='Dinleme durdu.';
- activeMicBtn=null;activeSpeechStatus=null;
- universalMic={targetId:null,buttonId:null,statusId:null,base:'',finalText:'',interimText:'',session:0,restarts:0};
+ if(universalMic.interimText){universalMic.finalText=mergeSpeechText(universalMic.finalText,universalMic.interimText);universalMic.interimText='';renderUniversalTranscript()}
+ listening=false;micSessionId++;clearTimeout(micRestartTimer);micRestartTimer=null;const old=rec;rec=null;if(old){try{old.onend=null;old.onerror=null;old.onresult=null;old.stop()}catch(e){try{old.abort()}catch(_){}}}
+ const b=btnId?$(btnId):activeMicBtn;if(b){b.classList.remove('mic-live');b.textContent='🎤 Speak'}const st=statusId?$(statusId):activeSpeechStatus;if(st)st.textContent='';activeMicBtn=null;activeSpeechStatus=null;universalMic={targetId:null,buttonId:null,statusId:null,base:'',finalText:'',interimText:'',session:0,restarts:0};
 };
 
 function cleanSpeechText(t){return String(t??'').replace(/^Ares:\s*/i,'').replace(/[*_#`]/g,'').trim()}
@@ -618,6 +540,18 @@ window.setPartner=p=>{state.partner=p;save();renderPartner()};window.setEmoji=e=
 window.loadPhoto=file=>{if(!file)return;const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas'),s=360;c.width=s;c.height=s;const ctx=c.getContext('2d'),sc=Math.max(s/im.width,s/im.height),w=im.width*sc,h=im.height*sc;ctx.drawImage(im,(s-w)/2,(s-h)/2,w,h);state.photo=c.toDataURL('image/jpeg',.78);state.partner='photo';save();renderPartner()};im.src=r.result};r.readAsDataURL(file)}
 function renderMistakes(){$('mistakeList').innerHTML=state.mistakes.length?state.mistakes.map((m,i)=>`<div style="padding:10px 0;border-bottom:1px solid #ddd"><b>Sen:</b> ${esc(m.a)}<br><b>Daha doğal:</b> ${esc(m.b)} <button class="pill" onclick="removeMistake(${i})">✓ Öğrendim</button></div>`).join(''):'Henüz önemli bir düzeltme yok.'}
 window.removeMistake=i=>{state.mistakes.splice(i,1);save();renderMistakes()};window.clearMistakes=()=>{state.mistakes=[];save();renderMistakes()}
-$('emojiGrid').innerHTML=emojis.map(e=>`<button onclick="setEmoji('${e}')">${e}</button>`).join('');if(!state.role)state.role=roles[0];if(!state.abroad)state.abroad=abroad[0];renderRoleTopics();renderAbroadTopics();renderScenario('role');renderScenario('abroad');newSurprise();renderMistakes();updateDailyFocus();updateStats();
+
+// Owner-only private practice. Scenario data is fetched only after a server-side device check.
+const PRIVATE_SB_URL='https://yedpdbsosaisalcnwcqv.supabase.co',PRIVATE_SB_KEY='sb_publishable_jtT-XD3Ge97HkRNaUQydgw_VqSQdHt7';
+let privateScenarios=[];
+function privateDeviceToken(){try{return localStorage.getItem('ares-device-token-v2')||localStorage.getItem('ares-device-token-v1')||''}catch(e){return ''}}
+async function initPrivatePractice(){
+ try{const token=privateDeviceToken();if(!token)return;const client=window.supabase?.createClient(PRIVATE_SB_URL,PRIVATE_SB_KEY,{auth:{storageKey:'ares-private-check',persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});if(!client)return;const access=await client.rpc('ares_private_speaking_access',{p_token:token});if(access.error||access.data!==true)return;const res=await client.rpc('ares_get_private_scenarios',{p_token:token});if(res.error||!Array.isArray(res.data)||!res.data.length)return;privateScenarios=res.data.map(x=>({id:x.id,cat:x.category,place:x.place,role:x.role,p:x.prompt,starter:x.starter}));const nav=$('privateNav');if(nav)nav.style.display='block';if(!state.private)state.private=privateScenarios[0];renderPrivateTopics();renderScenario('private') }catch(e){}
+}
+function renderPrivateTopics(){const box=$('privateTopics');if(!box||!privateScenarios.length)return;const cats=[...new Set(privateScenarios.map(x=>x.cat))];box.innerHTML=cats.map(c=>`<button class="topic ${state.private&&state.private.cat===c?'active':''}" onclick="pickPrivate(${JSON.stringify(c).replace(/"/g,'&quot;')})">🔒 ${esc(c)}</button>`).join('')}
+window.pickPrivate=c=>{stopVoice();const list=privateScenarios.filter(x=>x.cat===c);if(!list.length)return;state.private=smartPick('private',list,state.private);markScenarioSeen('private',state.private);state.privateChat=[];save();renderPrivateTopics();renderScenario('private')};
+window.newPrivate=()=>{stopVoice();if(!privateScenarios.length)return;state.private=smartPick('private',privateScenarios,state.private);markScenarioSeen('private',state.private);state.privateChat=[];save();renderPrivateTopics();renderScenario('private')};
+window.resetPrivate=()=>{stopVoice();if(!state.private&&privateScenarios.length)state.private=privateScenarios[0];state.privateChat=[];save();if(state.private)renderScenario('private')};
+$('emojiGrid').innerHTML=emojis.map(e=>`<button onclick="setEmoji('${e}')">${e}</button>`).join('');if(!state.role)state.role=roles[0];if(!state.abroad)state.abroad=abroad[0];renderRoleTopics();renderAbroadTopics();renderScenario('role');renderScenario('abroad');newSurprise();renderMistakes();updateDailyFocus();updateStats();initPrivatePractice();
 })();
 </script></body></html>
