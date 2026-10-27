@@ -1119,4 +1119,95 @@ function ec7Spoken(i){
  let timer=0;const obs=new MutationObserver(()=>{clearTimeout(timer);timer=setTimeout(inject,80)});const boot=()=>{const c=document.getElementById('content');if(c){obs.observe(c,{childList:true,subtree:false});inject()}else setTimeout(boot,100)};boot();
  window.addEventListener('storage',()=>setTimeout(()=>{document.getElementById('ares11-card')?.remove();inject()},100));
 })();
+<!-- ARES V2 STAGE 12 — Adaptive Speaking Coach -->
+<script id="ares-stage12-adaptive-speaking">
+(function(){
+  'use strict';
+
+  const PLAN_KEY = 'ares_adaptive_speaking_v1';
+
+  function json(key, fallback){
+    try {
+      return JSON.parse(localStorage.getItem(key) || '') || fallback;
+    } catch(e) {
+      return fallback;
+    }
+  }
+
+  function buildSpeakingPlan(){
+    const progress = json('ing_defter_progress', {});
+    const transfers = json('ares_lh_transfer_queue_v1', []);
+
+    const mistakes = (progress.mistakes || [])
+      .filter(x => x && !x.repairMastered)
+      .slice(0, 3);
+
+    const weakWords = Object.entries(progress.vocabMastery || {})
+      .filter(([word, data]) => {
+        const stages = (data && data.stages) || [];
+        return (data && data.weak > 0) ||
+               stages.filter(Boolean).length < 3;
+      })
+      .slice(0, 5)
+      .map(([word]) => word);
+
+    const speakingTransfers = transfers
+      .filter(x => x && x.status !== 'mastered')
+      .slice(0, 3);
+
+    let priority = 'fluency';
+
+    if (mistakes.length >= 3) priority = 'error-repair';
+    else if (speakingTransfers.length) priority = 'language-transfer';
+    else if (weakWords.length >= 3) priority = 'vocabulary';
+
+    const plan = {
+      version: 12,
+      createdAt: Date.now(),
+      priority,
+      mistakes,
+      weakWords,
+      transfers: speakingTransfers
+    };
+
+    localStorage.setItem(PLAN_KEY, JSON.stringify(plan));
+    localStorage.setItem('ares_sync_dirty_at_v1', String(Date.now()));
+
+    return plan;
+  }
+
+  window.aresStartAdaptiveSpeaking = function(){
+    buildSpeakingPlan();
+    location.href = './speaking.html?adaptive=1';
+  };
+
+  function addButton(){
+    const items = [...document.querySelectorAll('.navitem')];
+
+    const speaking = items.find(el =>
+      (el.textContent || '').includes('Ares Speaking')
+    );
+
+    if (!speaking || document.getElementById('ares-stage12-speaking-btn'))
+      return;
+
+    const btn = document.createElement('div');
+
+    btn.id = 'ares-stage12-speaking-btn';
+    btn.className = 'navitem';
+    btn.innerHTML =
+      '<span class="dot"></span> 🧠 Adaptive Speaking';
+
+    btn.onclick = window.aresStartAdaptiveSpeaking;
+
+    speaking.insertAdjacentElement('afterend', btn);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', addButton);
+  } else {
+    addButton();
+  }
+
+})();
 </script>
