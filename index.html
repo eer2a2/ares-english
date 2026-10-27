@@ -1119,6 +1119,7 @@ function ec7Spoken(i){
  let timer=0;const obs=new MutationObserver(()=>{clearTimeout(timer);timer=setTimeout(inject,80)});const boot=()=>{const c=document.getElementById('content');if(c){obs.observe(c,{childList:true,subtree:false});inject()}else setTimeout(boot,100)};boot();
  window.addEventListener('storage',()=>setTimeout(()=>{document.getElementById('ares11-card')?.remove();inject()},100));
 })();
+</script>
 <!-- ARES V2 STAGE 12 — Adaptive Speaking Coach -->
 <script id="ares-stage12-adaptive-speaking">
 (function(){
