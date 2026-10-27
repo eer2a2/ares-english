@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script id="ares-scroll-home-boot">try{if("scrollRestoration" in history)history.scrollRestoration="manual";}catch(e){}</script>
+<!-- Erhan English PWA / App Icon -->
+<link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" content="#06162f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Erhan English">
+<!-- ARES_COACH_RANDOM_LESSON_V3 -->
+<!-- COLLOCATIONS_NATURAL_CHUNKS_V3 -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Erhan English</title>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1E2A38">
+
+<!-- COLLOCATION_SPEAKING_V12_6_AI_RESILIENCE -->
+
+
+
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- ARES: dynamic lesson tests + close distractors + semantic variants -->
+
+
+
+
+
+
+
+
+
+
+  <link rel="stylesheet" href="assets/ares.css?v=10">
+</head>
+<body data-ares-stage="10">
+
+
+<div id="ares-app-lock"><div class="box">
+<div class="lock">🔐</div><h2>Erhan English</h2>
+<p id="ares-lock-msg">Cihaz erişimi kontrol ediliyor…</p>
+<div id="ares-lock-form" style="display:none">
+<label>Adınız</label><input id="ares-lock-name" placeholder="Örn. Ahmet" autocomplete="name">
+<label>Cihaz adı</label><input id="ares-lock-device" value="Chrome">
+<button id="ares-lock-request" type="button">ERİŞİM TALEBİ GÖNDER</button>
+</div>
+<button id="ares-lock-check" type="button" style="display:none;background:#34475a">ONAYI KONTROL ET</button>
+</div></div>
+<script>
+(function(){
+ const SB_URL='https://yedpdbsosaisalcnwcqv.supabase.co', SB_KEY='sb_publishable_jtT-XD3Ge97HkRNaUQydgw_VqSQdHt7';
+ const sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{storageKey:"ares-main-auth",persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
+ window.ARES_SB=sb;
+ const DEVICE_KEY="ares-device-token-v2";
+ function cookieGet(name){
+   const m=document.cookie.match(new RegExp('(?:^|; )'+name.replace(/([.$?*|{}()\[\]\\\/+^])/g,'\\$1')+'=([^;]*)'));
+   return m?decodeURIComponent(m[1]):null;
+ }
+ function cookieSet(name,value){
+   document.cookie=name+'='+encodeURIComponent(value)+'; Max-Age=315360000; Path=/; SameSite=Lax; Secure';
+ }
+ let DEVICE_TOKEN=null;
+ try{ DEVICE_TOKEN=localStorage.getItem(DEVICE_KEY)||localStorage.getItem("ares-device-token-v1"); }catch(e){}
+ if(!DEVICE_TOKEN) DEVICE_TOKEN=cookieGet(DEVICE_KEY)||cookieGet("ares-device-token-v1");
+ if(!DEVICE_TOKEN) DEVICE_TOKEN=(crypto.randomUUID?crypto.randomUUID():("ares-"+Date.now()+"-"+Math.random().toString(36).slice(2)+"-"+Math.random().toString(36).slice(2)));
+ try{ localStorage.setItem(DEVICE_KEY,DEVICE_TOKEN); localStorage.setItem("ares-device-token-v1",DEVICE_TOKEN); }catch(e){}
+ cookieSet(DEVICE_KEY,DEVICE_TOKEN); cookieSet("ares-device-token-v1",DEVICE_TOKEN);
+ window.ARES_DEVICE_TOKEN=DEVICE_TOKEN;
+
+ const lock=document.getElementById("ares-app-lock"), msg=document.getElementById("ares-lock-msg"), form=document.getElementById("ares-lock-form");
+ const req=document.getElementById("ares-lock-request"), chk=document.getElementById("ares-lock-check");
+ async function session(){
+   let r=await sb.auth.getSession(), s=r.data.session;
+   if(!s){let x=await sb.auth.signInAnonymously(); if(x.error) throw x.error; s=x.data.session;}
+   if(!s?.user?.id) throw new Error("Cihaz oturumu oluşturulamadı.");
+   return s;
+ }
+ async function check(){
+   try{
+     await session();
+     const q=await sb.rpc("ares_check_device",{p_token:DEVICE_TOKEN});
+     if(q.error) throw q.error;
+     const status=q.data;
+     if(status==="unregistered"){msg.textContent="Bu cihaz henüz kayıtlı değil. Bir kez erişim talebi gönderin.";form.style.display="block";chk.style.display="none";return;}
+     if(status==="approved"){window.dispatchEvent(new CustomEvent("ares:access-approved"));lock.remove();return;}
+     if(status==="blocked"){msg.textContent="Bu cihazın erişimi engellenmiş.";form.style.display="none";chk.style.display="none";return;}
+     msg.textContent="Erişim talebiniz gönderildi. Yönetici onayı bekleniyor.";form.style.display="none";chk.style.display="block";
+   }catch(e){msg.textContent="Bağlantı kurulamadı: "+(e?.message||e);form.style.display="none";chk.style.display="block";}
+ }
+ req.addEventListener("click",async()=>{
+   const name=document.getElementById("ares-lock-name").value.trim();
+   const device=document.getElementById("ares-lock-device").value.trim()||"Chrome";
+   if(!name){msg.textContent="Lütfen adınızı yazın.";return;}
+   req.disabled=true; req.textContent="GÖNDERİLİYOR…";
+   try{
+     await session();
+     const ins=await sb.rpc("ares_request_device",{p_token:DEVICE_TOKEN,p_name:name,p_device:device});
+     if(ins.error) throw ins.error;
+     if(ins.data==="approved"){lock.remove();return;}
+     msg.textContent="Erişim talebiniz gönderildi. Yönetici onayı bekleniyor.";
+     form.style.display="none"; chk.style.display="block";
+     req.disabled=false; req.textContent="ERİŞİM TALEBİ GÖNDER";
+   }catch(e){msg.textContent="Talep gönderilemedi: "+(e?.message||e);req.disabled=false;req.textContent="ERİŞİM TALEBİ GÖNDER";}
+ });
+ chk.addEventListener("click",check);
+ setInterval(()=>{if(document.body.contains(lock) && chk.style.display!=="none") check();},3000);
+ check();
+})();
+</script>
+
+<div id="app">
+  <nav id="sidebar">
+    <div class="brand">
+      <h1>Erhan English</h1>
+      <div class="sub">Personal English workspace · 42 core lessons</div>
+      <div class="sub" style="margin-top:2px; font-weight:600; opacity:0.85;">Erhan ERBAB</div>
+    </div>
+    <input id="search-mini" placeholder="Search words / sentences…" oninput="handleGlobalSearchInput(this.value)">
+    <div class="navgroup">
+      <div class="navgroup-title">Today</div>
+      <div class="navitem" data-view="dailyplan" onclick="startDailyPlan()">
+        <span class="dot"></span> ▶ Today’s Study
+      </div>
+      <div class="navitem" data-view="dashboard" onclick="navigate('dashboard')"><span class="dot"></span> Home</div>
+      <div class="navitem" data-view="weekly" onclick="navigate('weekly')"><span class="dot"></span> This Week</div>
+    </div>
+
+    <div class="navgroup">
+      <div class="navgroup-title">Learn</div>
+      <div class="navitem" id="lessons-toggle" onclick="toggleLessons()">
+        <span style="display:flex;align-items:center;gap:10px;"><span class="dot"></span> 📚 42 Core Lessons</span><span class="chev">›</span>
+      </div>
+      <div id="lesson-list"></div>
+      <div class="navitem" data-view="languagehub" onclick="navigate('languagehub')"><span class="dot"></span> 📘 Language Hub B1</div>
+      <div class="navitem" data-view="vocabhub" onclick="navigate('vocabhub')"><span class="dot"></span> Vocabulary Hub</div>
+      <div class="navitem" data-view="tenses" onclick="navigate('tenses')"><span class="dot"></span> Grammar</div>
+    </div>
+
+    <div class="navgroup">
+      <div class="navgroup-title">Review</div>
+      <div class="navitem with-badge" data-view="repeatcenter" onclick="navigate('repeatcenter')"><span style="display:flex;align-items:center;gap:10px;"><span class="dot"></span> Smart Review</span><span class="badge-count" id="due-badge">0</span></div>
+      <div class="navitem" data-view="errorclinic" onclick="navigate('errorclinic')"><span class="dot"></span> Error Clinic</div>
+      <div class="navitem" data-view="flashcards" onclick="navigate('flashcards')"><span class="dot"></span> Flashcards</div>
+    </div>
+
+    <div class="navgroup">
+      <div class="navgroup-title">Speak</div>
+      <div class="navitem" onclick="window.location.href='./speaking.html'" style="font-weight:800;"><span class="dot"></span> 🎤 Ares Speaking</div>
+      <div class="navitem" data-view="fastenglish" onclick="navigate('fastenglish')"><span class="dot"></span> Quick Response</div>
+      <div class="navitem" data-view="shadowing" onclick="navigate('shadowing')"><span class="dot"></span> Shadowing</div>
+    </div>
+
+    <div class="navgroup">
+      <div class="navgroup-title">Progress</div>
+      <div class="navitem" data-view="learningbrain" onclick="navigate('learningbrain')"><span class="dot"></span> Learning Insights</div>
+      <div class="navitem" data-view="generalassessment" onclick="navigate('generalassessment')"><span class="dot"></span> Assessment</div>
+      <div class="navitem" data-view="placementtest" onclick="navigate('placementtest')"><span class="dot"></span> Level Test</div>
+    </div>
+
+    <div class="navgroup">
+      <div class="navgroup-title">More</div>
+      <details class="ares-more-nav">
+        <summary class="navitem"><span style="display:flex;align-items:center;gap:10px"><span class="dot"></span> All tools & settings</span><span class="chev">›</span></summary>
+        <div class="ares-more-inner">
+          <div class="navitem" data-view="myenglish" onclick="navigate('myenglish')">My English</div>
+          <div class="navitem" data-view="chunks" onclick="navigate('chunks')">Sentence Patterns</div>
+          <div class="navitem" data-view="collocations" onclick="navigate('collocations')">Collocations</div>
+          <div class="navitem" data-view="phrasalhome" onclick="navigate('phrasalhome')">Phrasal Verbs</div>
+          <div class="navitem" data-view="irregular" onclick="navigate('irregular')">Irregular Verbs</div>
+          <div class="navitem" data-view="aciklamalar" onclick="navigate('aciklamalar')">Grammar Notes</div>
+          <div class="navitem" data-view="wordbook" onclick="navigate('wordbook')">My Vocabulary</div>
+          <div class="navitem" data-view="quizcenter" onclick="navigate('quizcenter')">Quizzes</div>
+          <div class="navitem" data-view="dictation" onclick="navigate('dictation')">Dictation</div>
+          <div class="navitem" data-view="builder" onclick="navigate('builder')">Sentence Builder</div>
+          <div class="navitem" data-view="journal" onclick="navigate('journal')">Writing Journal</div>
+          <div class="navitem" data-view="trips" onclick="navigate('trips')">My Trips</div>
+          <div id="custom-topics-list"></div>
+          <div class="navitem" onclick="addCustomTopic()">Add Topic</div>
+          <div class="navitem" onclick="toggleDark()"><span id="dark-label">Dark Mode</span></div>
+          <div class="navitem" onclick="toggleSpeechRate()"><span id="rate-label">Speech Speed: Normal</span></div>
+          <div class="navitem" onclick="showHomeScreenInstructions()">Add to Home Screen</div>
+          <div class="navitem" onclick="setApiKey()">AI API Key</div>
+          <div class="navitem" onclick="exportProgress()">Export Progress</div>
+          <div class="navitem" onclick="document.getElementById('import-file').click()">Import Progress</div>
+          <input type="file" id="import-file" accept="application/json" style="display:none" onchange="importProgress(this.files[0])">
+        </div>
+      </details>
+    </div>
+    <div style="flex:1"></div>
+  </nav>
+
+  <main id="main">
+    <button id="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰ Menu</button>
+    <div class="topbar">
+      <div>
+        <div class="crumb" id="crumb"></div>
+        <h2 id="page-title">Home</h2>
+      </div>
+      <input id="global-search" placeholder="Search all lessons (word or sentence)…" oninput="handleGlobalSearchInput(this.value)">
+      <button id="offline-badge" class="pill" onclick="toggleOfflineMode()">🌐 Online</button>
+      <span id="ares-cloud-sync" class="pill" title="Supabase progress sync">☁ Sync</span>
+      <button id="voice-nav-btn" class="pill" onclick="voiceNavigate(this)" title="Sesli komutla gez (örn. &quot;quiz aç&quot;, &quot;5. derse git&quot;)">🎙️ Voice Command</button>
+      <button id="close-app-btn" class="pill" onclick="handleTopAction()">💾 Save</button>
+    </div>
+    <div id="content"></div>
+  </main>
+</div>
+
+<script src="assets/ares-data.js?v=10"></script>
+<script src="assets/ares-app.js?v=10"></script>
+<script id="ares-stage10-sync-hotfix">
+(function(){
+  'use strict';
+  const DIRTY_KEY='ares_sync_dirty_at_v1', LAST_KEY='ares_sync_last_at_v1', RELOAD_GUARD='ares_sync_reloaded_v1';
+  const SYNC_EXACT=new Set(['ing_defter_progress','ares_v36','ares_speaking_metrics_v1','ares_lh_personal','ares_lh_stats','ares_lh_mistakes','ares_lh_mission','ares_lh_transfer_queue_v1']);
+  const SYNC_PREFIX=['ares_lh_speaking_u','ares_lh_theresa_u','ares_lt_history_'];
+  const NEVER_SYNC=/api[_-]?key|gemini|claude|device-token|ares-main-auth|supabase|offline_mode/i;
+  let busy=false;
+  const syncableKey=k=>!!k&&!NEVER_SYNC.test(k)&&(SYNC_EXACT.has(k)||SYNC_PREFIX.some(p=>k.startsWith(p)));
+  function badge(t,k){const e=document.getElementById('ares-cloud-sync');if(e){e.textContent=t;e.dataset.state=k||'';}}
+  function snapshot(){const storage={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(syncableKey(k)){const v=localStorage.getItem(k);if(v!==null)storage[k]=v;}}return {storage,clientUpdatedAt:Date.now(),appVersion:10};}
+  function apply(state){const rows=state&&state.storage;if(!rows||typeof rows!=='object')return false;Object.entries(rows).forEach(([k,v])=>{if(syncableKey(k)&&typeof v==='string')localStorage.setItem(k,v)});return Object.keys(rows).length>0;}
+  async function client(){const sb=window.ARES_SB;if(!sb)return null;const r=await sb.auth.getSession();return r?.data?.session?sb:null;}
+  async function pull(sb){const q=await sb.rpc('ares_learning_pull',{p_token:window.ARES_DEVICE_TOKEN});if(q.error)throw q.error;return q.data||null;}
+  async function push(sb,state){const q=await sb.rpc('ares_learning_push',{p_token:window.ARES_DEVICE_TOKEN,p_state:state});if(q.error)throw q.error;return {updated_at:q.data};}
+  window.aresCloudPush=async function(){if(busy)return;const sb=await client();if(!sb){badge('☁ Local','warn');return;}busy=true;badge('☁ Saving…','busy');try{const row=await push(sb,snapshot());localStorage.setItem(LAST_KEY,String(Date.parse(row.updated_at)||Date.now()));localStorage.setItem(DIRTY_KEY,'0');badge('☁ Synced','ok');}catch(e){console.warn('ARES cloud push hotfix:',e);badge('☁ Local','warn');}finally{busy=false;}};
+  window.aresCloudSync=async function(){if(busy)return;const sb=await client();if(!sb){badge('☁ Local','warn');return;}busy=true;badge('☁ Syncing…','busy');try{const row=await pull(sb), localDirty=Number(localStorage.getItem(DIRTY_KEY)||0), cloudTime=row?.updated_at?Date.parse(row.updated_at):0, cloudState=row?.state||{}, cloudHas=!!(cloudState.storage&&Object.keys(cloudState.storage).length), localHas=Object.keys(snapshot().storage).length>0;if(!cloudHas&&localHas||cloudHas&&localDirty>cloudTime){const saved=await push(sb,snapshot());localStorage.setItem(LAST_KEY,String(Date.parse(saved.updated_at)||Date.now()));localStorage.setItem(DIRTY_KEY,'0');badge('☁ Synced','ok');}else if(cloudHas){const changed=apply(cloudState);localStorage.setItem(LAST_KEY,String(cloudTime||Date.now()));localStorage.setItem(DIRTY_KEY,'0');badge('☁ Synced','ok');if(changed&&sessionStorage.getItem(RELOAD_GUARD)!=='1'){sessionStorage.setItem(RELOAD_GUARD,'1');setTimeout(()=>location.reload(),100);return;}}else{badge('☁ Ready','ok');}}catch(e){console.warn('ARES cloud sync hotfix:',e);badge('☁ Local','warn');}finally{busy=false;}};
+  document.addEventListener('click',function(e){const b=e.target.closest&&e.target.closest('#ares-cloud-sync');if(b){e.preventDefault();window.aresCloudSync();}});
+  window.addEventListener('ares:access-approved',()=>setTimeout(()=>window.aresCloudSync(),100));
+  setTimeout(()=>window.aresCloudSync(),1200);
+})();
+</script>
+
+<script>
+// Ares runs directly from GitHub Pages. Remove any old Service Worker/cache so updates
+// and button fixes are always loaded from the current index.html; no sw.js is required.
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', async ()=>{
+    try {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r => r.unregister()));
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map(k => caches.delete(k)));
+      }
+    } catch(e) { console.warn('Old cache cleanup skipped', e); }
+  });
+}
+</script>
+
+
+
+
+
+
+<script id="collocation-v12-6-ai-resilience">
+(function(){
+  window.colV126LastFailedAction = window.colV126LastFailedAction || null;
+
+  window.colV126ClassifyAIError=function(err){
+    const s=String((err&&err.message)||err||'');
+    if(/\b429\b|RESOURCE_EXHAUSTED|quota|rate.?limit/i.test(s))
+      return {kind:'rate',title:'Günlük AI kullanım sınırına ulaşıldı',detail:'Konuşman kaybolmadı. Kullanım hakkı yenilendiğinde veya daha sonra Tekrar Dene ile kaldığın yerden devam edebilirsin.'};
+    if(/\b503\b|UNAVAILABLE|high demand|overloaded/i.test(s))
+      return {kind:'busy',title:'Ares şu anda yoğun',detail:'Konuşman kaydedildi. Kısa bir süre sonra yeniden deneyebilirsin.'};
+    if(/Failed to fetch|NetworkError|network|offline/i.test(s))
+      return {kind:'offline',title:'Bağlantı kurulamadı',detail:'Cevabın korunuyor. İnternet bağlantını kontrol edip yeniden deneyebilirsin.'};
+    return {kind:'offline',title:'Ares’e şu anda ulaşılamıyor',detail:'Cevabın ve konuşma geçmişin korunuyor. Biraz sonra yeniden deneyebilirsin.'};
+  };
+
+  window.colV126NoticeHTML=function(err, retryFn){
+    const x=colV126ClassifyAIError(err);
+    const icon='<span class="ico"><svg viewBox="0 0 24 24"><path d="M12 8v5M12 17h.01"/><path d="M10.3 3.6 2.7 17a2 2 0 0 0 1.7 3h15.2a2 2 0 0 0 1.7-3L13.7 3.6a2 2 0 0 0-3.4 0Z"/></svg></span>';
+    return '<div class="col-ai-notice '+x.kind+'">'+icon+'<div><strong>'+x.title+'</strong><small>'+x.detail+'</small>'+(retryFn?'<button type="button" onclick="'+retryFn+'">Tekrar Dene</button>':'')+'</div></div>';
+  };
+
+  // Replaces any raw Gemini/API error already rendered by older code.
+  window.colV126SanitizeVisibleErrors=function(){
+    const nodes=document.querySelectorAll('#collocationsSection div,#collocationsSection p,#collocationsSection span,#collocationsSection section');
+    nodes.forEach(function(n){
+      if(n.children.length) return;
+      const s=(n.textContent||'').trim();
+      if(/API_ERROR|RESOURCE_EXHAUSTED|UNAVAILABLE|Quota exceeded|generativelanguage\.googleapis/i.test(s)){
+        n.innerHTML=colV126NoticeHTML(s,'colV126RetryLast()');
+        n.style.color='';
+      }
+    });
+  };
+
+  window.colV126RetryLast=function(){
+    if(typeof window.colV126LastFailedAction==='function'){
+      const fn=window.colV126LastFailedAction;
+      window.colV126LastFailedAction=null;
+      fn();
+    }
+  };
+
+  // Mutation observer is a safety net for legacy catch blocks: raw provider JSON
+  // is converted immediately into a clean product-level message.
+  const obs=new MutationObserver(()=>window.colV126SanitizeVisibleErrors());
+  document.addEventListener('DOMContentLoaded',function(){
+    const root=document.getElementById('collocationsSection')||document.body;
+    obs.observe(root,{subtree:true,childList:true,characterData:true});
+    colV126SanitizeVisibleErrors();
+  });
+})();
+</script>
+
+
+<script id="general-assessment-final">
+let gaState={started:false,count:20,index:0,questions:[],answers:[],scores:{},seen:new Set(),listening:false,rec:null};
+const GA_SKILLS={mc:'Grammar & Use',fill:'Boşluk Doldurma',dictation:'Dikte',translation:'Cümle Kurma',speaking:'Konuşma',pronunciation:'Telaffuz'};
+function gaPick(a){return a[Math.floor(Math.random()*a.length)]}
+function gaShuffle(a){return a.slice().sort(()=>Math.random()-.5)}
+function gaFillBank(){
+ const places=['Malta','Rome','Brussels','Hamburg','Sicily','Ankara'], nouns=['the meeting','my stay abroad','the flight','the lesson','the trip'], activities=['watching a film','waiting for the bus','having dinner','walking home','studying English'];
+ const out=[];
+ for(let k=0;k<5;k++){let n=gaPick(nouns),a=gaPick(activities),pl=gaPick(places);out.push({type:'fill',q:`I checked my phone twice ___ ${n}.`,a:'during',alts:['during']});out.push({type:'fill',q:`I listened to a podcast ___ I was ${a}.`,a:'while',alts:['while']});out.push({type:'fill',q:`I have ___ English regularly since last year.`,a:'studied',alts:['studied','practised','practiced']});out.push({type:'fill',q:`If I have enough time, I ___ visit ${pl}.`,a:'will',alts:['will']});out.push({type:'fill',q:`I ___ to ${pl} last year and really enjoyed it.`,a:'went',alts:['went']});}
+ return out;
+}
+function gaMCBank(){return [
+ {type:'mc',q:'I have lived here ___ 2020.',a:'since',opts:['for','since','during','while']},{type:'mc',q:'We ___ dinner when the phone rang.',a:'were having',opts:['had','were having','have','are having']},{type:'mc',q:'If it rains tomorrow, we ___ at home.',a:'will stay',opts:['stayed','stay yesterday','will stay','would stayed']},{type:'mc',q:'She is the woman ___ helped me.',a:'who',opts:['where','who','which','when']},{type:'mc',q:'I was tired, ___ I went home early.',a:'so',opts:['although','so','during','who']},{type:'mc',q:'___ it was raining, we went for a walk.',a:'Although',opts:['Because','Although','During','So']},{type:'mc',q:'I need to ___ a decision today.',a:'make',opts:['do','make','take up','get']},{type:'mc',q:'Let’s ___ a break before we continue.',a:'take',opts:['make','do','take','have made']},{type:'mc',q:'I usually ___ up at seven on weekdays.',a:'get',opts:['take','get','make','bring']},{type:'mc',q:'Could you ___ me up from the hotel?',a:'pick',opts:['take','pick','bring up','get out']},{type:'mc',q:'I wish I ___ more time to practise.',a:'had',opts:['have','had','will have','am having']},{type:'mc',q:'The report ___ yesterday.',a:'was finished',opts:['finished','was finished','is finish','has finishing']}
+]}
+function gaTranslationBank(){return [
+ {type:'translation',q:'Malta’da kaldığım süre boyunca toplu taşıma kullandım.',sample:'I took public transport during my stay in Malta.',keys:['public transport','malta']},
+ {type:'translation',q:'Yorgun olmama rağmen çalışmaya devam ettim.',sample:'Although I was tired, I continued studying.',keys:['although','tired']},
+ {type:'translation',q:'Toplantı sırasında telefonumu sessize aldım.',sample:'I put my phone on silent during the meeting.',keys:['during','meeting']},
+ {type:'translation',q:'Eve giderken bir arkadaşımla karşılaştım.',sample:'I met a friend while I was going home.',keys:['while','home']},
+ {type:'translation',q:'Plan değişirse seni haberdar edeceğim.',sample:'I will keep you updated if the plan changes.',keys:['keep','updated']},
+ {type:'translation',q:'Bugünlük bırakalım mı?',sample:'Shall we call it a day?',keys:['call it a day']},
+ {type:'translation',q:'Henüz kararımı vermedim.',sample:"I haven't made up my mind yet.",keys:['made up my mind']},
+ {type:'translation',q:'Dersten sonra bir kahve alalım.',sample:"Let's grab a coffee after class.",keys:['grab','coffee']}
+]}
+function gaSpeakingBank(){return [
+ {type:'speaking',q:'You are at a hotel. Ask reception for a late check-out.',keys:['late','check']},
+ {type:'speaking',q:'Tell me how you usually travel around a city when you are abroad.',keys:[]},
+ {type:'speaking',q:'Tell me about something you did last weekend.',keys:[]},
+ {type:'speaking',q:'What would you do if you had a free weekend in another country?',keys:[]},
+ {type:'speaking',q:'Tell me why you are learning English.',keys:[]},
+ {type:'speaking',q:'Describe your usual evening after work.',keys:[]}
+]}
+function gaPronBank(){return ['Could you pick me up from the hotel tomorrow?','I usually take public transport when I travel abroad.','Learning a language takes time and practice.','I would like to speak English more confidently.','Could I request a late check-out, please?','I have been learning English for a long time.'].map(x=>({type:'pronunciation',q:x,a:x}))}
+function gaDictBank(){
+ let arr=[]; try{arr=getAllSentences().filter(x=>x.en&&x.en.split(/\s+/).length>=5&&x.en.split(/\s+/).length<=13).map(x=>({type:'dictation',q:'Cümleyi dinle ve duyduğunu yaz.',a:x.en}))}catch(e){}
+ if(!arr.length) arr=['I usually drink coffee after breakfast.','I went for a walk after work.','We had dinner before going home.','I have never been to Malta before.'].map(x=>({type:'dictation',q:'Cümleyi dinle ve duyduğunu yaz.',a:x}));
+ return gaShuffle(arr).slice(0,80);
+}
+function gaBuild(count){
+ const banks={mc:gaMCBank(),fill:gaFillBank(),dictation:gaDictBank(),translation:gaTranslationBank(),speaking:gaSpeakingBank(),pronunciation:gaPronBank()};
+ const types=Object.keys(banks), out=[]; let i=0;
+ while(out.length<count){const t=types[i%types.length],b=banks[t];out.push({...gaPick(b),id:t+'-'+Math.random().toString(36).slice(2)});i++}
+ return gaShuffle(out);
+}
+function viewGeneralAssessment(){
+ if(!gaState.started)return `<div class="ga-hero"><h2 style="margin-top:0">Genel Değerlendirme</h2><p class="hint">Ezber değil, kullanım ölçer. Her sınavda soru ve bağlamlar yeniden karışır.</p><div class="ga-grid">${Object.values(GA_SKILLS).map(x=>`<div class="ga-skill"><strong>${x}</strong></div>`).join('')}</div><label><strong>Soru sayısı</strong></label><div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 18px">${[10,20,30,50].map(n=>`<button class="pill ${gaState.count===n?'primary':''}" onclick="gaState.count=${n};navigate('generalassessment')">${n}</button>`).join('')}</div><button class="pill primary" onclick="gaStart()">Sınavı Başlat</button><p class="hint" style="margin-top:14px">Boşluk doldurma soruları 42 dersteki cümleleri ezberletmez; öğrendiğin yapıları yeni cümlelerde kullanır.</p></div>`;
+ if(gaState.index>=gaState.questions.length)return gaResult();
+ const q=gaState.questions[gaState.index], pct=Math.round(100*gaState.index/gaState.questions.length);
+ let body='';
+ if(q.type==='mc')body=gaShuffle(q.opts).map(o=>`<button type="button" class="ga-option" data-ga-option="${encodeURIComponent(o)}" onclick="gaChooseOption(this,event)">${esc(o)}</button>`).join('');
+ else if(q.type==='dictation')body=`<button class="pill" onclick="gaListenDictation()">Dinle</button><input id="ga-answer" class="quiz-input" placeholder="Duyduğunu yaz…" style="margin-top:12px">${gaCheckBtn()}`;
+ else if(q.type==='pronunciation')body=`<div class="card" style="background:var(--paper)">${spk(q.q)}${esc(q.q)}</div><button id="ga-mic" class="pill primary" onclick="gaPronounce()">Konuş ve Kontrol Et</button><div id="ga-heard" class="hint" style="margin-top:10px"></div>`;
+ else if(q.type==='speaking')body=`<textarea id="ga-answer" class="quiz-input" style="min-height:90px" placeholder="Mikrofonla konuş veya cevabını yaz…"></textarea><div style="display:flex;gap:8px;flex-wrap:wrap"><button id="ga-speak-btn" class="pill" onclick="gaSpeakMic()">🎤 Konuş / Durdur</button>${gaCheckBtn()}</div>`;
+ else body=`<input id="ga-answer" class="quiz-input" placeholder="Cevabını yaz…">${gaCheckBtn()}`;
+ return `<div class="ga-hero"><div style="display:flex;justify-content:space-between;gap:10px"><span class="badge">${GA_SKILLS[q.type]}</span><strong>${gaState.index+1}/${gaState.questions.length}</strong></div><div class="ga-progress" style="margin-top:10px"><i style="width:${pct}%"></i></div><div class="ga-q">${esc(q.q)}</div>${body}<div id="ga-feedback"></div></div>`;
+}
+function gaCheckBtn(){return `<button class="pill primary" style="margin-top:10px" onclick="gaCheckText()">Cevapla</button>`}
+// FINAL FIX: Genel Değerlendirme çoktan seçmeli şıklarını dinamik render sonrası güvenilir biçimde bağla.
+let gaOptionLocked=false;
+document.addEventListener('click',function(e){
+ const btn=e.target.closest&&e.target.closest('.ga-option');
+ if(!btn||gaOptionLocked||!gaState.started)return;
+ e.preventDefault();e.stopPropagation();
+ const raw=btn.getAttribute('data-ga-option'); if(raw==null)return;
+ gaOptionLocked=true;
+ document.querySelectorAll('.ga-option').forEach(x=>{x.disabled=true;x.classList.remove('ga-selected')});
+ btn.classList.add('ga-selected');
+ const answer=decodeURIComponent(raw);
+ setTimeout(()=>{try{gaSubmit(answer)}finally{gaOptionLocked=false}},180);
+},true);
+function gaStart(){gaOptionLocked=false;gaState={started:true,count:gaState.count||20,index:0,questions:gaBuild(gaState.count||20),answers:[],scores:{},seen:new Set(),listening:false,rec:null};navigate('generalassessment')}
+function gaNorm(s){return normalizeAnswer(String(s||'')).replace(/\b(a|the)\b/g,'').replace(/\s+/g,' ').trim()}
+function gaSimilarity(a,b){let A=new Set(gaNorm(a).split(' ').filter(Boolean)),B=new Set(gaNorm(b).split(' ').filter(Boolean));if(!A.size||!B.size)return 0;let hit=[...A].filter(x=>B.has(x)).length;return hit/Math.max(A.size,B.size)}
+function gaSubmit(answer,scoreOverride){gaStopRecognition();const q=gaState.questions[gaState.index];let score=scoreOverride;
+ if(score==null){if(q.type==='mc')score=gaNorm(answer)===gaNorm(q.a)?100:0;else if(q.type==='fill')score=(q.alts||[q.a]).some(x=>gaNorm(answer)===gaNorm(x))?100:0;else if(q.type==='dictation')score=Math.round(100*gaSimilarity(answer,q.a));else if(q.type==='translation'){let low=gaNorm(answer);score=Math.round(100*(q.keys.filter(k=>low.includes(gaNorm(k))).length/Math.max(1,q.keys.length)));if(score===100&&answer.split(/\s+/).length<3)score=70}else if(q.type==='speaking'){let wc=String(answer).trim().split(/\s+/).filter(Boolean).length;score=Math.min(100,40+wc*5);if(wc<3)score=25}else score=0}
+ gaState.answers.push({q,answer,score});gaState.scores[q.type]=(gaState.scores[q.type]||[]).concat(score);gaState.index++;navigate('generalassessment')}
+function gaCheckText(){const el=document.getElementById('ga-answer');if(!el||!el.value.trim())return;gaStopRecognition();gaSubmit(el.value.trim())}
+
+/* FINAL GA AUDIO/MIC FIX
+   - Dictation uses the app-wide TTS helper that already works elsewhere.
+   - General Assessment mic keeps restarting on Android/Chrome when the browser
+     ends a recognition segment after a short phrase.
+*/
+let gaActiveRec=null, gaRecManualStop=false, gaRecMode='', gaRecFinal='', gaRecInterim='', gaRecRestartTimer=null;
+
+function gaListenDictation(){
+  const q=gaState.questions[gaState.index];
+  if(!q||q.type!=='dictation')return;
+  try{
+    if(window.speechSynthesis) window.speechSynthesis.cancel();
+    speak(q.a);
+  }catch(e){
+    try{ colSpeakSay(q.a); }catch(_){}
+  }
+}
+
+function gaStopRecognition(){
+  gaRecManualStop=true;
+  const speakBtn=document.getElementById('ga-speak-btn');
+  if(speakBtn){speakBtn.textContent='🎤 Konuş';speakBtn.style.fontWeight='';}
+  if(gaRecRestartTimer){clearTimeout(gaRecRestartTimer);gaRecRestartTimer=null}
+  if(gaActiveRec){
+    try{gaActiveRec.onend=null;gaActiveRec.stop()}catch(e){}
+    gaActiveRec=null;
+  }
+}
+
+
+function gaMergeTranscript(base, incoming){
+  base=(base||'').trim(); incoming=(incoming||'').trim();
+  if(!incoming)return base;
+  if(!base)return incoming;
+
+  const norm=s=>s.toLowerCase().replace(/[^\w\s']/g,'').replace(/\s+/g,' ').trim();
+  const a=base.split(/\s+/), b=incoming.split(/\s+/);
+  const an=a.map(norm), bn=b.map(norm);
+
+  // If Chrome re-sends the whole phrase, keep only the longer copy.
+  const A=norm(base), B=norm(incoming);
+  if(A===B)return base;
+  if(A.endsWith(B))return base;
+  if(B.endsWith(A) || B.startsWith(A))return incoming;
+
+  // Merge the largest word overlap: "... I learn English" + "I learn English because..."
+  let overlap=0, max=Math.min(an.length,bn.length);
+  for(let k=1;k<=max;k++){
+    let ok=true;
+    for(let i=0;i<k;i++){
+      if(an[an.length-k+i]!==bn[i]){ok=false;break}
+    }
+    if(ok)overlap=k;
+  }
+  return a.concat(b.slice(overlap)).join(' ').trim();
+}
+
+function gaStartRecognition(mode){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){alert('Bu tarayıcı konuşma tanımayı desteklemiyor.');return}
+  if(window.isSecureContext===false){alert('Mikrofon için uygulamayı HTTPS üzerinden aç.');return}
+  gaStopRecognition();
+  gaRecManualStop=false; gaRecMode=mode; gaRecInterim='';
+  if(mode==='pronunciation')gaRecFinal='';
+  const el=document.getElementById('ga-answer');
+  if(mode==='speaking' && el)gaRecFinal=(el.value||'').trim();
+  const speakBtn=document.getElementById('ga-speak-btn');
+  if(mode==='speaking' && speakBtn){
+    speakBtn.textContent='⏹️ Durdur';
+    speakBtn.style.fontWeight='700';
+  }
+
+  function launch(){
+    if(gaRecManualStop)return;
+    let r;
+    try{r=new SR()}catch(e){return}
+    gaActiveRec=r;
+    r.lang='en-US';
+    r.continuous=true;
+    r.interimResults=true;
+    r.maxAlternatives=3;
+
+    if(mode==='pronunciation'){
+      const b=document.getElementById('ga-mic');
+      if(b)b.textContent='⏹️ Bitir ve Kontrol Et';
+    }
+
+    r.onresult=(e)=>{
+      let interim='', newlyFinal='';
+      for(let i=e.resultIndex;i<e.results.length;i++){
+        const t=(e.results[i][0]&&e.results[i][0].transcript)||'';
+        if(e.results[i].isFinal)newlyFinal+=t+' ';
+        else interim+=t+' ';
+      }
+      if(newlyFinal)gaRecFinal=gaMergeTranscript(gaRecFinal,newlyFinal.trim());
+      gaRecInterim=interim.trim();
+      const preview=gaMergeTranscript(gaRecFinal,gaRecInterim);
+
+      if(mode==='speaking'){
+        const box=document.getElementById('ga-answer');
+        if(box)box.value=preview;
+      }else{
+        const h=document.getElementById('ga-heard');
+        if(h)h.innerHTML=`Duyduğum: <strong>${esc(preview)}</strong>`;
+      }
+    };
+
+    r.onerror=(e)=>{
+      if(e.error==='not-allowed'||e.error==='service-not-allowed'){
+        gaRecManualStop=true;
+        alert('Mikrofon izni kapalı. Chrome site izinlerinden mikrofonu aç.');
+      }
+      // no-speech / aborted are recoverable; onend restarts.
+    };
+
+    r.onend=()=>{
+      gaActiveRec=null;
+      if(!gaRecManualStop){
+        gaRecRestartTimer=setTimeout(()=>{gaRecRestartTimer=null;launch()},220);
+      }
+    };
+    try{r.start()}catch(e){
+      gaActiveRec=null;
+      if(!gaRecManualStop)gaRecRestartTimer=setTimeout(launch,350);
+    }
+  }
+  launch();
+}
+
+function gaPronounce(){
+  if(gaActiveRec && gaRecMode==='pronunciation'){
+    const q=gaState.questions[gaState.index];
+    const heard=gaMergeTranscript(gaRecFinal,gaRecInterim);
+    gaStopRecognition();
+    if(!heard){
+      const b=document.getElementById('ga-mic');if(b)b.textContent='Tekrar Konuş';
+      return;
+    }
+    const score=Math.round(100*gaSimilarity(heard,q.a));
+    const h=document.getElementById('ga-heard');
+    if(h)h.innerHTML=`Duyduğum: <strong>${esc(heard)}</strong> · Anlaşılabilirlik ${score}/100`;
+    setTimeout(()=>gaSubmit(heard,score),700);
+    return;
+  }
+  gaStartRecognition('pronunciation');
+}
+
+function gaSpeakMic(){
+  if(gaActiveRec && gaRecMode==='speaking'){
+    gaStopRecognition();
+    return;
+  }
+  gaStartRecognition('speaking');
+}
+function gaResult(){const avg=a=>a&&a.length?Math.round(a.reduce((x,y)=>x+y,0)/a.length):0;let vals=Object.keys(GA_SKILLS).map(k=>[k,avg(gaState.scores[k]||[])]),overall=Math.round(vals.reduce((s,x)=>s+x[1],0)/vals.length);let weak=vals.slice().sort((a,b)=>a[1]-b[1]).slice(0,2);progress.generalAssessmentHistory=progress.generalAssessmentHistory||[];if(!gaState.saved){progress.generalAssessmentHistory.unshift({date:new Date().toISOString(),score:overall,count:gaState.count,skills:Object.fromEntries(vals)});progress.generalAssessmentHistory=progress.generalAssessmentHistory.slice(0,20);saveProgress(progress);gaState.saved=true}
+ const cards=vals.map(([k,v])=>`<div class="ga-skill"><strong>${GA_SKILLS[k]}</strong><div class="ga-score">${v}</div></div>`).join('');const mistakes=gaState.answers.filter(x=>x.score<70).slice(0,8).map(x=>`<div class="card ga-bad"><strong>${GA_SKILLS[x.q.type]}</strong><div>${esc(x.q.q)}</div><div class="hint">Sen: ${esc(x.answer||'—')}${x.q.a||x.q.sample?` · Örnek/cevap: ${esc(x.q.a||x.q.sample)}`:''}</div></div>`).join('');return `<div class="ga-hero"><div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">Sınav Sonucu</h2><div class="ga-score">${overall}/100</div></div><div class="ga-result-grid">${cards}</div><div class="card ga-good"><strong>Odak önerisi</strong><div class="hint" style="margin-top:5px">Bir sonraki çalışmada özellikle ${weak.map(x=>GA_SKILLS[x[0]]).join(' ve ')} alanlarına dön.</div></div>${mistakes?`<h3>Tekrar Bakılacaklar</h3>${mistakes}`:'<div class="card ga-good">Belirgin bir zayıf cevap görünmüyor.</div>'}<button class="pill primary" style="margin-top:14px" onclick="gaState.started=false;gaState.saved=false;navigate('generalassessment')">Yeni Sınav</button></div>`}
+</script>
+
+
+
+<script id="ares-final-learning-loop-js">
+// ARES FINAL learning loop: Learn -> Analyse -> Practise -> Speak -> Test -> Review.
+progress.mistakes=progress.mistakes||[];
+progress.generalAssessmentHistory=progress.generalAssessmentHistory||[];
+progress.reviewHistory=progress.reviewHistory||[];
+
+function inferLessonNoFromText(en){
+  const needle=String(en||'').trim().toLowerCase(); if(!needle)return null;
+  const hit=DATA.lessons.find(l=>l.sentences.some(x=>String(x[0]).trim().toLowerCase()===needle)||l.words.some(x=>String(x[0]).trim().toLowerCase()===needle));
+  return hit?hit.no:null;
+}
+function mistakeKind(type,en){
+  const t=String(type||'').toLowerCase();
+  if(t.includes('ses')||t.includes('konuş'))return 'Konuşma / anlaşılabilirlik';
+  if(t.includes('dikte'))return 'Dinleme / yazım';
+  if(t.includes('kelime'))return 'Kelime';
+  if(t.includes('cümle')||String(en||'').trim().includes(' '))return 'Cümle / yapı';
+  return 'Kelime / yazım';
+}
+const _oldAddMistake=addMistake;
+addMistake=function(en,tr,mtype){
+  const now=Date.now(), existing=progress.mistakes.find(m=>m.en===en);
+  if(existing){existing.hits=(existing.hits||1)+1;existing.lastWrong=now;existing.type=mtype||existing.type;existing.kind=mistakeKind(existing.type,en);existing.lesson=existing.lesson||inferLessonNoFromText(en);existing.due=now;saveProgress(progress);return}
+  progress.mistakes.unshift({en,tr,type:mtype||'cümle',kind:mistakeKind(mtype,en),lesson:inferLessonNoFromText(en),hits:1,streak:0,lastWrong:now,due:now});
+  if(progress.mistakes.length>200)progress.mistakes.pop();
+};
+const _oldRemoveMistake=removeMistake;
+removeMistake=function(en){
+  const m=progress.mistakes.find(x=>x.en===en);
+  if(!m){_oldRemoveMistake(en);return}
+  m.streak=(m.streak||0)+1;
+  if(m.streak>=2){progress.mistakes=progress.mistakes.filter(x=>x.en!==en)}
+  else {m.due=Date.now()+24*60*60*1000;m.lastCorrect=Date.now()}
+};
+function mistakeDueCount(){return ((progress&&progress.mistakes)||[]).filter(m=>!m.due||m.due<=Date.now()).length}
+function skillPct(obj){return obj&&obj.total?Math.round(100*obj.correct/obj.total):null}
+function recentTrendData(){
+  const out=[], dailyStats=(progress&&progress.dailyStats)||{};for(let i=6;i>=0;i--){const d=dateStrOffset(-i),x=dailyStats[d];out.push({d,label:new Date(d+'T12:00:00').toLocaleDateString('tr-TR',{weekday:'short'}),pct:x&&x.total?Math.round(100*x.correct/x.total):null})}return out;
+}
+function dashboardLearningPanel(){
+  const trend=recentTrendData(), vals=trend.filter(x=>x.pct!==null), latest=vals.length?vals[vals.length-1].pct:null, prev=vals.length>1?vals[vals.length-2].pct:null, delta=(latest!==null&&prev!==null)?latest-prev:null;
+  const pts=trend.map((x,i)=>{const y=x.pct===null?82:82-(x.pct*.62);return `${10+i*48},${y}`}).join(' ');
+  const q=skillPct(progress.quizScore),w=skillPct(progress.wordQuizScore),tr=skillPct(progress.translateScore);
+  const lessonVals=Object.values(progress.lessonStats||{}).filter(x=>x.total).map(x=>100*x.correct/x.total), lm=lessonVals.length?Math.round(lessonVals.reduce((a,b)=>a+b,0)/lessonVals.length):null;
+  const skills=[['Ders testleri',lm],['Cümle / gramer',q],['Kelime',w],['Çeviri / üretim',tr]].filter(x=>x[1]!==null);
+  const focus=skills.length?skills.slice().sort((a,b)=>a[1]-b[1])[0][0]:'İlk testini tamamla';
+  return `<div class="dash-progress"><div class="trend-card"><div class="trend-head"><div><div class="hint">SON 7 GÜN · GELİŞİM</div><div class="trend-big">${latest===null?'—':latest+'%'}</div></div><div class="hint">${delta===null?'Yeni sonuçlarla trend oluşacak':delta>0?'↑ '+delta+' puan':delta<0?'Sonuçlar dalgalanabilir · '+delta+' puan':'→ Sabit'}</div></div><svg viewBox="0 0 310 95" width="100%" height="120" aria-label="Son 7 gün başarı grafiği"><line x1="10" y1="82" x2="300" y2="82" stroke="currentColor" opacity=".12"/><polyline points="${pts}" fill="none" stroke="currentColor" stroke-width="3" opacity=".7"/>${trend.map((x,i)=>`<circle cx="${10+i*48}" cy="${x.pct===null?82:82-x.pct*.62}" r="${x.pct===null?2:4}" fill="currentColor" opacity="${x.pct===null?.15:.8}"/>`).join('')}</svg><div style="display:flex;justify-content:space-between" class="hint">${trend.map(x=>`<span>${x.label}</span>`).join('')}</div></div><div class="focus-card"><div class="hint">BUGÜNÜN ODAĞI</div><h3 style="margin:5px 0 12px">${esc(focus)}</h3>${skills.map(x=>`<div class="skill-row"><span>${esc(x[0])}</span><span class="skill-track"><i style="width:${x[1]}%"></i></span><b>${x[1]}%</b></div>`).join('')}<div class="soft-note" style="margin-top:14px"><b>${mistakeDueCount()} tekrar</b> bugün hazır. Amaç not değil; zayıf noktayı tekrar kullanarak güçlendirmek.</div><button class="pill" style="margin-top:10px" onclick="navigate('mistakes')">Yanlış Havuzuna Git</button></div></div>`;
+}
+const _baseDashboard=viewDashboard;
+viewDashboard=function(){return dashboardLearningPanel()+_baseDashboard()};
+// This enhancement is defined after the original boot render. Refresh the active dashboard now.
+if(currentView==='dashboard'){ render(); }
+
+const STRUCTURES=[
+ {re:/\bwhile\b/i,name:'while',rule:'while + özne + fiil',tip:'Bir eylem sürerken başka bir durumu/eylemi anlatır.'},
+ {re:/\bduring\b/i,name:'during',rule:'during + isim / isim grubu',tip:'Bir olayın veya dönemin sırasında/boyunca.'},
+ {re:/\balthough\b/i,name:'although',rule:'although + cümle',tip:'Zıt iki fikri bağlar: -mesine rağmen.'},
+ {re:/\beven though\b/i,name:'even though',rule:'even though + cümle',tip:'Although’dan daha güçlü bir zıtlık verir.'},
+ {re:/\bbecause\b/i,name:'because',rule:'because + sebep cümlesi',tip:'Nedeni açıklar.'},
+ {re:/\bso\b/i,name:'so',rule:'sonuç cümlesi + so + sonuç',tip:'Sebebin sonucunu bağlar.'},
+ {re:/\bsince\b/i,name:'since',rule:'since + başlangıç noktası / cümle',tip:'Özellikle present perfect ile başlangıç noktasını gösterir.'},
+ {re:/\bfor\b/i,name:'for',rule:'for + süre',tip:'Ne kadar süredir? sorusuna cevap verir.'},
+ {re:/\bused to\b/i,name:'used to',rule:'used to + V1',tip:'Geçmişte düzenli olup artık olmayan durum/alışkanlık.'},
+ {re:/\bgoing to\b/i,name:'be going to',rule:'be going to + V1',tip:'Plan veya güçlü belirtiye dayalı gelecek.'},
+ {re:/\bshould have\b/i,name:'should have',rule:'should have + V3',tip:'Geçmişte yapılması daha iyi olurdu.'}
+];
+function lessonAnalysis(l){
+  const text=l.sentences.map(x=>x[0]).join(' ');
+  const found=STRUCTURES.filter(x=>x.re.test(text));
+  const chunks=[]; const fixed=(typeof getStudyCollocations==='function'?getStudyCollocations():[]);
+  fixed.forEach(c=>{if(text.toLowerCase().includes(String(c.phrase||'').toLowerCase())&&!chunks.some(x=>x.phrase===c.phrase))chunks.push(c)});
+  const items=[];
+  const cleanRule=(name,rule)=>{
+    let r=String(rule||'').trim(), n=String(name||'').trim();
+    const re=new RegExp('^'+n.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\s*','i');
+    r=r.replace(re,'').trim();
+    return r || String(rule||'').trim();
+  };
+  const kind=(name)=>{
+    const n=String(name||'').toLowerCase();
+    if(n==='because'||n==='although'||n==='while'||n==='when') return 'Bağlaç';
+    if(n==='so') return 'Sonuç';
+    if(n==='for'||n==='since') return 'Süre';
+    return 'Yapı';
+  };
+  found.slice(0,6).forEach((x,i)=>{
+    const ex=l.sentences.find(s=>x.re.test(s[0]));
+    const rule=cleanRule(x.name,x.rule);
+    items.push(`<div class="pro-analysis-card tone-${i%3}">
+      <div class="pro-analysis-top"><span class="pro-num">${i+1}</span><div class="pro-analysis-name"><b>${esc(x.name)}</b><code>${esc(rule)}</code></div><span class="pro-tag">${kind(x.name)}</span></div>
+      <div class="pro-tip">${esc(x.tip)}</div>
+      ${ex?`<div class="pro-example-label">💬 Örnek Cümle</div><div class="pro-example">${spk(ex[0])}<span>${esc(ex[0])}</span></div><div class="pro-tr">${esc(ex[1])}</div>`:''}
+    </div>`);
+  });
+  chunks.slice(0,5).forEach((c,i)=>items.push(`<div class="pro-analysis-card tone-${i%3}">
+    <div class="pro-analysis-top"><span class="pro-num">${items.length+1}</span><div class="pro-analysis-name"><b>${esc(c.phrase)}</b><code>doğal kalıp</code></div><span class="pro-tag">Chunk</span></div>
+    <div class="pro-tip">${esc(c.meaning||'Doğal kalıp')}</div>
+    ${c.examples&&c.examples[0]?`<div class="pro-example-label">💬 Örnek Cümle</div><div class="pro-example">${spk(c.examples[0])}<span>${esc(c.examples[0])}</span></div>`:''}
+  </div>`));
+  if(!items.length){l.sentences.slice(0,3).forEach((x,i)=>items.push(`<div class="pro-analysis-card tone-${i%3}"><div class="pro-analysis-top"><span class="pro-num">${i+1}</span><div class="pro-analysis-name"><b>Doğal cümle kalıbı</b></div></div><div class="pro-example">${spk(x[0])}<span>${esc(x[0])}</span></div><div class="pro-tr">${esc(x[1])}</div></div>`))}
+  return `<details class="card pro-analysis-wrap" open>
+    <summary>🔎 Kalıp & Yapı Analizi</summary>
+    <div class="pro-analysis-head"><p>Bu bölüm ders cümlelerini ezberletmez; tekrar eden yapıları ve doğal kalıpları görünür hale getirir.</p><span class="pro-head-note">💡 Aynı yapıyı farklı cümlelerde kullan.</span></div>
+    <div class="pro-analysis-grid">${items.join('')}</div>
+  </details>`;
+}
+const _baseLesson=viewLesson;
+viewLesson=function(l){
+  if(!l)return _baseLesson(l);
+  const path=`<div class="learning-path"><div class="learning-step"><b>1 · Kelime & İfadeler</b><span class="hint">Anlamı tanı</span></div><div class="learning-step"><b>2 · Analiz</b><span class="hint">Kalıbı fark et</span></div><div class="learning-step"><b>3 · Üret</b><span class="hint">Yeni cümle kur</span></div><div class="learning-step"><b>4 · Konuş</b><span class="hint">Bağlam içinde kullan</span></div><div class="learning-step"><b>5 · Test</b><span class="hint">Ölç ve yanlışları kaydet</span></div></div>`;
+  const speak=`<div class="card"><h3 class="section-title" style="margin-top:0">🎤 Konuşarak Kullan</h3><p class="hint">Tek kelime telaffuz puanı yok. Role Play / Abroad gibi bağlam içinde konuş. Ares seni anladıysa sohbet devam eder; tarayıcının tek başına yanlış duyduğu bir kelime otomatik olarak “telaffuz hatası” sayılmaz.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="pill primary" onclick="window.location.href='./speaking.html'">Ares Speaking'i Aç</button><button class="pill" onclick="navigate('lessontest',${l.no});setTimeout(()=>setLessonTestMode('voice'),0)">Bu Dersi Sesli Test Et</button></div></div>`;
+  return path+lessonAnalysis(l)+_baseLesson(l)+speak;
+};
+
+// Voice lesson tests use full contextual sentences, not isolated word pronunciation.
+buildLessonVoiceQuestions=function(l,count){
+  const arr=shuffleArr(l.sentences.slice()).map(s=>({type:'voice',tr:s[1],en:s[0],context:true}));
+  return arr.slice(0,Math.min(count,arr.length));
+};
+const _baseViewLessonTest=viewLessonTest;
+viewLessonTest=function(lessonNo){
+  let html=_baseViewLessonTest(lessonNo);
+  if(lessonTestState.mode==='voice'){
+    html=html.replace('Bu test, derste öğrendiğin kelime, kalıp ve yapıları yeni bağlamlarda kullanıp kullanamadığını ölçer. Ders cümlelerini ezberlemen gerekmez. Sesli modda amaç anlaşılır ve doğal üretimdir.','Sesli mod artık tek kelime telaffuz sınavı değildir. Dersteki anlamı bağlam içinde İngilizce cümleyle üretirsin; tarayıcının yanlış duyması otomatik olarak hata sayılmaz.')
+      .replace('Türkçesini söyle: (İngilizcesini yüksek sesle mikrofona söyle)','Anlamı İngilizce bir cümleyle söyle. Hazır olduğunda mikrofona bas; akıcılık önce.');
+  }
+  return html;
+};
+checkLessonTestVoice=function(){
+ const btn=document.getElementById('lt-voice-btn');
+ if(recordingActive){
+  btn.textContent='⏳ Bitiriliyor…';btn.disabled=true;
+  stopVoiceRecording((transcript,supported,errorReason)=>{
+   btn.textContent='🎤 Şimdi Söyle';btn.disabled=true;
+   const st=lessonTestState,q=st.questions[st.index],fb=document.getElementById('lt-feedback');
+   if(!supported){fb.innerHTML='Ses tanıma kullanılamıyor. Bu soru otomatik puanlanmadı.<div class="btns" style="display:flex;gap:8px;margin-top:8px"><button class="pill good" onclick="markLessonTestVoiceManual(true)">✓ Cümlem doğruydu</button><button class="pill bad" onclick="markLessonTestVoiceManual(false)">Tekrar çalışacağım</button></div>';return}
+   if(!transcript){fb.innerHTML='⚠️ Ses tanıma net bir metin oluşturamadı. <b>Yanlış saymadım.</b> <button class="pill primary" onclick="checkLessonTestVoice()">Tekrar Dene</button>';btn.disabled=false;return}
+   const pct=wordMatchScore(normSpeech(q.en),normSpeech(transcript));
+   if(pct>=70){st.correct++;removeMistake(q.en);recordLessonStat(st.lesson,true);recordDailyStat(true);fb.innerHTML=`✓ Anlam ve hedef cümle net biçimde algılandı.<div class="lt-context"><b>Duyduğum:</b> ${esc(transcript)}<br><b>Doğal örnek:</b> ${esc(q.en)}</div>`;fb.className='quiz-feedback ok';saveProgress(progress);document.getElementById('lt-next').style.display='inline-flex'}
+   else {fb.innerHTML=`<div class="soft-note"><b>Ses tanıma tam eşleştiremedi; bunu telaffuz hatası saymıyorum.</b><br>Duyduğum: ${esc(transcript)}<br>Doğal örnek: ${esc(q.en)}</div><div class="btns" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:9px"><button class="pill good" onclick="markLessonTestVoiceManual(true)">✓ Anlamım doğruydu</button><button class="pill primary" onclick="document.getElementById('lt-voice-btn').disabled=false;checkLessonTestVoice()">🎤 Tekrar Dene</button><button class="pill bad" onclick="markLessonTestVoiceManual(false)">Yanlış Havuzuna Ekle</button></div>`;fb.className='quiz-feedback';btn.disabled=false}
+   updateMistakeBadge();
+  });return;
+ }
+ const started=beginVoiceRecording((audioUrl)=>{const slot=document.getElementById('lt-audio-slot');if(slot)slot.innerHTML=playbackHtml(audioUrl)});if(started){btn.disabled=false;btn.textContent='⏹️ Durdur'}
+};
+
+viewMistakes=function(){
+ const list=progress.mistakes||[]; if(!list.length)return '<div class="card"><h3 style="margin-top:0">Yanlış Havuzu boş 🎯</h3><p class="hint">Testlerde zorlandığın kelime, yazım, yapı ve konuşma öğeleri burada birikecek. İki başarılı tekrar sonrası aktif havuzdan çıkar.</p></div>';
+ const due=list.filter(m=>!m.due||m.due<=Date.now());
+ let html=`<div class="card"><h3 style="margin-top:0">🧠 Akıllı Yanlış Havuzu</h3><p class="hint">Aynı soruyu ezberletmek yerine hatayı türüne göre tekrar çalıştırır. Yazım hatasını yazdırır; yapı hatasını yeni cümlede kullandırır; konuşma hatasını bağlam içinde tekrar ettirir.</p><div class="score-row"><div class="score-item"><b>${list.length}</b>Aktif</div><div class="score-item"><b>${due.length}</b>Bugün tekrar</div></div></div>`;
+ list.forEach((m,i)=>{m.kind=m.kind||mistakeKind(m.type,m.en);m.lesson=m.lesson||inferLessonNoFromText(m.en);html+=`<div class="mistake-card ${(!m.due||m.due<=Date.now())?'review-due':''}"><div class="mistake-meta"><span class="badge">${esc(m.kind)}</span>${m.lesson?`<span class="badge">${m.lesson}. Ders</span>`:''}<span class="badge">${m.hits||1} kez zorlandı</span></div><div class="en"><b>${spk(m.en)}${esc(m.en)}</b></div><div class="tr">${esc(m.tr||'')}</div><div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:9px"><button class="pill primary" onclick="mistakePractice(${i})">Şimdi Tekrar Et</button><button class="pill" onclick="removeMistakeUI('${escJs(m.en)}')">Listeden Kaldır</button></div><div id="mistake-practice-${i}"></div></div>`});
+ return html;
+};
+function mistakePractice(i){
+ const m=progress.mistakes[i];if(!m)return;const box=document.getElementById('mistake-practice-'+i);if(!box)return;
+ const kind=m.kind||mistakeKind(m.type,m.en);let task='';
+ if(kind.includes('Dinleme'))task=`Dinle ve sonra cümleyi kendin yaz: ${spk(m.en)} <input id="mr-${i}" class="quiz-input" placeholder="Duyduğunu yaz…">`;
+ else if(kind.includes('Konuşma'))task=`<b>Bağlam içinde tekrar söyle:</b> “${esc(m.tr||'Bu fikri İngilizce söyle.')}”<div class="hint">Tek kelimeyi değil, mümkünse tam bir cümleyi söyle.</div><input id="mr-${i}" class="quiz-input" placeholder="İstersen önce cümleni buraya yaz…">`;
+ else task=`<b>Yeni deneme:</b> ${esc(m.tr||'Türkçesine bakıp İngilizcesini üret.')}<input id="mr-${i}" class="quiz-input" placeholder="İngilizcesini yaz…">`;
+ box.innerHTML=`<div class="lt-context">${task}<button class="pill primary" onclick="checkMistakePractice(${i})">Kontrol Et</button><div id="mr-fb-${i}" class="quiz-feedback"></div></div>`;
+}
+function checkMistakePractice(i){
+ const m=progress.mistakes[i],el=document.getElementById('mr-'+i),fb=document.getElementById('mr-fb-'+i);if(!m||!el||!el.value.trim())return;
+ const sim=wordMatchScore(normSpeech(m.en),normSpeech(el.value));
+ if(sim>=75){fb.textContent='✓ Güzel. Bir doğru tekrar kaydedildi.';fb.className='quiz-feedback ok';removeMistake(m.en);progress.reviewHistory.push({date:Date.now(),en:m.en,ok:true});saveProgress(progress);setTimeout(()=>navigate('mistakes'),600)}
+ else {fb.innerHTML=`Bir kez daha dene. <b>Doğal cevap:</b> ${esc(m.en)}`;fb.className='quiz-feedback bad';m.hits=(m.hits||1)+1;m.due=Date.now()+6*60*60*1000;saveProgress(progress)}
+}
+
+function gaChooseOption(btn,e){
+ if(e){e.preventDefault();e.stopPropagation()} if(!btn||gaOptionLocked||!gaState.started)return false;
+ gaOptionLocked=true;document.querySelectorAll('.ga-option').forEach(x=>{x.disabled=true;x.classList.remove('ga-selected')});btn.classList.add('ga-selected');
+ const raw=btn.getAttribute('data-ga-option');const answer=decodeURIComponent(raw||'');setTimeout(()=>{try{gaSubmit(answer)}finally{gaOptionLocked=false}},120);return false;
+}
+</script>
+
+
+
+<script id="ares-20261009-learning-upgrade">
+// Micro Task implementation is defined in the main application script above.
+// English-first Travel Mode. Turkish remains only where it has a learning purpose.
+window.tripStatus=function(t){const now=travelToday(),s=travelDate(t.start),e=travelDate(t.end||t.start);if(!s||!e)return{type:'invalid',label:'Date missing'};if(now<s){const d=travelDays(now,s);return{type:'future',days:d,label:d===1?'Tomorrow':`${d} days to go`}}if(now<=e){const day=travelDays(s,now)+1,total=travelDays(s,e)+1;return{type:'active',day,total,label:`Day ${day} of ${total}`}}return{type:'past',label:'Completed'}};
+window.formatTravelDate=function(v){const d=travelDate(v);return d?d.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}):'—'};
+travelDisplay=function(t){const city=String(t.city||'').trim(),country=String(t.country||'').trim();const key=v=>String(v||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/gi,'').toLowerCase();if(!city||key(city)===key(country))return country||city;return `${city}, ${country}`;}
+window.travelHeroBanner=function(){const active=activeTrip(),upcoming=nextTrip();if(active){const st=tripStatus(active),task=travelTaskFor(active);return `<div class="travel-pro"><div class="travel-hero-pro"><div class="travel-kicker">TRAVEL MODE <span style="float:right">${esc(st.label)}</span></div><div class="travel-place">${travelFlag(active.code)} ${esc(travelDisplay(active))}</div><div class="travel-dates">${formatTravelDate(active.start)} — ${formatTravelDate(active.end||active.start)}</div><div class="travel-mission"><b>🎯 TODAY'S MISSION</b><br>${esc(task)}</div><div class="travel-actions" style="margin-top:14px"><button class="pill primary" onclick="navigate('trips')">View Travel Journal →</button></div></div></div>`}if(upcoming){const st=tripStatus(upcoming);return `<div class="card"><div class="travel-kicker">✈️ NEXT TRIP</div><div class="travel-place" style="font-size:24px">${travelFlag(upcoming.code)} ${esc(travelDisplay(upcoming))}</div><div class="travel-dates"><b>${esc(st.label)}</b> · ${formatTravelDate(upcoming.start)}</div><div class="travel-actions"><button class="pill" onclick="navigate('trips')">My Trips</button></div></div>`}return `<div class="card"><b>✈️ Add your next trip.</b> <span class="hint">Country flag and countdown are automatic.</span> <button class="pill primary" style="float:right" onclick="navigate('trips')">+ Add Trip</button></div>`};
+window.maltaCountdownBanner=function(){return travelHeroBanner()};
+window.toggleTripForm=function(){document.getElementById('travel-add-panel')?.classList.toggle('open')};
+window.viewTrips=function(){const trips=sortedTrips(),active=activeTrip();let html=`<div class="travel-pro">`;
+ if(active){const st=tripStatus(active),key=active.id,log=(progress.travelLogs||{})[key]||{};html+=`<div class="travel-hero-pro"><div class="travel-kicker">TRAVEL MODE <span style="float:right">${esc(st.label)}</span></div><div class="travel-place">${travelFlag(active.code)} ${esc(travelDisplay(active))}</div><div class="travel-dates">${formatTravelDate(active.start)} — ${formatTravelDate(active.end||active.start)}</div><div class="travel-mission"><b>🎯 TODAY'S MISSION</b><br>${esc(travelTaskFor(active))}</div></div><div class="card travel-journal"><div class="travel-kicker">TODAY'S TRAVEL JOURNAL</div><h3 style="margin:5px 0 20px">Practice from real life</h3><div class="travel-field"><label>Where did you use English today?</label><select id="travel-log-place" class="quiz-input"><option>Café</option><option>School</option><option>Restaurant</option><option>Transport</option><option>Social</option><option>Shop</option><option>Other</option></select></div><div class="travel-field"><label>What did you say?</label><input id="travel-log-used" class="quiz-input" value="${esc(log.used||'')}" placeholder="e.g. Could I have the bill, please?"></div><div class="travel-field"><label>Anything you wanted to say but couldn't?</label><input id="travel-log-missed" class="quiz-input" value="${esc(log.missed||'')}" placeholder="Write it in English or Turkish…"></div><div class="travel-actions"><button class="pill primary" onclick="saveTravelLog('${esc(key)}')">Save Entry</button></div></div>`}
+ html+=`<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div><div class="travel-kicker">YOUR TRIPS</div><h3 style="margin:4px 0">Trips & plans</h3></div><button class="pill primary" onclick="toggleTripForm()">+ Add Trip</button></div><div id="travel-add-panel" class="travel-add-panel"><p class="hint">Choose a country and dates. The flag, countdown and Travel Mode switch automatically.</p><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px"><div><label class="hint">Country</label><select id="trip-country" class="quiz-input">${countryOptions('ES')}</select></div><div><label class="hint">City / Region</label><input id="trip-city" class="quiz-input" placeholder="e.g. Seville"></div><div><label class="hint">Departure</label><input id="trip-start" type="date" class="quiz-input"></div><div><label class="hint">Return</label><input id="trip-end" type="date" class="quiz-input"></div></div><div class="travel-actions"><button class="pill primary" onclick="addTrip()">Add Trip</button></div></div>`;
+ if(!trips.length)html+=`<p class="hint">No trips added yet.</p>`;trips.forEach(t=>{const st=tripStatus(t);html+=`<div class="travel-list-row"><div><div style="font-size:18px;font-weight:800">${travelFlag(t.code)} ${esc(travelDisplay(t))}</div><div class="hint">${formatTravelDate(t.start)} — ${formatTravelDate(t.end||t.start)} · <b>${esc(st.label)}</b></div></div><div><button class="pill" onclick="editTrip('${esc(t.id)}')">Edit</button> <button class="pill bad" onclick="removeTrip('${esc(t.id)}')">Delete</button></div></div>`});return html+'</div></div>'};
+</script>
+
+</body>
+</html>
+
+<!-- v68 PHRASAL VERBS PRO: audited phrasal-verb structures, separability and natural examples -->
+<!-- v65 BUILDER & WRITING PRO: builder fallback explanations + 3/5/10 guided journal + teacher assessment/export -->
+
+
+<script id="ares-guided-lesson-v2">
+// Guided lesson flow v2: learn -> analyse -> produce -> speak -> test.
+progress.lessonFlow=progress.lessonFlow||{};
+function flowState(no){return progress.lessonFlow[no]||(progress.lessonFlow[no]={learn:false,analyse:false,produce:false,speak:false,test:false});}
+function saveFlow(no,key){const f=flowState(no);f[key]=true;saveProgress(progress);}
+function scrollLessonStage(id,no,key){
+  saveFlow(no,key);
+  const go=()=>{
+    let el=document.getElementById(id);
+    // Analiz bölümü eski/yeni ders şablonlarında farklı üretilebildiği için güvenli fallback.
+    if(!el && key==='analyse') el=document.querySelector('#content .pro-analysis-wrap, #content details.card');
+    if(!el) return;
+    if(el.tagName==='DETAILS'){
+      el.open=true;
+      el.setAttribute('open','');
+    }
+    const y=el.getBoundingClientRect().top + window.pageYOffset - 150;
+    window.scrollTo({top:Math.max(0,y),behavior:'smooth'});
+    el.classList.add('active-step-target');
+    setTimeout(()=>el.classList.remove('active-step-target'),900);
+  };
+  requestAnimationFrame(()=>requestAnimationFrame(go));
+}
+function guidedPath(l){const f=flowState(l.no);const steps=[['learn','lesson-study-material','Kelime & İfadeler','ÖĞREN','Anlamı tanı'],['analyse','lesson-analysis','Analiz','ANLA','Kalıbı fark et'],['produce','lesson-production','Üret','KULLAN','Yeni cümle kur'],['speak','lesson-speaking','Konuş','KONUŞ','Bağlam içinde kullan'],['test','lesson-test-launch','Test','ÖLÇ','Ölç ve yanlışları kaydet']];return `<div class="learning-path">${steps.map((x,i)=>`<div class="learning-step ${f[x[0]]?'active-step':''}" onclick="scrollLessonStage('${x[1]}',${l.no},'${x[0]}')"><span class="step-kicker">${x[3]}</span><b>${i+1} · ${x[2]}</b><span class="hint">${x[4]}</span>${f[x[0]]?'<div class="stage-done">✓ çalışıldı</div>':''}</div>`).join('')}</div>`}
+
+// Fix duplicated labels such as "duringduring + ..." in analysis cards.
+function cleanAnalysisHtml(html){
+ html=String(html||'')
+   .replace(/>\s*(because|while|during|before|after|since|although|though|if|when|for|so)\1\b/gi,'>$1')
+   .replace(/\b(because|while|during|before|after|since|although|though|if|when|for|so)(?=\1\s*\+)/gi,'');
+return String(html).replace(/(<b>during<\/b><code>)during\s*\+?/gi,'$1').replace(/(<b>for<\/b><code>)for\s*\+?/gi,'$1').replace(/(<b>while<\/b><code>)while\s*\+?/gi,'$1').replace(/(<b>since<\/b><code>)since\s*\+?/gi,'$1');}
+
+const NOVEL_STRUCTURE_BANK={
+ during:[['I checked my phone twice ___ the meeting.','during','Toplantı sırasında telefonumu iki kez kontrol ettim.'],['I met several new people ___ my course.','during','Kursum sırasında birkaç yeni insanla tanıştım.']],
+ while:[['I listened to a podcast ___ I was walking home.','while','Eve yürürken podcast dinledim.'],['The phone rang ___ we were having dinner.','while','Akşam yemeği yerken telefon çaldı.']],
+ for:[['I stayed there ___ three weeks.','for','Orada üç hafta kaldım.'],['We talked ___ about twenty minutes.','for','Yaklaşık yirmi dakika konuştuk.']],
+ since:[['I have studied English ___ last year.','since','Geçen yıldan beri İngilizce çalışıyorum.'],['I have known him ___ 2022.','since','Onu 2022’den beri tanıyorum.']],
+ although:[['___ I was tired, I went for a walk.','although','Yorgun olmama rağmen yürüyüşe çıktım.'],['___ it was raining, we went out.','although','Yağmur yağmasına rağmen dışarı çıktık.']],
+ because:[['I stayed home ___ I was tired.','because','Yorgun olduğum için evde kaldım.'],['I am learning English ___ I want to travel more easily.','because','Daha rahat seyahat etmek istediğim için İngilizce öğreniyorum.']],
+ 'even though':[['___ I was nervous, I answered the question.','even though','Gergin olmama rağmen soruyu cevapladım.']],
+ 'as soon as':[['I will call you ___ I arrive.','as soon as','Varır varmaz seni arayacağım.']],
+ 'should have':[['I ___ booked the hotel earlier.','should have','Oteli daha erken ayırtmalıydım.']]
+};
+function structureQuestionsForLesson(l){const text=l.sentences.map(x=>x[0]).join(' '),out=[];Object.keys(NOVEL_STRUCTURE_BANK).forEach(k=>{const re=new RegExp('\\b'+k.replace(/ /g,'\\s+')+'\\b','i');if(re.test(text)){NOVEL_STRUCTURE_BANK[k].forEach(x=>out.push({type:'structure',blanked:esc(x[0]).replace('___','<span class="quiz-blank">…….</span>'),answer:x[1].toLowerCase(),en:x[0].replace('___',x[1]),tr:x[2],skill:'Yapı'}))}});return out;}
+function collocationQuestionsForLesson(l){const text=l.sentences.map(x=>x[0]).join(' ').toLowerCase(),fixed=(typeof getStudyCollocations==='function'?getStudyCollocations():[]),out=[];fixed.forEach(c=>{const phrase=String(c.phrase||'').trim();if(!phrase||!text.includes(phrase.toLowerCase()))return;const ex=(c.examples||[]).find(e=>!text.includes(String(e).toLowerCase()));if(!ex)return;const re=new RegExp(phrase.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'i');if(!re.test(ex))return;out.push({type:'chunk',blanked:esc(ex).replace(re,'<span class="quiz-blank">…….</span>'),answer:phrase.toLowerCase(),en:ex,tr:c.meaning||'',skill:'Kalıp / Chunk',constrained:true})});return out;}
+
+// vNext: test variety + plausible distractors.
+// Recent questions are remembered per lesson so a new test prefers unseen material.
+function ltHistoryKey(no){return 'aresLessonTestHistoryV2_'+no;}
+function getLtHistory(no){try{return JSON.parse(localStorage.getItem(ltHistoryKey(no))||'[]')}catch(e){return []}}
+function saveLtHistory(no,sigs){
+  let h=getLtHistory(no);
+  sigs.forEach(s=>{h=h.filter(x=>x!==s);h.push(s)});
+  localStorage.setItem(ltHistoryKey(no),JSON.stringify(h.slice(-80)));
+}
+function qSig(q){
+  return [q.type,q.prompt||'',q.blanked||'',q.tr||'',q.answer||''].join('|').toLowerCase();
+}
+function preferUnseen(arr,no){
+  const seen=new Set(getLtHistory(no));
+  const fresh=shuffleArr(arr.filter(q=>!seen.has(qSig(q))));
+  const old=shuffleArr(arr.filter(q=>seen.has(qSig(q))));
+  return fresh.concat(old);
+}
+function roughWordClass(en){
+  const s=String(en||'').trim().toLowerCase();
+  if(/\s/.test(s)) return 'phrase';
+  if(/ly$/.test(s)) return 'adv';
+  if(/(ing|ed)$/.test(s)) return 'verbish';
+  if(/(ous|ful|less|ive|al|able|ible|ic|y)$/.test(s)) return 'adj';
+  return 'word';
+}
+function lessonCloseDistractors(l,w,count){
+  const correctTr=String(w[1]||'').trim().toLowerCase();
+  const cls=roughWordClass(w[0]);
+  let pool=l.words
+    .filter(x=>x[0]&&x[1]&&String(x[1]).trim().toLowerCase()!==correctTr)
+    .map(x=>({en:x[0],tr:x[1]}));
+  // Prefer items with a similar grammatical shape; then same-lesson items.
+  const sameClass=pool.filter(x=>roughWordClass(x.en)===cls);
+  let candidates=sameClass.length>=count?sameClass:pool;
+  // If lesson pool is too small, use the global close-distractor heuristic only as fallback.
+  if(candidates.length<count){
+    const global=pickCloseDistractors(getAllWords(),{en:w[0],tr:w[1]},'tr',count*2);
+    candidates=candidates.concat(global.filter(x=>!candidates.some(y=>String(y.tr).toLowerCase()===String(x.tr).toLowerCase())));
+  }
+  // Rank by English-form similarity only after keeping the semantic context local to the lesson.
+  candidates=candidates.map(x=>({x,score:diceCoefficient(String(w[0]),String(x.en))}))
+    .sort((a,b)=>b.score-a.score).map(z=>z.x);
+  const top=candidates.slice(0,Math.max(count*3,count));
+  return shuffleArr(top).slice(0,count).map(x=>x.tr);
+}
+
+function buildLessonTestQuestions(l,count){
+ const items=[];
+ // 1) Vocabulary recognition. Distractors come first from the SAME lesson and similar word-shape,
+ // so options are plausible rather than unrelated random words.
+ shuffleArr(l.words.slice()).forEach(w=>{
+   if(!w[0]||!w[1])return;
+   const ds=lessonCloseDistractors(l,w,3);
+   if(ds.length===3)items.push({type:'choice',prompt:w[0],options:shuffleArr([w[1],...ds]),answer:w[1],en:w[0],tr:w[1],skill:'Kelime'});
+ });
+ // 2) Structure/chunk questions already use novel contexts.
+ items.push(...structureQuestionsForLesson(l),...collocationQuestionsForLesson(l));
+ // 3) Production questions use the lesson targets, but recent prompts are deprioritized.
+ l.sentences.forEach(s=>items.push({type:'production',prompt:s[1],answer:s[0],en:s[0],tr:s[1],skill:'Cümle Kurma'}));
+
+ const rec=preferUnseen(items.filter(x=>x.type==='choice'),l.no);
+ const controlled=preferUnseen(items.filter(x=>x.type==='structure'||x.type==='chunk'),l.no);
+ const prod=preferUnseen(items.filter(x=>x.type==='production'),l.no);
+
+ let out=[];
+ const take=(a,n)=>{while(a.length&&n-->0)out.push(a.shift())};
+ take(rec,Math.max(2,Math.round(count*.2)));
+ take(controlled,Math.max(2,Math.round(count*.3)));
+ take(prod,count-out.length);
+
+ const rest=preferUnseen([...rec,...controlled,...prod],l.no);
+ while(out.length<count&&rest.length)out.push(rest.shift());
+
+ out=shuffleArr(out).slice(0,count);
+ saveLtHistory(l.no,out.map(qSig));
+ return out;
+}
+
+function productionPracticeHtml(l){const picks=shuffleArr(l.sentences.slice()).slice(0,3);return `<div id="lesson-production" class="card lesson-stage-card"><h3 class="section-title" style="margin-top:0">✍️ Üret · Yeni Cümleyi Sen Kur</h3><p class="hint">Burada amaç cümleyi ezberlemek değil. Türkçe fikri gör, İngilizceyi kendin üret. Kontrolden sonra doğal örneği karşılaştır.</p><div class="production-grid">${picks.map((s,i)=>`<div class="production-task"><b>${esc(s[1])}</b><input id="prod-${l.no}-${i}" class="quiz-input" placeholder="İngilizce cümleni kur…"><button class="pill" onclick="checkProduction(${l.no},${i},'${escJs(s[0])}','${escJs(s[1])}')">Kontrol Et</button><div id="prod-fb-${l.no}-${i}" class="quiz-feedback"></div></div>`).join('')}</div></div>`}
+function checkProduction(no,i,target,tr){const el=document.getElementById(`prod-${no}-${i}`),fb=document.getElementById(`prod-fb-${no}-${i}`);if(!el||!el.value.trim())return;const pct=wordMatchScore(normSpeech(target),normSpeech(el.value));if(pct>=72){fb.innerHTML=`✓ Anlam ve yapı iyi. <span class="hint">Doğal örnek: ${esc(target)}</span>`;fb.className='quiz-feedback ok';removeMistake(target)}else{fb.innerHTML=`Bir daha dene. <b>Doğal örnek:</b> ${esc(target)}`;fb.className='quiz-feedback bad';addMistake(target,tr,'cümle kurma')}saveFlow(no,'produce');saveProgress(progress);updateMistakeBadge();}
+
+// Rebuild lesson page as an actual guided flow. Manual "Ders Bitti" is removed; completion comes after the test.
+viewLesson=function(l){
+ if(!l)return _baseLesson(l);
+ let base=_baseLesson(l);
+ // Keep the original manual lesson-completion control.
+ // It remains independent from test scores so Erhan decides when a lesson is genuinely finished.
+ base=base.replace('<div class="cols">','<div id="lesson-study-material" class="cols lesson-stage-card">');
+ let analysis=cleanAnalysisHtml(lessonAnalysis(l));
+ if(!/id=["']lesson-analysis["']/.test(analysis)){
+   analysis=analysis.replace(/<details\b([^>]*)>/i,(m,attrs)=>`<details id="lesson-analysis"${attrs}>`);
+ }
+ analysis=analysis.replace('class="card','class="card lesson-stage-card');
+ const speak=`<div id="lesson-speaking" class="card lesson-stage-card"><h3 class="section-title" style="margin-top:0">🎤 Konuş · Bağlam İçinde Kullan</h3><p class="hint">Role Play / Abroad mantığı: hazır cümleyi okumak yerine soruya doğal cevap ver. Tarayıcının tek bir kelimeyi yanlış duyması otomatik olarak telaffuz hatası sayılmaz.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="pill primary" onclick="saveFlow(${l.no},'speak');window.location.href='./speaking.html'">Ares Speaking'i Aç</button><button class="pill" onclick="saveFlow(${l.no},'speak');navigate('lessontest',${l.no});setTimeout(()=>setLessonTestMode('voice'),0)">Bu Dersi Sesli Çalış</button></div></div>`;
+ const launch=`<div id="lesson-test-launch" class="card lesson-stage-card"><h3 class="section-title" style="margin-top:0">📝 Test · Ölç</h3><p class="hint">Rastgele kelime silinen ezber soruları yok. Test; kelime anlamı, hedef yapı/chunk ve tam cümle üretimini ölçer. Yanlışların Akıllı Yanlış Havuzu'na gider.</p><button class="pill primary" onclick="saveFlow(${l.no},'test');navigate('lessontest',${l.no})">${l.no}. Ders Testine Başla</button></div>`;
+ return guidedPath(l)+base.replace('</div>\n  <div class="card">\n    <h3 class="section-title" style="margin-top:0;">Notlarım</h3>',`</div>${lessonChunksHtml(l.no)}${analysis}${productionPracticeHtml(l)}${speak}${launch}<div class="card"><h3 class="section-title" style="margin-top:0;">Notlarım</h3>`);
+};
+
+// Render new test question types.
+const _guidedViewLessonTest=viewLessonTest;
+viewLessonTest=function(lessonNo){
+ const l=DATA.lessons.find(x=>x.no===lessonNo);if(!l)return '<div class="card">Ders bulunamadı.</div>';
+ if(lessonTestState.lesson===lessonNo&&lessonTestState.questions.length&&lessonTestState.index>=lessonTestState.questions.length){
+   const total=lessonTestState.questions.length,pct=total?Math.round(100*lessonTestState.correct/total):0;const f=flowState(lessonNo);f.test=true;if(!isDone(lessonNo)){progress.lessonsDone.push(lessonNo);progress.lessonDoneDates[lessonNo]=todayStr()}saveProgress(progress);renderLessonList();
+   return `<div class="quiz-box card"><h3 class="section-title" style="margin-top:0">Test Bitti 🎉</h3><div class="score-row"><div class="score-item"><b>${lessonTestState.correct}</b>Doğru</div><div class="score-item"><b>${total}</b>Toplam</div><div class="score-item"><b>${pct}%</b>Başarı</div></div><div class="lesson-complete-note"><b>✓ ${lessonNo}. ders tamamlandı.</b><br>Yanlışların varsa Yanlış Havuzu'nda tekrar çalışabilirsin.</div><div class="btns" style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap"><button class="pill primary" onclick="restartLessonTest(${lessonNo})">Yeni Test</button><button class="pill" onclick="navigate('mistakes')">Yanlış Havuzu</button><button class="pill" onclick="navigate('lesson',${lessonNo})">Derse Dön</button></div></div>`;
+ }
+ return _guidedViewLessonTest(lessonNo);
+};
+function semanticLocalVariant(user,target){
+  const n=x=>normSpeech(String(x||'')).replace(/\b(a|an|the)\b/g,' ').replace(/\s+/g,' ').trim();
+  let u=n(user),t=n(target);
+  if(u===t)return {level:'natural',reason:'same'};
+  const canon=x=>x
+    .replace(/\bin the mornings\b/g,'in morning')
+    .replace(/\bin the morning\b/g,'in morning')
+    .replace(/\bhave black coffee\b/g,'drink black coffee')
+    .replace(/\bhave coffee\b/g,'drink coffee')
+    .replace(/\bhave a black coffee\b/g,'drink black coffee')
+    .replace(/\bhave a coffee\b/g,'drink coffee')
+    .replace(/\bhave lunch\b/g,'eat lunch')
+    .replace(/\bhave breakfast\b/g,'eat breakfast')
+    .replace(/\bhave dinner\b/g,'eat dinner')
+    .replace(/\bget to work\b/g,'go to work')
+    .replace(/\busually do not\b/g,'do not usually')
+    .replace(/\busually dont\b/g,'dont usually')
+    .replace(/\s+/g,' ').trim();
+  if(canon(u)===canon(t))return {level:'natural',reason:'known-natural-variant'};
+  const score=wordMatchScore(canon(t),canon(u));
+  if(score>=88)return {level:'natural',reason:'high-match'};
+  if(score>=72)return {level:'meaning',reason:'close-match'};
+  return {level:'uncertain',reason:'needs-semantic-check'};
+}
+async function semanticAiJudge(user,target,tr){
+  if(!restoreApiKeyPersistent())return null;
+  try{
+    const sys=`You are evaluating an A2-B1 English learner. Judge meaning, grammar and naturalness, not exact wording. Accept natural alternatives such as have/drink coffee, go/get to work, frequency-adverb variants, articles or singular/plural time expressions when meaning remains correct. Return ONLY compact JSON: {"level":"natural"|"meaning"|"wrong","note":"short Turkish feedback","natural":"one natural English example"}. natural = correct and natural; meaning = intended meaning is clear but wording/grammar should be improved; wrong = meaning or core structure is materially wrong.`;
+    const msg=`Turkish prompt: ${tr}\nReference example: ${target}\nLearner answer: ${user}`;
+    const raw=await callClaudeAPI(sys,msg,220);
+    const m=String(raw).match(/\{[\s\S]*\}/);if(!m)return null;
+    const j=JSON.parse(m[0]);if(!['natural','meaning','wrong'].includes(j.level))return null;return j;
+  }catch(e){return null;}
+}
+checkLessonTestAnswer=async function(){
+  const st=lessonTestState,q=st.questions[st.index],el=document.getElementById('lt-input'),fb=document.getElementById('lt-feedback');
+  if(!el||!el.value.trim())return;
+  const user=el.value.trim();let ok=false,level='wrong',note='',natural=q.answer;
+  const b=document.getElementById('lt-check');if(b)b.disabled=true;
+  if(q.type==='production'){
+    const local=semanticLocalVariant(user,q.answer);level=local.level;
+    if(level==='uncertain'){
+      fb.innerHTML='Değerlendiriliyor…';fb.className='quiz-feedback';
+      const ai=await semanticAiJudge(user,q.answer,q.tr);
+      if(ai){level=ai.level;note=ai.note||'';natural=ai.natural||q.answer;}
+      else level='wrong';
+    }
+    ok=level!=='wrong';
+    if(level==='natural'){
+      st.correct++;fb.innerHTML=`✓ <b>Doğru ve doğal.</b>${normSpeech(user)!==normSpeech(q.answer)?`<div class="hint"><b>Alternatif:</b> ${esc(q.answer)}</div>`:''}`;fb.className='quiz-feedback ok';removeMistake(q.en);
+    }else if(level==='meaning'){
+      st.correct++;fb.innerHTML=`◐ <b>Anlam doğru.</b> ${esc(note||'Cümlen iletişim kuruyor; küçük bir doğallık veya yapı iyileştirmesi yapılabilir.')}<div class="hint"><b>Daha doğal örnek:</b> ${esc(natural)}</div><div class="hint"><b>Senin cevabın:</b> ${esc(user)}</div>`;fb.className='quiz-feedback';removeMistake(q.en);
+    }else{
+      fb.innerHTML=`✕ <b>Tekrar çalışalım.</b>${note?` ${esc(note)}`:''}<div class="hint"><b>Doğal cevap:</b> ${esc(natural)}</div><div class="hint"><b>Senin cevabın:</b> ${esc(user)}</div>`;fb.className='quiz-feedback bad';addMistake(q.en,q.tr,'cümle kurma');
+    }
+  }else{
+    ok=normSpeech(user)===normSpeech(q.answer);level=ok?'natural':'wrong';
+    if(ok){st.correct++;fb.innerHTML='✓ Doğru.';fb.className='quiz-feedback ok';removeMistake(q.en)}
+    else{fb.innerHTML=`✕ Tekrar çalışalım. <b>Doğal cevap:</b> ${esc(q.answer)}`;fb.className='quiz-feedback bad';addMistake(q.en,q.tr,q.type==='chunk'?'kalıp':'yapı')}
+  }
+  recordLessonStat(st.lesson,ok);recordDailyStat(ok);saveProgress(progress);updateMistakeBadge();el.disabled=true;if(b)b.disabled=true;const nx=document.getElementById('lt-next');if(nx)nx.style.display='inline-flex';
+};
+document.addEventListener('DOMContentLoaded',()=>setTimeout(updateTopActionButton,0));
+// Today's Session opens directly in-page via startDailyPlan().
+
+
+</script>
+
+
+
+
+
+<script id="ares-stage7-error-clinic-js">
+// STAGE 7 — spaced repair: Day 0 correction -> Day 2 translation -> Day 5 cloze -> Day 10 speaking.
+const EC7_DAY=24*60*60*1000;
+function ec7Ref(m){return String((m&&(m.note||m.correct||m.en||m.answer||m.sentence))||'').trim()}
+function ec7Key(m){return String((m&&m.en)||'')+'|'+String((m&&m.tr)||'')}
+function ec7Init(m){
+  if(!m.repairStarted){m.repairStarted=Date.now();m.repairStep=0;m.repairDue=Date.now()}
+  if(typeof m.repairStep!=='number')m.repairStep=0;
+  if(!m.repairDue)m.repairDue=Date.now();
+  return m;
+}
+function ec7Schedule(m,nextStep){
+  const waits=[0,2,5,10]; m.repairStep=nextStep;
+  if(nextStep>=4){m.repairMastered=Date.now();m.repairDue=null;}
+  else m.repairDue=m.repairStarted+waits[nextStep]*EC7_DAY;
+  saveProgress(progress);
+}
+function ec7When(ts){if(!ts)return 'Completed';const d=Math.ceil((ts-Date.now())/EC7_DAY);return d<=0?'Due now':d===1?'Tomorrow':`In ${d} days`}
+function ec7Cloze(s){
+  const words=String(s||'').split(/\s+/);if(words.length<3)return '___';
+  let ix=words.findIndex((w,i)=>i>0&&i<words.length-1&&w.replace(/[^A-Za-z]/g,'').length>=4);if(ix<0)ix=Math.floor(words.length/2);
+  words[ix]='_____';return words.join(' ');
+}
+function ec7TaskHtml(m,i){
+  ec7Init(m);const step=m.repairStep||0, due=(m.repairDue||0)<=Date.now(), ref=ec7Ref(m), prompt=String(m.tr||'Bu fikri doğal İngilizceyle söyle.');
+  if(step>=4)return `<div class="ec7-task"><b>✓ Repair cycle completed</b><div class="hint">Bu hata aktif üretimle onarıldı. Yeni bir hatada tekrar döngüye girebilir.</div></div>`;
+  if(!due)return `<div class="ec7-task"><b>Next repair: ${ec7When(m.repairDue)}</b><div class="hint">Spaced repair bilinçli olarak bekliyor. Erken ezber yerine doğru zamanda geri gelecek.</div></div>`;
+  if(step===0)return `<div class="ec7-task"><b>DAY 0 · Correct it</b><div class="hint">Önce kendi doğru versiyonunu üret. Sonra karşılaştır.</div><div style="margin-top:8px">${esc(prompt)}</div><input class="ec7-input" id="ec7-${i}" placeholder="Correct English…"><button class="pill primary" onclick="ec7Check(${i})">Check & schedule Day 2</button></div>`;
+  if(step===1)return `<div class="ec7-task"><b>DAY 2 · Translate from memory</b><div style="margin-top:8px">${esc(prompt)}</div><input class="ec7-input" id="ec7-${i}" placeholder="English from memory…"><button class="pill primary" onclick="ec7Check(${i})">Check & schedule Day 5</button></div>`;
+  if(step===2)return `<div class="ec7-task"><b>DAY 5 · Rebuild the sentence</b><div style="font-size:18px;margin-top:8px">${esc(ec7Cloze(ref))}</div><input class="ec7-input" id="ec7-${i}" placeholder="Write the complete sentence…"><button class="pill primary" onclick="ec7Check(${i})">Check & schedule Day 10</button></div>`;
+  return `<div class="ec7-task"><b>DAY 10 · Speaking transfer</b><div class="hint">Ekrandaki cevabı okumadan bu fikri sesli söyle.</div><div style="margin-top:8px">${esc(prompt)}</div><div class="row" style="margin-top:10px"><button class="pill primary" onclick="ec7Speak(${i})">🎙 Open Ares Speaking</button><button class="pill" onclick="ec7Spoken(${i})">✓ I said it aloud</button></div></div>`;
+}
+function viewErrorClinic(){
+  const arr=(progress.mistakes||[]).filter(Boolean);
+  arr.forEach(ec7Init);saveProgress(progress);
+  const active=arr.filter(m=>!m.repairMastered), due=active.filter(m=>(m.repairDue||0)<=Date.now()).length, done=arr.filter(m=>m.repairMastered).length;
+  let html=`<div class="card"><div class="ec7-head"><div><div class="travel-kicker">ARES · SPACED REPAIR</div><h2 style="margin:5px 0">🩹 Error Clinic</h2><p class="hint">Hata → düzeltme → 2 gün sonra çeviri → 5 gün sonra rebuild → 10 gün sonra speaking.</p></div><div class="row"><span class="badge">${due} due</span><span class="badge">${done} repaired</span></div></div></div>`;
+  if(!arr.length)return html+`<div class="card"><p class="hint">Henüz kayıtlı hata yok. Quiz, Language Hub ve Speaking hataları burada otomatik onarım döngüsüne girecek.</p></div>`;
+  arr.slice(0,30).forEach((m,i)=>{const s=m.repairStep||0;html+=`<div class="card"><div class="ec7-head"><div><div class="travel-kicker">${esc(m.kind||m.type||'ACTIVE ERROR')}</div><div style="font-size:18px;font-weight:750;margin-top:5px">${esc(m.tr||'Bu fikri doğal İngilizceyle yeniden söyle.')}</div></div><div class="ec7-due">${m.repairMastered?'✓ Repaired':ec7When(m.repairDue)}</div></div><div class="ec7-path">${['Day 0 · Correct','Day 2 · Translate','Day 5 · Rebuild','Day 10 · Speak'].map((x,k)=>`<div class="ec7-step ${s>k||m.repairMastered?'done':s===k?'now':'wait'}">${x}</div>`).join('')}</div>${ec7TaskHtml(m,i)}<details style="margin-top:10px"><summary class="hint">Reference / saved correction</summary><p><b>${esc(ec7Ref(m))}</b>${m.note&&m.en&&m.note!==m.en?`<br><span class="hint">Original: ${esc(m.en)}</span>`:''}</p></details></div>`});
+  return html;
+}
+function ec7Check(i){
+  const m=(progress.mistakes||[]).filter(Boolean)[i],el=document.getElementById('ec7-'+i);if(!m||!el||!el.value.trim())return;
+  const ref=ec7Ref(m),score=ref?orderedWordScore(ref,el.value.trim()):0;
+  if(score>=.58){const next=(m.repairStep||0)+1;ec7Schedule(m,next);alert(next===1?'✓ Good. Scheduled for Day 2.':next===2?'✓ Good. Scheduled for Day 5.':'✓ Good. Scheduled for Day 10 speaking.');navigate('errorclinic')}
+  else alert('🟡 Not yet. Compare with the saved correction, then try once more.');
+}
+function ec7Speak(i){
+  const m=(progress.mistakes||[]).filter(Boolean)[i];if(!m)return;
+  localStorage.setItem('ares_speaking_transfer',JSON.stringify({source:'error-clinic',prompt:m.tr||'Say this naturally in English.',target:ec7Ref(m),key:ec7Key(m),createdAt:Date.now()}));
+  window.location.href='speaking.html?source=error-clinic';
+}
+function ec7Spoken(i){
+  const m=(progress.mistakes||[]).filter(Boolean)[i];if(!m)return;
+  ec7Schedule(m,4);progress.learningBrain.fixedMistakes=progress.learningBrain.fixedMistakes||[];progress.learningBrain.fixedMistakes.push({date:todayStr(),key:ec7Key(m),source:'stage7'});progress.learningBrain.fixedMistakes=progress.learningBrain.fixedMistakes.slice(-200);saveProgress(progress);navigate('errorclinic');
+}
+</script>
+
+<!-- ARES V2 STAGE 8 — Unified Professional UI -->
+
+
+
+<!-- ARES V2 STAGE 11 — Personal Learning Intelligence -->
+<style id="ares-stage11-style">
+.ares11-card{border:1px solid rgba(69,105,94,.22);border-left:5px solid #52786d;border-radius:18px;padding:20px 22px;margin:0 0 22px;background:rgba(255,255,255,.48);box-shadow:0 8px 24px rgba(30,42,56,.05)}
+.ares11-top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap}.ares11-kicker{font-size:12px;letter-spacing:.13em;text-transform:uppercase;font-weight:800;opacity:.65}.ares11-title{font-size:22px;font-weight:850;margin:5px 0}.ares11-reason{max-width:760px;line-height:1.5;opacity:.78}.ares11-grid{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:10px;margin-top:16px}.ares11-metric{border:1px solid rgba(90,100,100,.14);border-radius:13px;padding:12px;background:rgba(255,255,255,.35)}.ares11-metric b{display:block;font-size:20px;margin-bottom:2px}.ares11-metric span{font-size:12px;opacity:.66}.ares11-action{margin-top:15px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}.ares11-pill{font-size:12px;font-weight:800;padding:6px 9px;border-radius:999px;background:rgba(82,120,109,.12)}
+@media(max-width:800px){.ares11-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+<script id="ares-stage11-intelligence">
+(function(){
+ 'use strict';
+ const KEY='ing_defter_progress', PROFILE_KEY='ares_intelligence_v1';
+ const safe=(v,d)=>{try{return JSON.parse(v)}catch(e){return d}};
+ function read(){return safe(localStorage.getItem(KEY),{})||{}}
+ function transfer(){return safe(localStorage.getItem('ares_lh_transfer_queue_v1'),'[]')||[]}
+ function dueWords(p){const now=Date.now();return Object.values(p.wordSR||{}).filter(x=>{const t=Date.parse(x&&x.next||'');return !t||t<=now}).length}
+ function weakVocab(p){return Object.values(p.vocabMastery||{}).filter(x=>{const s=x&&x.stages||[];return (x&&x.weak>0)||s.filter(Boolean).length<3}).length}
+ function activeErrors(p){return (p.mistakes||[]).filter(x=>x&&!x.repairMastered).length}
+ function speakingTurns(p){return Number(p.learningBrain&&p.learningBrain.speaking&&p.learningBrain.speaking.turns||0)}
+ function build(){
+   const p=read(), q=transfer(), due=dueWords(p), weak=weakVocab(p), errors=activeErrors(p), speak=speakingTurns(p), activeTransfer=q.filter(x=>x&&x.status!=='mastered').length;
+   const scores={review:due*5+activeTransfer*4,repair:errors*8,speaking:(speak<5?28:8)+activeTransfer*7,vocabulary:Math.min(weak,40),learn:12};
+   const focus=Object.keys(scores).sort((a,b)=>scores[b]-scores[a])[0];
+   const map={
+    review:{label:'Smart Review',reason:`${due} tekrar zamanı gelen öğe ve ${activeTransfer} aktif transfer var. Önce hatırlamayı güçlendir.`,view:'repeatcenter'},
+    repair:{label:'Error Repair',reason:`${errors} aktif hata onarım bekliyor. Yeni içerikten önce bu hataları düzelt.`,view:'errorclinic'},
+    speaking:{label:'Speaking Activation',reason:`Bilgiyi pasif bırakma: ${activeTransfer} içerik konuşmaya aktarılabilir. Bugünün önceliği aktif üretim.`,view:'speaking'},
+    vocabulary:{label:'Vocabulary Activation',reason:`${weak} kelime henüz güçlü aktif kullanıma ulaşmadı. Yeni kelime eklemekten çok mevcut kelimeleri üret.`,view:'vocabhub'},
+    learn:{label:'Core Learning',reason:'Tekrar ve hata yükü düşük. Bugün yeni içeriğe kontrollü biçimde ilerleyebilirsin.',view:'lesson'}
+   };
+   const profile={date:new Date().toISOString().slice(0,10),focus,...map[focus],metrics:{due,weak,errors,speak,activeTransfer},scores,updatedAt:Date.now()};
+   localStorage.setItem(PROFILE_KEY,JSON.stringify(profile));
+   try{
+    p.learningBrain=p.learningBrain||{};p.learningBrain.intelligence=profile;
+    p.dailyPlan=p.dailyPlan||{};p.dailyPlan.enginePlan=p.dailyPlan.enginePlan||{};
+    p.dailyPlan.enginePlan.focus={id:focus,score:scores[focus],label:profile.label,reason:profile.reason};
+    const mins=focus==='speaking'?{warmup:3,review:5,learn:5,speak:10,repair:2}:focus==='repair'?{warmup:3,review:5,learn:5,speak:5,repair:7}:focus==='review'?{warmup:3,review:10,learn:5,speak:5,repair:2}:focus==='vocabulary'?{warmup:3,review:6,learn:8,speak:6,repair:2}:{warmup:3,review:5,learn:9,speak:6,repair:2};
+    if(Array.isArray(p.dailyPlan.enginePlan.steps))p.dailyPlan.enginePlan.steps.forEach(x=>{if(mins[x.id]!=null)x.min=mins[x.id]});
+    p.dailyPlan.enginePlan.total=25;localStorage.setItem(KEY,JSON.stringify(p));
+   }catch(e){}
+   return profile;
+ }
+ function action(profile){if(profile.view==='speaking')location.href='./speaking.html';else if(profile.view==='lesson'&&typeof window.openLesson==='function')window.openLesson((read().dailyPlan||{}).lessonNo||2);else if(typeof window.navigate==='function')window.navigate(profile.view)}
+ window.aresIntelligenceAction=function(){action(build())};
+ function card(){const x=build(),m=x.metrics;return `<section class="ares11-card" id="ares11-card"><div class="ares11-top"><div><div class="ares11-kicker">ARES · PERSONAL LEARNING INTELLIGENCE</div><div class="ares11-title">🧠 Today: ${x.label}</div><div class="ares11-reason">${x.reason}</div></div><span class="ares11-pill">Adaptive · 25 min</span></div><div class="ares11-grid"><div class="ares11-metric"><b>${m.due}</b><span>Due review</span></div><div class="ares11-metric"><b>${m.errors}</b><span>Active errors</span></div><div class="ares11-metric"><b>${m.weak}</b><span>Weak vocabulary</span></div><div class="ares11-metric"><b>${m.activeTransfer}</b><span>Speaking transfer</span></div></div><div class="ares11-action"><button class="pill primary" onclick="aresIntelligenceAction()">Start priority →</button><span class="hint">ARES recalculates this from your latest learning data.</span></div></section>`}
+ function inject(){const c=document.getElementById('content');if(!c||document.getElementById('ares11-card'))return;const title=(document.getElementById('page-title')?.textContent||'').toLowerCase();if(!(title.includes('ana sayfa')||title.includes('home')))return;c.insertAdjacentHTML('afterbegin',card())}
+ let timer=0;const obs=new MutationObserver(()=>{clearTimeout(timer);timer=setTimeout(inject,80)});const boot=()=>{const c=document.getElementById('content');if(c){obs.observe(c,{childList:true,subtree:false});inject()}else setTimeout(boot,100)};boot();
+ window.addEventListener('storage',()=>setTimeout(()=>{document.getElementById('ares11-card')?.remove();inject()},100));
+})();
+</script>
