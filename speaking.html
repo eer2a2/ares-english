@@ -697,5 +697,173 @@ $('emojiGrid').innerHTML=emojis.map(e=>`<button onclick="setEmoji('${e}')">${e}<
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();
 </script>
+<!-- ARES V2 STAGE 12 — Adaptive Speaking Receiver -->
+<style>
+#ares12AdaptiveCard{
+  border:1px solid #c9c0ac;
+  border-left:5px solid #5b7361;
+  border-radius:14px;
+  padding:18px;
+  margin:0 0 18px;
+  background:#fbf8f1;
+}
 
+#ares12AdaptiveCard h3{
+  margin:5px 0 10px;
+}
+
+.ares12-chip{
+  display:inline-block;
+  padding:6px 9px;
+  margin:4px;
+  border-radius:999px;
+  background:#edf0f2;
+  font-size:12px;
+  font-weight:700;
+}
+</style>
+
+<script id="ares-stage12-speaking-receiver">
+(function(){
+  'use strict';
+
+  const KEY = 'ares_adaptive_speaking_v1';
+
+  function getPlan(){
+    try {
+      return JSON.parse(localStorage.getItem(KEY) || 'null');
+    } catch(e) {
+      return null;
+    }
+  }
+
+  function textFromMistake(m){
+    if (!m) return '';
+    return m.correct ||
+           m.corrected ||
+           m.answer ||
+           m.sentence ||
+           m.text ||
+           m.wrong ||
+           '';
+  }
+
+  function render(){
+    const params = new URLSearchParams(location.search);
+
+    if (params.get('adaptive') !== '1') return;
+
+    const plan = getPlan();
+    if (!plan) return;
+
+    const mission = document.getElementById('mission');
+    if (!mission) return;
+
+    const old = document.getElementById('ares12AdaptiveCard');
+    if (old) old.remove();
+
+    const card = document.createElement('div');
+    card.id = 'ares12AdaptiveCard';
+
+    const transferTexts = (plan.transfers || [])
+      .map(x =>
+        x.personalSentence ||
+        x.sentence ||
+        x.text ||
+        x.answer ||
+        ''
+      )
+      .filter(Boolean);
+
+    const errorTexts = (plan.mistakes || [])
+      .map(textFromMistake)
+      .filter(Boolean);
+
+    const words = plan.weakWords || [];
+
+    let focus = 'Fluency';
+
+    if (plan.priority === 'error-repair')
+      focus = 'Error Repair';
+
+    if (plan.priority === 'language-transfer')
+      focus = 'Language Hub Transfer';
+
+    if (plan.priority === 'vocabulary')
+      focus = 'Vocabulary Activation';
+
+    card.innerHTML = `
+      <div class="tiny">ARES · ADAPTIVE SPEAKING COACH</div>
+
+      <h3>🧠 Today's Personal Speaking Focus: ${focus}</h3>
+
+      <div class="sub">
+        ARES prepared this practice from your current learning data.
+      </div>
+
+      ${
+        transferTexts.length
+        ? `<p><b>Use naturally:</b><br>
+           ${transferTexts.map(x =>
+             `<span class="ares12-chip">${escapeHtml(x)}</span>`
+           ).join('')}</p>`
+        : ''
+      }
+
+      ${
+        words.length
+        ? `<p><b>Activate these words:</b><br>
+           ${words.map(x =>
+             `<span class="ares12-chip">${escapeHtml(x)}</span>`
+           ).join('')}</p>`
+        : ''
+      }
+
+      ${
+        errorTexts.length
+        ? `<p><b>Repair while speaking:</b><br>
+           ${errorTexts.map(x =>
+             `<span class="ares12-chip">${escapeHtml(x)}</span>`
+           ).join('')}</p>`
+        : ''
+      }
+
+      <p class="sub">
+        Goal: speak naturally. Do not stop for small mistakes.
+        Use at least two of the targets above.
+      </p>
+    `;
+
+    mission.insertBefore(card, mission.firstChild);
+
+    const chunk = document.getElementById('dailyChunk');
+
+    if (chunk) {
+      if (transferTexts[0])
+        chunk.textContent = transferTexts[0];
+      else if (words[0])
+        chunk.textContent = words[0];
+      else if (errorTexts[0])
+        chunk.textContent = errorTexts[0];
+    }
+  }
+
+  function escapeHtml(value){
+    return String(value || '').replace(/[&<>"']/g, ch => ({
+      '&':'&amp;',
+      '<':'&lt;',
+      '>':'&gt;',
+      '"':'&quot;',
+      "'":'&#039;'
+    })[ch]);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', render);
+  } else {
+    render();
+  }
+
+})();
+</script>
 </body></html>
