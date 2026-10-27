@@ -8555,3 +8555,111 @@ document.addEventListener('click', function(e){
   e.stopPropagation();
   startDailyPlan();
 });
+
+// ---------- ARES V2 STAGE 10 — Supabase cross-device progress sync ----------
+(function(){
+  'use strict';
+  const DIRTY_KEY='ares_sync_dirty_at_v1';
+  const LAST_KEY='ares_sync_last_at_v1';
+  const RELOAD_GUARD='ares_sync_reloaded_v1';
+  const SYNC_EXACT=new Set([
+    'ing_defter_progress','ares_v36','ares_speaking_metrics_v1','ares_lh_personal',
+    'ares_lh_stats','ares_lh_mistakes','ares_lh_mission','ares_lh_transfer_queue_v1'
+  ]);
+  const SYNC_PREFIX=['ares_lh_speaking_u','ares_lh_theresa_u','ares_lt_history_'];
+  const NEVER_SYNC=/api[_-]?key|gemini|claude|device-token|ares-main-auth|supabase|offline_mode/i;
+  let busy=false, timer=null, ready=false;
+
+  function syncableKey(k){
+    if(!k || NEVER_SYNC.test(k)) return false;
+    return SYNC_EXACT.has(k) || SYNC_PREFIX.some(p=>k.startsWith(p));
+  }
+  function setCloudBadge(text,kind){
+    const el=document.getElementById('ares-cloud-sync'); if(!el)return;
+    el.textContent=text; el.dataset.state=kind||'';
+  }
+  function snapshot(){
+    const storage={};
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i); if(!syncableKey(k))continue;
+      const v=localStorage.getItem(k); if(v!==null)storage[k]=v;
+    }
+    return {storage, clientUpdatedAt:Date.now(), appVersion:10};
+  }
+  function applySnapshot(state){
+    const rows=state&&state.storage; if(!rows||typeof rows!=='object')return false;
+    Object.entries(rows).forEach(([k,v])=>{if(syncableKey(k)&&typeof v==='string')localStorage.setItem(k,v);});
+    return Object.keys(rows).length>0;
+  }
+  function markDirty(){
+    try{localStorage.setItem(DIRTY_KEY,String(Date.now()));}catch(e){}
+    clearTimeout(timer); timer=setTimeout(()=>aresCloudPush(),1200);
+  }
+  window.aresCloudMarkDirty=markDirty;
+
+  async function client(){
+    const sb=window.ARES_SB; if(!sb)return null;
+    const r=await sb.auth.getSession(); return r?.data?.session?sb:null;
+  }
+  async function readCloud(sb){
+    const q=await sb.from('ares_learning_sync').select('state,updated_at,schema_version').eq('id','main').maybeSingle();
+    if(q.error)throw q.error; return q.data;
+  }
+  async function writeCloud(sb,state){
+    const q=await sb.from('ares_learning_sync').upsert({id:'main',state,schema_version:1,updated_at:new Date().toISOString()},{onConflict:'id'}).select('updated_at').single();
+    if(q.error)throw q.error; return q.data;
+  }
+  window.aresCloudPush=async function(){
+    if(busy)return; const sb=await client(); if(!sb)return;
+    busy=true; setCloudBadge('☁ Saving…','busy');
+    try{
+      const row=await writeCloud(sb,snapshot());
+      const t=Date.parse(row.updated_at)||Date.now();
+      localStorage.setItem(LAST_KEY,String(t)); localStorage.setItem(DIRTY_KEY,'0');
+      setCloudBadge('☁ Synced','ok');
+    }catch(e){console.warn('ARES cloud push:',e);setCloudBadge('☁ Local','warn');}
+    finally{busy=false;}
+  };
+  window.aresCloudSync=async function(){
+    if(busy)return; const sb=await client(); if(!sb)return;
+    busy=true; setCloudBadge('☁ Syncing…','busy');
+    try{
+      const row=await readCloud(sb), localDirty=Number(localStorage.getItem(DIRTY_KEY)||0);
+      const cloudTime=row?.updated_at?Date.parse(row.updated_at):0;
+      const cloudState=row?.state||{};
+      const cloudHas=cloudState.storage&&Object.keys(cloudState.storage).length>0;
+      const localHas=Object.keys(snapshot().storage).length>0;
+      if(!cloudHas && localHas){
+        const saved=await writeCloud(sb,snapshot()); localStorage.setItem(LAST_KEY,String(Date.parse(saved.updated_at)||Date.now())); localStorage.setItem(DIRTY_KEY,'0');
+        setCloudBadge('☁ Synced','ok');
+      }else if(cloudHas && localDirty>cloudTime){
+        const saved=await writeCloud(sb,snapshot()); localStorage.setItem(LAST_KEY,String(Date.parse(saved.updated_at)||Date.now())); localStorage.setItem(DIRTY_KEY,'0');
+        setCloudBadge('☁ Synced','ok');
+      }else if(cloudHas){
+        const changed=applySnapshot(cloudState); localStorage.setItem(LAST_KEY,String(cloudTime||Date.now())); localStorage.setItem(DIRTY_KEY,'0');
+        setCloudBadge('☁ Synced','ok');
+        if(changed && sessionStorage.getItem(RELOAD_GUARD)!=='1'){
+          sessionStorage.setItem(RELOAD_GUARD,'1'); setTimeout(()=>location.reload(),80); return;
+        }
+      }else setCloudBadge('☁ Ready','ok');
+      ready=true;
+    }catch(e){console.warn('ARES cloud sync:',e);setCloudBadge('☁ Local','warn');}
+    finally{busy=false;}
+  };
+
+  // Hook the app's central save path without changing learning logic.
+  const originalSaveProgress=window.saveProgress||saveProgress;
+  window.saveProgress=function(p){originalSaveProgress(p);markDirty();};
+  try{saveProgress=window.saveProgress;}catch(e){}
+
+  // Language Hub has a second storage path; keep it cloud-aware too.
+  const originalLhStoreSet=window.lhStoreSet||lhStoreSet;
+  window.lhStoreSet=function(k,v){originalLhStoreSet(k,v);if(syncableKey(k))markDirty();};
+  try{lhStoreSet=window.lhStoreSet;}catch(e){}
+
+  window.addEventListener('ares:access-approved',()=>setTimeout(()=>window.aresCloudSync(),50));
+  window.addEventListener('online',()=>window.aresCloudSync());
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&Number(localStorage.getItem(DIRTY_KEY)||0)>0)window.aresCloudPush();});
+  window.addEventListener('beforeunload',()=>{if(Number(localStorage.getItem(DIRTY_KEY)||0)>0)window.aresCloudPush();});
+  setTimeout(()=>window.aresCloudSync(),900);
+})();

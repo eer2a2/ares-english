@@ -640,3 +640,9 @@ body.dark,body.dark-mode,[data-theme="dark"]{
   --ares-border:rgba(255,255,255,.10);
   --ares-shadow:none;
 }
+
+/* ARES V2 STAGE 10 — cloud sync status */
+#ares-cloud-sync{cursor:default;user-select:none;white-space:nowrap}
+#ares-cloud-sync[data-state="ok"]{font-weight:700}
+#ares-cloud-sync[data-state="busy"]{opacity:.78}
+#ares-cloud-sync[data-state="warn"]{border-style:dashed}
