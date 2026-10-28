@@ -1291,4 +1291,210 @@ $('emojiGrid').innerHTML=emojis.map(e=>`<button onclick="setEmoji('${e}')">${e}<
 
 })();
 </script>
+<!-- ARES V2 STAGE 14 — Adaptive Prompt Bridge -->
+<script id="ares-stage14-adaptive-prompt-bridge">
+(function(){
+  'use strict';
+
+  const PLAN_KEY = 'ares_adaptive_speaking_v1';
+
+  function readPlan(){
+    try{
+      return JSON.parse(localStorage.getItem(PLAN_KEY) || 'null');
+    }catch(e){
+      return null;
+    }
+  }
+
+  function cleanWord(value){
+    return String(value || '')
+      .replace(/\|\d+$/,'')
+      .replace(/\s+/g,' ')
+      .trim();
+  }
+
+  function getTransfer(plan){
+    const item = (plan.transfers || [])[0];
+
+    if(!item) return '';
+
+    return (
+      item.personalSentence ||
+      item.sentence ||
+      item.text ||
+      item.answer ||
+      ''
+    ).trim();
+  }
+
+  function getError(plan){
+    const item = (plan.mistakes || [])[0];
+
+    if(!item) return '';
+
+    return (
+      item.correct ||
+      item.corrected ||
+      item.answer ||
+      item.sentence ||
+      item.text ||
+      ''
+    ).trim();
+  }
+
+  function buildPrompt(plan){
+    const transfer = getTransfer(plan);
+    const error = getError(plan);
+
+    const words = (plan.weakWords || [])
+      .map(cleanWord)
+      .filter(Boolean)
+      .slice(0,2);
+
+    if(plan.priority === 'error-repair' && error){
+      return {
+        question:
+          'Let’s practise one of your weak points. ' +
+          'Can you tell me something about yourself using this idea: "' +
+          error + '"?',
+
+        target:error
+      };
+    }
+
+    if(transfer){
+      if(
+        /improve my english|english speaking/i.test(transfer)
+      ){
+        return {
+          question:
+            'What would you like to improve about your English, and why?',
+          target:transfer
+        };
+      }
+
+      if(/cinema|movie/i.test(transfer)){
+        return {
+          question:
+            'Tell me about the last time you went to the cinema with friends.',
+          target:transfer
+        };
+      }
+
+      return {
+        question:
+          'Tell me something from your own life using this idea: "' +
+          transfer + '".',
+        target:transfer
+      };
+    }
+
+    if(words.length){
+      return {
+        question:
+          'Let’s activate today’s vocabulary. Can you make a short answer using "' +
+          words.join('" and "') +
+          '" naturally?',
+        target:words.join(', ')
+      };
+    }
+
+    return {
+      question:
+        'Tell me about something interesting you did recently.',
+      target:'fluency'
+    };
+  }
+
+  function adaptiveCoachStart(){
+    if(
+      new URLSearchParams(location.search).get('adaptive') !== '1'
+    ){
+      return false;
+    }
+
+    const plan = readPlan();
+    if(!plan) return false;
+
+    const chat = document.getElementById('coachChat');
+    const text = document.getElementById('coachText');
+    const feedback = document.getElementById('coachFeedback');
+
+    if(!chat) return false;
+
+    const prompt = buildPrompt(plan);
+
+    chat.innerHTML =
+      '<div class="msg ai">Ares: ' +
+      escape14(prompt.question) +
+      '</div>';
+
+    if(text) text.value = '';
+
+    if(feedback){
+      feedback.style.display = 'none';
+    }
+
+    localStorage.setItem(
+      'ares_stage14_current_target_v1',
+      prompt.target
+    );
+
+    return true;
+  }
+
+  function escape14(value){
+    return String(value || '').replace(
+      /[&<>"']/g,
+      ch => ({
+        '&':'&amp;',
+        '<':'&lt;',
+        '>':'&gt;',
+        '"':'&quot;',
+        "'":'&#039;'
+      })[ch]
+    );
+  }
+
+  function install(){
+    if(
+      new URLSearchParams(location.search).get('adaptive') !== '1'
+    ) return;
+
+    if(typeof window.newCoach !== 'function') return;
+
+    if(window.newCoach.__aresStage14) return;
+
+    const originalNewCoach = window.newCoach;
+
+    function stage14NewCoach(){
+      try{
+        if(adaptiveCoachStart()) return;
+      }catch(e){}
+
+      return originalNewCoach();
+    }
+
+    stage14NewCoach.__aresStage14 = true;
+    stage14NewCoach.__original = originalNewCoach;
+
+    window.newCoach = stage14NewCoach;
+
+    /*
+      When Adaptive Speaking first opens, prepare the Coach immediately.
+      This does NOT start the microphone.
+    */
+    setTimeout(()=>{
+      adaptiveCoachStart();
+    },350);
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', install);
+  }else{
+    install();
+  }
+
+})();
+</script>
 </body></html>
