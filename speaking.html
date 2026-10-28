@@ -935,7 +935,7 @@ $('emojiGrid').innerHTML=emojis.map(e=>`<button onclick="setEmoji('${e}')">${e}<
 
     const coach = document.getElementById('coachChat');
     if(coach){
-      coach.querySelectorAll('.msg.me').forEach(x=>{
+      coach.querySelectorAll('.msg').forEach(x=>{
         parts.push(x.textContent || '');
       });
     }
