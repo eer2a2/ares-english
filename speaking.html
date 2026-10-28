@@ -968,7 +968,41 @@ $('emojiGrid').innerHTML=emojis.map(e=>`<button onclick="setEmoji('${e}')">${e}<
     return parts.join(' ').trim();
   }
 
-  function usedTarget(text, target){
+  function usedTarget(text,target){
+
+  function words(value){
+    return String(value || '')
+      .toLowerCase()
+      .replace(/[.,!?;:'"]/g,' ')
+      .replace(/\s+/g,' ')
+      .trim()
+      .split(' ')
+      .filter(Boolean)
+      .map(word=>{
+        // friend/friends, movie/movies, skill/skills vb.
+        if(word.length > 4 && word.endsWith('s')){
+          return word.slice(0,-1);
+        }
+        return word;
+      });
+  }
+
+  const spoken = words(text);
+  const goal = words(target);
+
+  if(!spoken.length || !goal.length) return false;
+
+  let matched = 0;
+
+  goal.forEach(word=>{
+    if(spoken.includes(word)){
+      matched++;
+    }
+  });
+
+  // Hedef kelimelerin en az %80'i kullanıldıysa başarılı.
+  return (matched / goal.length) >= 0.80;
+}
     const a = normalize(text);
     const b = normalize(cleanWord(target));
 
