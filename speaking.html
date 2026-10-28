@@ -866,4 +866,429 @@ $('emojiGrid').innerHTML=emojis.map(e=>`<button onclick="setEmoji('${e}')">${e}<
 
 })();
 </script>
+<!-- ARES V2 STAGE 13 — Adaptive Speaking Feedback Loop -->
+<style id="ares-stage13-style">
+#ares13Feedback{
+  margin-top:12px;
+  padding:14px;
+  border:1px solid #c9c0ac;
+  border-left:5px solid #5b7361;
+  border-radius:12px;
+  background:#f5f7f4;
+}
+.ares13-actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:10px;
+}
+.ares13-clean{
+  display:inline-block;
+  padding:6px 9px;
+  margin:4px;
+  border-radius:999px;
+  background:#edf0f2;
+  font-size:12px;
+  font-weight:700;
+}
+</style>
+
+<script id="ares-stage13-feedback-loop">
+(function(){
+  'use strict';
+
+  const PLAN_KEY = 'ares_adaptive_speaking_v1';
+  const PROGRESS_KEY = 'ing_defter_progress';
+  const TRANSFER_KEY = 'ares_lh_transfer_queue_v1';
+  const RESULT_KEY = 'ares_stage13_feedback_v1';
+
+  function read(key, fallback){
+    try{
+      const value = JSON.parse(localStorage.getItem(key) || 'null');
+      return value == null ? fallback : value;
+    }catch(e){
+      return fallback;
+    }
+  }
+
+  function write(key, value){
+    localStorage.setItem(key, JSON.stringify(value));
+  }
+
+  function cleanWord(value){
+    return String(value || '')
+      .replace(/\|\d+$/,'')
+      .replace(/\s+/g,' ')
+      .trim();
+  }
+
+  function normalize(value){
+    return String(value || '')
+      .toLowerCase()
+      .replace(/[^\p{L}\p{N}' ]/gu,' ')
+      .replace(/\s+/g,' ')
+      .trim();
+  }
+
+  function collectSpeech(){
+    const parts = [];
+
+    const coach = document.getElementById('coachChat');
+    if(coach){
+      coach.querySelectorAll('.msg.me').forEach(x=>{
+        parts.push(x.textContent || '');
+      });
+    }
+
+    ['quickText','surpriseText','roleText','abroadText'].forEach(id=>{
+      const el = document.getElementById(id);
+      if(el && el.value) parts.push(el.value);
+    });
+
+    return parts.join(' ').trim();
+  }
+
+  function usedTarget(text, target){
+    const a = normalize(text);
+    const b = normalize(cleanWord(target));
+
+    if(!a || !b) return false;
+
+    if(b.split(' ').length === 1){
+      return a.split(' ').includes(b);
+    }
+
+    return a.includes(b);
+  }
+
+  function getTargets(plan){
+    const transfers = (plan.transfers || [])
+      .map(x => ({
+        type:'transfer',
+        raw:x,
+        text:
+          x.personalSentence ||
+          x.sentence ||
+          x.text ||
+          x.answer ||
+          ''
+      }))
+      .filter(x => x.text);
+
+    const words = (plan.weakWords || [])
+      .map(x => ({
+        type:'word',
+        raw:x,
+        text:cleanWord(x)
+      }))
+      .filter(x => x.text);
+
+    const mistakes = (plan.mistakes || [])
+      .map(x => ({
+        type:'error',
+        raw:x,
+        text:
+          x.correct ||
+          x.corrected ||
+          x.answer ||
+          x.sentence ||
+          x.text ||
+          ''
+      }))
+      .filter(x => x.text);
+
+    return [...transfers, ...words, ...mistakes];
+  }
+
+  function updateVocabulary(progress, successfulWords){
+    progress.vocabMastery = progress.vocabMastery || {};
+
+    successfulWords.forEach(word=>{
+      const keys = Object.keys(progress.vocabMastery);
+
+      const key = keys.find(k =>
+        cleanWord(k).toLowerCase() === cleanWord(word).toLowerCase()
+      );
+
+      if(!key) return;
+
+      const item = progress.vocabMastery[key] || {};
+
+      item.speakingUses = Number(item.speakingUses || 0) + 1;
+      item.lastSpeakingUse = Date.now();
+
+      if(Number(item.weak || 0) > 0){
+        item.weak = Math.max(0, Number(item.weak) - 1);
+      }
+
+      item.stages = Array.isArray(item.stages)
+        ? item.stages
+        : [];
+
+      item.stages[4] = true;
+
+      progress.vocabMastery[key] = item;
+    });
+  }
+
+  function updateTransfers(successfulTransfers){
+    const queue = read(TRANSFER_KEY, []);
+
+    successfulTransfers.forEach(sentence=>{
+      const target = normalize(sentence);
+
+      const item = queue.find(x =>
+        normalize(
+          x.personalSentence ||
+          x.sentence ||
+          x.text ||
+          x.answer ||
+          ''
+        ) === target
+      );
+
+      if(!item) return;
+
+      item.speakingUses = Number(item.speakingUses || 0) + 1;
+      item.lastSpokenAt = Date.now();
+
+      if(item.speakingUses >= 2){
+        item.status = 'mastered';
+        item.masteredAt = Date.now();
+      }else{
+        item.status = 'spoken';
+      }
+    });
+
+    write(TRANSFER_KEY, queue);
+  }
+
+  function updateErrors(progress, successfulErrors){
+    const success = new Set(
+      successfulErrors.map(normalize)
+    );
+
+    (progress.mistakes || []).forEach(m=>{
+      const text =
+        m.correct ||
+        m.corrected ||
+        m.answer ||
+        m.sentence ||
+        m.text ||
+        '';
+
+      if(!success.has(normalize(text))) return;
+
+      m.speakingSuccess = Number(m.speakingSuccess || 0) + 1;
+      m.lastSpeakingSuccess = Date.now();
+
+      if(m.speakingSuccess >= 2){
+        m.repairMastered = true;
+        m.repairStep = 4;
+      }
+    });
+  }
+
+  function saveFeedback(){
+    const plan = read(PLAN_KEY, null);
+
+    if(!plan){
+      alert('Adaptive Speaking planı bulunamadı.');
+      return;
+    }
+
+    const speech = collectSpeech();
+
+    if(!speech){
+      alert('Önce Adaptive Speaking içinde biraz konuş.');
+      return;
+    }
+
+    const targets = getTargets(plan);
+
+    const successful = targets.filter(x =>
+      usedTarget(speech, x.text)
+    );
+
+    const missed = targets.filter(x =>
+      !usedTarget(speech, x.text)
+    );
+
+    const progress = read(PROGRESS_KEY, {});
+
+    progress.learningBrain = progress.learningBrain || {};
+    progress.learningBrain.speaking =
+      progress.learningBrain.speaking || {};
+
+    progress.learningBrain.speaking.adaptiveSessions =
+      Number(
+        progress.learningBrain.speaking.adaptiveSessions || 0
+      ) + 1;
+
+    progress.learningBrain.speaking.lastAdaptiveAt = Date.now();
+
+    const words = successful
+      .filter(x => x.type === 'word')
+      .map(x => x.text);
+
+    const transfers = successful
+      .filter(x => x.type === 'transfer')
+      .map(x => x.text);
+
+    const errors = successful
+      .filter(x => x.type === 'error')
+      .map(x => x.text);
+
+    updateVocabulary(progress, words);
+    updateTransfers(transfers);
+    updateErrors(progress, errors);
+
+    write(PROGRESS_KEY, progress);
+
+    const result = {
+      version:13,
+      createdAt:Date.now(),
+      successful:successful.map(x=>({
+        type:x.type,
+        text:cleanWord(x.text)
+      })),
+      missed:missed.map(x=>({
+        type:x.type,
+        text:cleanWord(x.text)
+      }))
+    };
+
+    write(RESULT_KEY, result);
+
+    localStorage.setItem(
+      'ares_sync_dirty_at_v1',
+      String(Date.now())
+    );
+
+    renderResult(result);
+  }
+
+  function renderResult(result){
+    let box = document.getElementById('ares13Feedback');
+
+    if(!box){
+      const card =
+        document.getElementById('ares12AdaptiveCard') ||
+        document.getElementById('ares12-speaking');
+
+      if(!card) return;
+
+      box = document.createElement('div');
+      box.id = 'ares13Feedback';
+      card.appendChild(box);
+    }
+
+    const good = result.successful || [];
+    const missed = result.missed || [];
+
+    box.innerHTML = `
+      <div class="tiny">ARES · STAGE 13 · FEEDBACK LOOP</div>
+
+      <b>
+        ${good.length} target activated ·
+        ${missed.length} still needs practice
+      </b>
+
+      ${
+        good.length
+        ? `<div style="margin-top:8px">
+            ${good.map(x =>
+              `<span class="ares13-clean">✓ ${escape13(x.text)}</span>`
+            ).join('')}
+           </div>`
+        : ''
+      }
+
+      <div class="sub" style="margin-top:8px">
+        Your result has been sent back to the Learning Engine.
+        Successful targets become stronger; unfinished targets stay
+        in future practice.
+      </div>
+    `;
+  }
+
+  function escape13(value){
+    return String(value || '').replace(
+      /[&<>"']/g,
+      ch => ({
+        '&':'&amp;',
+        '<':'&lt;',
+        '>':'&gt;',
+        '"':'&quot;',
+        "'":'&#039;'
+      })[ch]
+    );
+  }
+
+  function cleanStage12Chips(){
+    document
+      .querySelectorAll('.ares12-chip,.ares12-target')
+      .forEach(el=>{
+        const cleaned = cleanWord(el.textContent);
+        if(cleaned) el.textContent = cleaned;
+      });
+  }
+
+  function addButton(){
+    if(
+      new URLSearchParams(location.search).get('adaptive') !== '1'
+    ) return;
+
+    const card =
+      document.getElementById('ares12AdaptiveCard') ||
+      document.getElementById('ares12-speaking');
+
+    if(!card || document.getElementById('ares13-save')) return;
+
+    const actions = document.createElement('div');
+    actions.className = 'ares13-actions';
+
+    actions.innerHTML = `
+      <button class="pill good" id="ares13-save">
+        ✓ Finish & Update Learning Engine
+      </button>
+    `;
+
+    card.appendChild(actions);
+
+    document.getElementById('ares13-save').onclick = saveFeedback;
+
+    cleanStage12Chips();
+
+    const previous = read(RESULT_KEY, null);
+    if(previous) renderResult(previous);
+  }
+
+  function boot(){
+    cleanStage12Chips();
+
+    let tries = 0;
+
+    const timer = setInterval(()=>{
+      tries++;
+      addButton();
+      cleanStage12Chips();
+
+      if(
+        document.getElementById('ares13-save') ||
+        tries > 30
+      ){
+        clearInterval(timer);
+      }
+    },200);
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', boot);
+  }else{
+    boot();
+  }
+
+})();
+</script>
 </body></html>
