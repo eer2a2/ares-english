@@ -1612,8 +1612,30 @@ $('emojiGrid').innerHTML=emojis.map(e=>`<button onclick="setEmoji('${e}')">${e}<
     button.dataset.stage15 = '1';
 
     button.addEventListener('click', ()=>{
-      setTimeout(rebuildPlan, 100);
-    });
+  /*
+    Stage 13 önce sonucu kaydetsin.
+    Sonra Stage 15 yeni sonucu okuyup
+    bir sonraki konuşma planını oluştursun.
+  */
+  setTimeout(()=>{
+    rebuildPlan();
+
+    const plan = read(PLAN_KEY, null);
+
+    if(plan){
+      localStorage.setItem(
+        'ares_stage15_ready_v1',
+        JSON.stringify({
+          updatedAt: Date.now(),
+          remainingTargets: plan.remainingTargets || 0,
+          priority: plan.priority || 'fluency'
+        })
+      );
+    }
+  }, 700);
+});
+      
+    
   }
 
   let tries = 0;
