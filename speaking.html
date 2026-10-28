@@ -1654,4 +1654,155 @@ $('emojiGrid').innerHTML=emojis.map(e=>`<button onclick="setEmoji('${e}')">${e}<
 
 })();
 </script>
+<!-- ARES V2 STAGE 16 — Adaptive Difficulty -->
+<script id="ares-stage16-adaptive-difficulty">
+(function(){
+  'use strict';
+
+  const RESULT_KEY = 'ares_stage13_feedback_v1';
+  const LEVEL_KEY  = 'ares_stage16_difficulty_v1';
+
+  function read(key, fallback){
+    try{
+      const v = JSON.parse(localStorage.getItem(key) || 'null');
+      return v === null ? fallback : v;
+    }catch(e){
+      return fallback;
+    }
+  }
+
+  function calculateLevel(){
+    const result = read(RESULT_KEY, null);
+
+    if(!result){
+      return {
+        level:'normal',
+        score:50,
+        updatedAt:Date.now()
+      };
+    }
+
+    const good = (result.successful || []).length;
+    const missed = (result.missed || []).length;
+    const total = good + missed;
+
+    let ratio = total ? good / total : 0;
+
+    const previous = read(LEVEL_KEY, null);
+
+    if(previous && previous.level){
+      if(previous.level === 'hard') ratio += 0.08;
+      if(previous.level === 'easy') ratio -= 0.05;
+    }
+
+    let level = 'normal';
+
+    if(ratio >= 0.60){
+      level = 'hard';
+    }else if(ratio <= 0.20){
+      level = 'easy';
+    }
+
+    const data = {
+      level,
+      score:Math.round(
+        Math.max(0,Math.min(1,ratio)) * 100
+      ),
+      successful:good,
+      missed,
+      updatedAt:Date.now()
+    };
+
+    localStorage.setItem(
+      LEVEL_KEY,
+      JSON.stringify(data)
+    );
+
+    return data;
+  }
+
+  function getDifficulty(){
+    return read(LEVEL_KEY, null) || calculateLevel();
+  }
+
+  function difficultyInstruction(level){
+    if(level === 'easy'){
+      return (
+        ' Keep the question short and simple. ' +
+        'Ask about one idea only.'
+      );
+    }
+
+    if(level === 'hard'){
+      return (
+        ' Make the conversation more challenging. ' +
+        'Ask for a reason, detail or example.'
+      );
+    }
+
+    return (
+      ' Keep the conversation natural and at an intermediate difficulty.'
+    );
+  }
+
+  function adaptCoach(){
+    if(
+      new URLSearchParams(location.search).get('adaptive') !== '1'
+    ) return;
+
+    const chat = document.getElementById('coachChat');
+    if(!chat) return;
+
+    const difficulty = getDifficulty();
+
+    chat.dataset.aresDifficulty = difficulty.level;
+
+    window.ARES_ADAPTIVE_DIFFICULTY = {
+      level:difficulty.level,
+      score:difficulty.score,
+      instruction:difficultyInstruction(difficulty.level)
+    };
+  }
+
+  function updateAfterFinish(){
+    const button = document.getElementById('ares13-save');
+
+    if(!button || button.dataset.stage16 === '1') return;
+
+    button.dataset.stage16 = '1';
+
+    button.addEventListener('click', ()=>{
+      setTimeout(()=>{
+        calculateLevel();
+        adaptCoach();
+      },900);
+    });
+  }
+
+  function install(){
+    if(
+      new URLSearchParams(location.search).get('adaptive') !== '1'
+    ) return;
+
+    calculateLevel();
+    adaptCoach();
+    updateAfterFinish();
+  }
+
+  let tries = 0;
+
+  const timer = setInterval(()=>{
+    tries++;
+    install();
+
+    if(
+      document.querySelector('#ares13-save[data-stage16="1"]') ||
+      tries > 30
+    ){
+      clearInterval(timer);
+    }
+  },200);
+
+})();
+</script>
 </body></html>
