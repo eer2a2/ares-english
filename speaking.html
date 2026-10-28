@@ -1497,4 +1497,139 @@ $('emojiGrid').innerHTML=emojis.map(e=>`<button onclick="setEmoji('${e}')">${e}<
 
 })();
 </script>
+<!-- ARES V2 STAGE 15 — Adaptive Next Session -->
+<script id="ares-stage15-adaptive-next-session">
+(function(){
+  'use strict';
+
+  const PLAN_KEY = 'ares_adaptive_speaking_v1';
+  const RESULT_KEY = 'ares_stage13_feedback_v1';
+
+  function read(key, fallback){
+    try{
+      const v = JSON.parse(localStorage.getItem(key) || 'null');
+      return v === null ? fallback : v;
+    }catch(e){
+      return fallback;
+    }
+  }
+
+  function write(key, value){
+    localStorage.setItem(key, JSON.stringify(value));
+  }
+
+  function clean(value){
+    return String(value || '')
+      .replace(/\|\d+$/,'')
+      .replace(/\s+/g,' ')
+      .trim();
+  }
+
+  function normalize(value){
+    return clean(value).toLowerCase();
+  }
+
+  function itemText(item){
+    if(typeof item === 'string') return clean(item);
+
+    return clean(
+      item.personalSentence ||
+      item.correct ||
+      item.corrected ||
+      item.sentence ||
+      item.answer ||
+      item.text ||
+      ''
+    );
+  }
+
+  function rebuildPlan(){
+    const plan = read(PLAN_KEY, null);
+    const result = read(RESULT_KEY, null);
+
+    if(!plan || !result) return;
+
+    const successful = new Set(
+      (result.successful || []).map(x => normalize(x.text))
+    );
+
+    function keepUnfinished(list){
+      return (list || []).filter(item=>{
+        const text = itemText(item);
+        return text && !successful.has(normalize(text));
+      });
+    }
+
+    const nextPlan = Object.assign({}, plan);
+
+    nextPlan.transfers = keepUnfinished(plan.transfers);
+    nextPlan.weakWords = keepUnfinished(plan.weakWords);
+    nextPlan.mistakes = keepUnfinished(plan.mistakes);
+
+    nextPlan.previousSuccessful =
+      (result.successful || []).map(x=>({
+        type:x.type,
+        text:clean(x.text)
+      }));
+
+    nextPlan.generatedAt = Date.now();
+    nextPlan.stage = 15;
+
+    const remaining =
+      nextPlan.transfers.length +
+      nextPlan.weakWords.length +
+      nextPlan.mistakes.length;
+
+    nextPlan.remainingTargets = remaining;
+
+    if(nextPlan.mistakes.length){
+      nextPlan.priority = 'error-repair';
+    }else if(nextPlan.transfers.length){
+      nextPlan.priority = 'transfer';
+    }else if(nextPlan.weakWords.length){
+      nextPlan.priority = 'vocabulary';
+    }else{
+      nextPlan.priority = 'fluency';
+    }
+
+    write(PLAN_KEY, nextPlan);
+
+    localStorage.setItem(
+      'ares_stage15_last_update_v1',
+      String(Date.now())
+    );
+  }
+
+  function install(){
+    if(
+      new URLSearchParams(location.search).get('adaptive') !== '1'
+    ) return;
+
+    const button = document.getElementById('ares13-save');
+    if(!button) return;
+
+    if(button.dataset.stage15 === '1') return;
+    button.dataset.stage15 = '1';
+
+    button.addEventListener('click', ()=>{
+      setTimeout(rebuildPlan, 100);
+    });
+  }
+
+  let tries = 0;
+
+  const timer = setInterval(()=>{
+    tries++;
+    install();
+
+    if(
+      document.querySelector('#ares13-save[data-stage15="1"]') ||
+      tries > 30
+    ){
+      clearInterval(timer);
+    }
+  },200);
+
+})();
+</script>
 </body></html>
