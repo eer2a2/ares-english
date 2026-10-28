@@ -302,7 +302,27 @@ window.startVoice=(id,btnId,statusId)=>{
      for(let i=e.resultIndex;i<e.results.length;i++){
        const res=e.results[i];
        if(!res||!res[0])continue;
-       const phrase=String(res[0].transcript||'').trim();
+       let best=res[0];
+const context=((document.getElementById('coachChat')?.textContent||'')+' '+(document.getElementById('quickQ')?.textContent||'')).toLowerCase();
+
+for(let a=0;a<res.length;a++){
+  const alt=res[a];
+  const text=String(alt.transcript||'').trim().toLowerCase();
+  if(!text)continue;
+
+  let score=Number(alt.confidence||0);
+
+  text.split(/\s+/).forEach(word=>{
+    if(word.length>3 && context.includes(word)) score+=0.20;
+  });
+
+  if(score > Number(best._aresScore ?? best.confidence ?? 0)){
+    alt._aresScore=score;
+    best=alt;
+  }
+}
+
+const phrase=String(best.transcript||'').trim();
        if(!phrase)continue;
        if(res.isFinal)finals.push(phrase);
        else interim=phrase;
