@@ -291,7 +291,7 @@ window.startVoice=(id,btnId,statusId)=>{
    r.lang='en-US';
    r.continuous=false;
    r.interimResults=false;
-   r.maxAlternatives=1;
+   r.maxAlternatives=5;
 
    r.onstart=()=>{
      if(stillActive())setUniversalMicUI(true,'Seni dinliyorum… Konuşman bitince Durdur’a bas.');
