@@ -1,0 +1,148 @@
+<!doctype html><html lang="tr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ares · Deneme Sınavları</title>
+<style>
+body{font:17px system-ui;background:#f2efe6;color:#17283a;margin:0}main{max-width:760px;margin:auto;padding:24px}section,fieldset{background:#fffdf8;border:1px solid #d5d0c2;border-radius:14px;padding:18px;margin:16px 0}button,select,textarea{font:inherit;padding:10px;border:1px solid #50717b;border-radius:8px}button{background:#294e5b;color:white;cursor:pointer}button:disabled{opacity:.45}label.option{display:block;padding:9px;cursor:pointer}textarea{display:block;width:100%;box-sizing:border-box;margin-top:8px}a{color:#294e5b}.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.tabs{display:flex;gap:5px;flex-wrap:wrap}.tabs button{padding:7px;min-width:40px}.tabs button.answered{background:#496a48}.tabs button[aria-current=true]{outline:3px solid #b76d30}#clock{font-variant-numeric:tabular-nums}.reading{padding:12px;background:#ede9dc;border-radius:6px}
+</style><main><a href="./index.html">← Ares English</a><h1>Önceki Denemeler</h1><p><a href="./ace-exams.html">← Deneme menüsüne dön</a></p>
+<section id="setup"><p>ACE Malta müfredatına göre hazırlanmış özgün pratik. Puanlar deneme amaçlıdır.</p>
+<div class="row"><label for="mode">Sınav</label><select id="mode"><option value="placement">Seviye tespit</option><option>A1</option><option>A1+</option><option>A2</option></select>
+<label for="form">Form</label><select id="form"><option>1</option><option>2</option></select><button id="start">Sınava başla</button></div><p id="description"></p></section>
+<section id="exam" hidden><div class="row"><strong id="progress"></strong><strong id="clock" role="timer"></strong></div><div id="question"></div><div class="row"><button id="prev">Geri</button><button id="next">İleri</button><button id="finish">Sınavı bitir</button></div><p class="tabs" id="jump" aria-label="Soru seç"></p></section>
+<section id="results" hidden aria-live="polite"></section>
+<script>
+const bank = {"A1": [{"unit": 1, "stem": "I ___ from Türkiye.", "options": ["am", "is", "are", "be"], "reason": "I ile am kullanılır.", "level": "A1"}, {"unit": 1, "stem": "“What’s your job?” “I’m a ___.”", "options": ["teacher", "Turkish", "Tuesday", "twenty"], "reason": "Teacher bir meslek adıdır.", "level": "A1"}, {"unit": 2, "stem": "Leo and Mia are in a band. ___ band plays on Fridays.", "options": ["Their", "Our", "Her", "His"], "reason": "Their iki kişiye ait bir şeyi belirtir.", "level": "A1"}, {"unit": 2, "stem": "“___ are they from?” “Brazil.”", "options": ["Where", "Who", "When", "How old"], "reason": "Ülke veya yer sormak için where kullanılır.", "level": "A1"}, {"unit": 3, "stem": "My sister ___ got brown eyes.", "options": ["has", "have", "is", "are"], "reason": "My sister üçüncü tekil kişidir: has got.", "level": "A1"}, {"unit": 3, "stem": "Look at ___ shoes here next to me.", "options": ["these", "that", "this", "it"], "reason": "Yakındaki çoğul nesneler için these kullanılır.", "level": "A1"}, {"unit": 4, "stem": "Ella ___ work at eight every day.", "options": ["starts", "start", "starting", "is start"], "reason": "Present simple’da üçüncü tekil kişi -s alır.", "level": "A1"}, {"unit": 4, "stem": "Our class starts ___ half past nine.", "options": ["at", "on", "in", "from to"], "reason": "Saatten önce at kullanılır.", "level": "A1"}, {"unit": 5, "stem": "I need a ___ of water, please.", "options": ["bottle", "slice", "piece", "loaf"], "reason": "Su şişesi a bottle of water olur.", "level": "A1"}, {"unit": 5, "stem": "You are ready to order in a café. What do you say?", "options": ["Can I have a tea, please?", "Where is my ticket?", "What’s your address?", "How old are you?"], "reason": "Can I have…? sipariş vermek için kullanılır.", "level": "A1"}, {"unit": 6, "stem": "There ___ two chairs next to the window.", "options": ["are", "is", "be", "has"], "reason": "Çoğul isimden önce there are kullanılır.", "level": "A1"}, {"unit": 6, "stem": "I keep my milk in the ___.", "options": ["fridge", "sofa", "wardrobe", "mirror"], "reason": "Sütü soğuk tutan eşya fridge.", "level": "A1"}, {"unit": 7, "stem": "My brother can ___ very well.", "options": ["swim", "swims", "swimming", "to swim"], "reason": "Can’den sonra fiilin yalın hali gelir.", "level": "A1"}, {"unit": 7, "stem": "“Can you play the piano?” “Yes, ___.”", "options": ["I can", "I am", "I do", "I play"], "reason": "Can sorusunun kısa yanıtı Yes, I can.", "level": "A1"}, {"unit": 8, "stem": "Please be quiet. I ___ on the phone.", "options": ["am talking", "talked", "talk", "am talk"], "reason": "Şu anda süren iş için am talking.", "level": "A1"}, {"unit": 8, "stem": "Look! It ___ outside.", "options": ["’s raining", "rain", "rained", "is rain"], "reason": "Look, şu anda gerçekleşen bir duruma işaret ediyor.", "level": "A1"}, {"unit": 9, "stem": "We ___ at home yesterday evening.", "options": ["were", "are", "was", "be"], "reason": "We ile geçmiş zamanda were kullanılır.", "level": "A1"}, {"unit": 9, "stem": "I ___ my aunt last Sunday.", "options": ["visited", "visit", "visiting", "am visit"], "reason": "Last Sunday bitmiş bir zamanı belirtir.", "level": "A1"}, {"unit": 10, "stem": "When ___ the film start yesterday?", "options": ["did", "does", "was", "is"], "reason": "Past simple sorusunda did ve yalın fiil kullanılır.", "level": "A1"}, {"unit": 10, "stem": "They ___ the bus to work yesterday.", "options": ["took", "take", "takes", "taking"], "reason": "Take fiilinin geçmiş hali took.", "level": "A1"}, {"unit": 11, "stem": "“Let’s go to the cinema.” “___”", "options": ["Good idea.", "At my house.", "It’s seven.", "She’s my sister."], "reason": "Good idea bir öneriye olumlu yanıttır.", "level": "A1"}, {"unit": 11, "stem": "I like ___ to music at home.", "options": ["listening", "listen", "listens", "listened"], "reason": "Like + -ing genel bir beğeniyi anlatabilir.", "level": "A1"}, {"unit": 12, "stem": "We’re going to ___ our cousins this weekend.", "options": ["visit", "visited", "visits", "visiting"], "reason": "Be going to sonrasında yalın fiil gelir.", "level": "A1"}, {"unit": 12, "stem": "At the station, you buy a ___ before getting on the train.", "options": ["ticket", "menu", "pillow", "receipt for lunch"], "reason": "Trene binmek için ticket alınır.", "level": "A1"}], "A1+": [{"unit": 1, "stem": "“___ these your keys?” “No, they aren’t.”", "options": ["Are", "Is", "Do", "Am"], "reason": "These çoğuldur ve are ile kullanılır.", "level": "A1+"}, {"unit": 1, "stem": "There’s ___ umbrella in my hand luggage.", "options": ["an", "a", "some", "two"], "reason": "Umbrella ünlü sesle başladığı için an kullanılır.", "level": "A1+"}, {"unit": 2, "stem": "That’s ___ bag. She left it here.", "options": ["Emma’s", "Emma", "Emmas", "Emmas’"], "reason": "Tek bir kişinin sahipliği Emma’s ile gösterilir.", "level": "A1+"}, {"unit": 2, "stem": "My parents ___ got the same colour eyes.", "options": ["have", "has", "are", "is"], "reason": "My parents çoğuldur: have got.", "level": "A1+"}, {"unit": 3, "stem": "Maya ___ eats breakfast before work. She does it every day.", "options": ["always", "never", "rarely", "hardly ever"], "reason": "Every day ile always uyumludur.", "level": "A1+"}, {"unit": 3, "stem": "I don’t usually work ___ Sundays.", "options": ["on", "in", "at", "of"], "reason": "Günlerden önce on kullanılır.", "level": "A1+"}, {"unit": 4, "stem": "“What ___ your sister do?” “She’s a nurse.”", "options": ["does", "do", "is", "has"], "reason": "Meslek sormak için What does … do? kullanılır.", "level": "A1+"}, {"unit": 4, "stem": "I have an exam tomorrow, so I need to ___ tonight.", "options": ["study", "book", "check out", "catch the bus"], "reason": "Study sınava hazırlanmak anlamına gelir.", "level": "A1+"}, {"unit": 5, "stem": "The pharmacy is ___ the bank and the café.", "options": ["between", "behind", "into", "along"], "reason": "İki yerin arasında: between A and B.", "level": "A1+"}, {"unit": 5, "stem": "Is there ___ supermarket near the flat?", "options": ["a", "any of", "many", "an"], "reason": "Tekil, sayılabilen supermarket için a kullanılır.", "level": "A1+"}, {"unit": 6, "stem": "I ___ this film at the cinema last weekend.", "options": ["saw", "see", "seen", "am see"], "reason": "See fiilinin past simple hali saw.", "level": "A1+"}, {"unit": 6, "stem": "We want to hear live music. Let’s go to a ___.", "options": ["concert", "library", "pharmacy", "bank"], "reason": "Canlı müzik için concert uygun seçenektir.", "level": "A1+"}, {"unit": 7, "stem": "You can ___ the number 4 bus outside the station.", "options": ["catch", "drive to", "make", "ride on to"], "reason": "Catch the bus otobüse binmek veya yetişmek demektir.", "level": "A1+"}, {"unit": 7, "stem": "We missed our train, so we ___ a later one.", "options": ["took", "take", "taken", "taking"], "reason": "Missed geçmiş zamandadır, sonraki ana olay da took olur.", "level": "A1+"}, {"unit": 8, "stem": "There isn’t ___ milk in the fridge.", "options": ["any", "some", "a", "many"], "reason": "Olumsuz cümlede sayılamayan milk ile any kullanılır.", "level": "A1+"}, {"unit": 8, "stem": "How ___ apples do we need?", "options": ["many", "much", "any", "often"], "reason": "Sayılabilen çoğul apples için how many kullanılır.", "level": "A1+"}, {"unit": 9, "stem": "These shoes are too small. Have you got a ___ pair?", "options": ["larger", "largest", "more large", "large than"], "reason": "Mevcut çiftten daha büyük bir çift için larger.", "level": "A1+"}, {"unit": 9, "stem": "“Can I try this jacket ___?”", "options": ["on", "in", "up", "at"], "reason": "Try on kıyafeti denemek demektir.", "level": "A1+"}, {"unit": 10, "stem": "We walked ___ the bridge to the other side.", "options": ["across", "under", "behind", "above"], "reason": "Karşı tarafa geçmek için across.", "level": "A1+"}, {"unit": 10, "stem": "It’s cold and wet today, so wear a ___ jacket.", "options": ["waterproof", "noisy", "round", "wooden"], "reason": "Waterproof yağmur geçirmeyen anlamına gelir.", "level": "A1+"}, {"unit": 11, "stem": "You have a sore throat. You should ___ some water.", "options": ["drink", "drinks", "to drink", "drank"], "reason": "Should’dan sonra yalın fiil gelir.", "level": "A1+"}, {"unit": 11, "stem": "My ___ hurts, so I can’t write easily.", "options": ["hand", "ankle", "knee", "foot"], "reason": "Yazmayı doğrudan etkileyen vücut bölümü hand.", "level": "A1+"}, {"unit": 12, "stem": "I can’t talk now. I ___ dinner.", "options": ["am making", "make", "made", "am make"], "reason": "O anda devam eden iş present continuous ile anlatılır.", "level": "A1+"}, {"unit": 12, "stem": "I’m going to ___ my phone when I get home. The battery is at 2%.", "options": ["charge", "print", "repair the screen", "delete"], "reason": "Pil azaldığında charge my phone kullanılır.", "level": "A1+"}], "A2": [{"unit": 1, "stem": "How often ___ you see your old classmates?", "options": ["do", "are", "have", "does"], "reason": "Present simple’da you ile do kullanılır.", "level": "A2"}, {"unit": 1, "stem": "I don’t know ___ at this party.", "options": ["anyone", "no one", "somewhere", "every place"], "reason": "Olumsuz cümlede kişiler için anyone kullanılır.", "level": "A2"}, {"unit": 2, "stem": "I ___ for the bus when my colleague called.", "options": ["was waiting", "waited usually", "am waiting", "have waiting"], "reason": "Devam eden arka plan için past continuous.", "level": "A2"}, {"unit": 2, "stem": "This flat feels like home. I settled ___ quickly.", "options": ["in", "off", "on", "up"], "reason": "Settle in yeni bir yere alışmak demektir.", "level": "A2"}, {"unit": 3, "stem": "We’ve ___ at the hotel. Shall I call you after we unpack?", "options": ["just checked in", "checked in yesterday morning", "check in", "just checking in"], "reason": "Present perfect: have + past participle. Just yakın zamanı belirtir.", "level": "A2"}, {"unit": 3, "stem": "After breakfast, we checked ___ of the hotel and took a taxi.", "options": ["out", "in", "on", "away"], "reason": "Check out of a hotel otelden ayrılış işlemi yapmak demektir.", "level": "A2"}, {"unit": 4, "stem": "“Have you got plans for Friday?” “Yes, I ___ my cousins at seven.”", "options": ["’m meeting", "meet usually", "met", "have meet"], "reason": "Saat verilmiş kişisel düzenleme için present continuous uygundur.", "level": "A2"}, {"unit": 4, "stem": "It’s only a small gathering. Would you like to come ___ for dinner?", "options": ["over", "out of", "up to", "down on"], "reason": "Come over birinin evine uğramak demektir.", "level": "A2"}, {"unit": 5, "stem": "Staff ___ wear an ID badge. It’s a company rule.", "options": ["have to", "might", "don’t have to", "would rather"], "reason": "Have to dışarıdan gelen zorunluluğu belirtir.", "level": "A2"}, {"unit": 5, "stem": "I’m responsible ___ preparing the weekly report.", "options": ["for", "of", "to", "at"], "reason": "Responsible for + -ing.", "level": "A2"}, {"unit": 6, "stem": "“I feel tired all the time.” “You ___ go to bed earlier.”", "options": ["should", "would to", "mustn’t to", "could to"], "reason": "Should ile tavsiye verilir.", "level": "A2"}, {"unit": 6, "stem": "I go cycling twice a week to ___ fit.", "options": ["keep", "do", "stay in", "make"], "reason": "Keep fit doğal bir kalıptır.", "level": "A2"}, {"unit": 7, "stem": "My sister ___ live near the station, but now she lives abroad.", "options": ["used to", "is used to", "uses to", "would to"], "reason": "Used to artık geçerli olmayan geçmiş durumları anlatır.", "level": "A2"}, {"unit": 7, "stem": "Tom couldn’t work out the instructions. He looked ___.", "options": ["confused", "relaxed", "pleased", "cheerful"], "reason": "Talimatları anlayamadığında confused hissedebilir.", "level": "A2"}, {"unit": 8, "stem": "The children made the costumes by ___.", "options": ["themselves", "them", "their", "itself"], "reason": "Çoğul özne için reflexive pronoun themselves.", "level": "A2"}, {"unit": 8, "stem": "If the exhibition closes early, we ___ to the cinema instead.", "options": ["’ll go", "went", "’d go", "had gone"], "reason": "First conditional: if + present, will + verb.", "level": "A2"}, {"unit": 9, "stem": "If I ___ more free time, I’d take an art class.", "options": ["had", "have", "would have", "will have"], "reason": "Second conditional: if + past, would + verb.", "level": "A2"}, {"unit": 9, "stem": "The shop ___ repaired my camera is next to the post office.", "options": ["that", "where", "what", "whose"], "reason": "Relative clause içinde özne yerini that alır.", "level": "A2"}, {"unit": 10, "stem": "This laptop is just ___ fast as the more expensive one.", "options": ["as", "than", "more", "so much"], "reason": "Eşitlik için as + sıfat + as.", "level": "A2"}, {"unit": 10, "stem": "It’s an online form. You ___ print it.", "options": ["don’t need to", "must", "should have", "are needed"], "reason": "Don’t need to zorunluluk olmadığını söyler.", "level": "A2"}, {"unit": 11, "stem": "The local park ___ in 2018.", "options": ["was opened", "has opened in", "opening", "were opened"], "reason": "Tekil özne ve geçmiş passive: was + past participle.", "level": "A2"}, {"unit": 11, "stem": "It’s important ___ water when you go hiking.", "options": ["to carry", "carry", "carrying", "to carrying"], "reason": "It’s important + to-infinitive.", "level": "A2"}, {"unit": 12, "stem": "By the time I switched on the TV, the match ___.", "options": ["had already started", "has already started", "will start", "was start"], "reason": "Daha önce olan geçmiş olay için past perfect.", "level": "A2"}, {"unit": 12, "stem": "“I’m working from home today,” Leyla said. Leyla said she ___ from home that day.", "options": ["was working", "is work", "has worked", "will be working"], "reason": "Reported speech’te am working → was working.", "level": "A2"}]};
+const topics = {"A1": ["Nice To Meet You!", "Our Music, Our World", "My Life", "Time", "Time For A Break", "A Place To Live", "Skills", "The Here And Now", "Looking Back", "It’S History", "Having Fun", "Going Away"], "A1+": ["Arrivals", "People", "Days", "Work And Education", "Places", "That’S Entertainment", "Travel And Transport", "Food And Drink", "Shopping", "The Great Outdoors", "The Body", "Modern Lives"], "A2": ["Relationships", "Living", "Travel", "Socialising", "Work", "Health", "Mind", "Art", "Money", "Science And Technology", "Natural World", "Media"]};
+const passages = {
+ A1:['Hi, I’m Ava. I work at a hotel. I start at eight on Monday, and I take the bus to work.','How does Ava go to work?','By bus|By train|By car|On foot','Hi Sam. The bookshop is closed today. Let’s meet at the café at three instead.','Where will they meet?','At the café|At the bookshop|At the hotel|At the station'],
+ 'A1+':['The town pool opens at ten on Saturday. A ticket costs six pounds for adults, but children under eight can swim free.','Who can swim without paying?','Children under eight|All children|Adults|Everyone after ten','Hi Eva. I’m at the market. We already have bread and cheese, so I’ll only buy some tomatoes.','What will the speaker buy?','Tomatoes|Cheese|Bread|Bread and cheese'],
+ A2:['Mila booked a hotel near the station because she had an early train. The hotel offered a free breakfast, but it didn’t start until seven, twenty minutes after her train left.','Why couldn’t Mila have breakfast at the hotel?','Her train left before breakfast started.|Breakfast wasn’t included.|She booked the wrong hotel.|The station was too far away.','Hello, this is the gallery. Your Sunday tour will now begin at eleven instead of ten. Please keep your original ticket. You don’t need to download a new one.','What should the listener do?','Keep the original ticket.|Book a new tour.|Arrive at ten for the tour.|Download a different ticket.']
+};
+const byId = id => document.getElementById(id);
+let items=[], answers=[], position=0, deadline=0, timer=0, writing='';
+function shuffle(values){
+ const out=[...values];
+ for(let i=out.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[out[i],out[j]]=[out[j],out[i]];}
+ return out;
+}
+function addSkills(level,form){
+ const p=passages[level], keys=form===0?p:[
+  'The library closes at four today. You can return books after four using the box by the door.',
+  'How can you return a book after four?', 'Use the box outside|Wait for the librarian|Go to the café|Leave it on a desk',
+  'Hi Jo. I’ve moved our meeting from the station to the bus stop by the park. The time is still two.',
+  'What changed?', 'The meeting place|The meeting time|The day|The person coming'
+ ];
+ return [0,3].map((i)=>({
+  level, unit: level==='A2'?3:level==='A1+'?7:12, stem:keys[i+1],
+  options:keys[i+2].split('|'), script:keys[i], type:i===0?'Reading':'Listening',
+  reason:'Metindeki ilgili bilgi: '+keys[i+2].split('|')[0]+'.'
+ }));
+}
+function describe(){
+ byId('description').textContent=byId('mode').value==='placement'
+ ? '36 soru · 35 dakika · A1 → A1+ → A2. Sonuç bir çalışma aralığı önerir.'
+ : '14 soru · 20 dakika · Dil kullanımı, okuma ve dinleme. Sonuçta isteğe bağlı yazma ve konuşma görevi var.';
+}
+byId('mode').onchange=describe;describe();
+byId('start').onclick=()=>{
+ const form=Number(byId('form').value)-1;
+ const level=byId('mode').value;
+ const levels=level==='placement'?['A1','A1+','A2']:[level];
+ items=levels.flatMap(l=>{
+  const selected=bank[l].filter((_,i)=>i%2===form);
+  return level==='placement'?selected:[...selected,...addSkills(l,form)];
+ }).map(q=>({...q,correct:q.options[0],options:shuffle(q.options)}));
+ answers=items.map(()=>null);position=0;writing='';deadline=Date.now()+(level==='placement'?35:20)*60000;
+ byId('setup').hidden=true;byId('results').hidden=true;byId('exam').hidden=false;
+ clearInterval(timer);timer=setInterval(tick,250);tick();render();
+};
+function tick(){
+ const left=Math.max(0,Math.ceil((deadline-Date.now())/1000));
+ byId('clock').textContent=Math.floor(left/60)+':'+String(left%60).padStart(2,'0');
+ if(left===0) finish();
+}
+function node(tag,text,parent){
+ const el=document.createElement(tag);el.textContent=text;parent.append(el);return el;
+}
+function render(){
+ const q=items[position], box=byId('question');
+ box.replaceChildren();byId('progress').textContent=(position+1)+' / '+items.length+' · '+q.level+' · '+(q.type||'Use of English');
+ if(q.type==='Reading')node('p',q.script,box).className='reading';
+ if(q.type==='Listening'){
+  const play=node('button','Dinle',box);
+  play.onclick=()=>{
+   if(!('speechSynthesis' in window)){play.textContent='Bu tarayıcıda ses desteği yok';return;}
+   speechSynthesis.cancel();
+   const u=new SpeechSynthesisUtterance(q.script);u.lang='en-GB';u.rate=.87;speechSynthesis.speak(u);
+  };
+ }
+ const f=node('fieldset','',box);node('legend',q.stem,f);
+ q.options.forEach(o=>{
+  const l=node('label','',f);l.className='option';
+  const input=document.createElement('input');input.type='radio';input.name='answer';input.checked=answers[position]===o;
+  input.onchange=()=>{answers[position]=o;renderJump();};
+  l.append(input,document.createTextNode(' '+o));
+ });
+ byId('prev').disabled=position===0;byId('next').disabled=position===items.length-1;renderJump();
+}
+function renderJump(){
+ const box=byId('jump');box.replaceChildren();
+ items.forEach((_,i)=>{
+  const b=node('button',String(i+1),box);
+  if(answers[i]!==null)b.className='answered';
+  b.setAttribute('aria-current',String(i===position));
+  b.onclick=()=>{position=i;render();};
+ });
+}
+byId('prev').onclick=()=>{position--;render();};
+byId('next').onclick=()=>{position++;render();};
+byId('finish').onclick=()=>{
+ const missing=answers.filter(a=>a===null).length;
+ if(confirm(missing?missing+' soru boş. Sınavı bitir?':'Sınavı bitir?'))finish();
+};
+function finish(){
+ clearInterval(timer);
+ if('speechSynthesis' in window)speechSynthesis.cancel();
+ const box=byId('results');box.replaceChildren();
+ byId('exam').hidden=true;box.hidden=false;
+ const tally={};let total=0;
+ items.forEach((q,i)=>{
+  const t=tally[q.level]??={right:0,count:0};t.count++;
+  if(q.correct===answers[i]){t.right++;total++;}
+ });
+ node('h2',total+' / '+items.length+' doğru · %'+Math.round(100*total/items.length),box);
+ const placement=byId('mode').value==='placement';
+ let recommendation='A1 temellerini tekrar et';
+ for(const [level,t] of Object.entries(tally)){
+  node('p',level+' · '+t.right+'/'+t.count,box);
+  if(placement && t.right/t.count<.75)break;
+  recommendation=level==='A2'?'A2 konularında güçlü sonuç':level+' konularında güçlü sonuç';
+ }
+ if(placement){
+  for(const [level,t] of Object.entries(tally)){
+   if(!Array.from(box.querySelectorAll('p')).some(p=>p.textContent.startsWith(level+' ·')))node('p',level+' · '+t.right+'/'+t.count,box);
+  }
+  node('p','Çalışma önerisi: '+recommendation+'. Bu tarama B1 düzeyini ölçmez.',box);
+ } else {
+  node('p',total/items.length>=.75?'Bu denemede %75 çalışma hedefini geçtin.':'Bu denemede %75 çalışma hedefinin altında kaldın.',box);
+ }
+ const review=node('details','',box);node('summary','Yanlışlar ve boşlar',review);
+ items.forEach((q,i)=>{
+  if(q.correct===answers[i])return;
+  const entry=node('section','',review);
+  node('strong',(i+1)+'. '+q.stem,entry);
+  node('p','Senin cevabın: '+(answers[i]||'Boş')+' · Doğru: '+q.correct,entry);
+  node('p',q.reason,entry);
+  node('p',(q.level==='A2'?'Language Hub':'Müfredat')+' · '+q.level+' Ünite '+q.unit+' — '+topics[q.level][q.unit-1],entry);
+ });
+ if(total===items.length)node('p','Yanlış veya boş cevap yok.',review);
+ if(!placement){
+  const level=byId('mode').value;
+  const prompts={A1:['Bir arkadaşına kendini ve günlük rutinini 4–5 cümleyle tanıt.','Kendini tanıt ve hafta sonu planını söyle.'], 'A1+':['Bir arkadaşına hafta sonu gezini anlatan kısa bir e-posta yaz.','Bir şehir gezisini anlat ve bir ulaşım önerisi yap.'], A2:['Bir arkadaşına 50–100 kelimelik gezi tavsiyesi e-postası yaz. Yer, ulaşım ve görülecek şeylerden bahset.','Karşılaştırarak konuş: Seyahatte tablet mi dizüstü bilgisayar mı? Bir öneri ve iki gerekçe ver.']};
+  node('h3','Yazma ve konuşma pratiği',box);
+  node('p','Yazma · '+prompts[level][0],box);
+  const draft=node('textarea','',box);draft.rows=5;draft.setAttribute('aria-label','Yazma taslağı');draft.value=writing;draft.oninput=()=>{writing=draft.value;};
+  node('p','Konuşma · '+prompts[level][1],box);
+  node('p','Öz kontrol: Görevin bütün noktalarına değindin mi? Zamanlar tutarlı mı? En az bir ayrıntı veya gerekçe verdin mi?',box);
+ }
+ const again=node('button','Başka deneme seç',box);again.onclick=()=>{box.hidden=true;byId('setup').hidden=false;window.scrollTo(0,0);};
+ window.scrollTo(0,0);
+}
+</script></main></html>
