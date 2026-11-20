@@ -621,12 +621,16 @@ function editSentence(lessonNo, idx){
   if(newTr===null) return;
   const en = newEn.trim(), tr = newTr.trim();
   if(!en || !tr){ alert('Cümle boş bırakılamaz.'); return; }
-  l.sentences[idx] = [en, tr];
-  progress.sentenceEdits[lessonNo+':'+idx] = [en, tr];
+  saveSentenceEdit(l, idx, en, tr);
+  if(currentView==='lesson') render();
+}
+
+function saveSentenceEdit(lesson, idx, en, tr){
+  lesson.sentences[idx] = [en, tr];
+  progress.sentenceEdits[lesson.no+':'+idx] = [en, tr];
   allWordsCache = null;
   allSentencesCache = null;
   saveProgress(progress);
-  if(currentView==='lesson') render();
 }
 
 // ---------- Ders kelimeleri: düzelt / sil / tekrarları göster ----------
@@ -6110,6 +6114,15 @@ function viewBuilder(){
     <div class="btns" style="display:flex; gap:8px; margin-top:16px;">
       <button class="pill primary" onclick="checkBuilder()">Kontrol Et</button>
       <button class="pill" onclick="nextBuilder()">Yeni Cümle ›</button>
+      <button class="pill" type="button" aria-controls="bd-edit" aria-expanded="false" id="bd-edit-toggle" onclick="editBuilderSentenceFromQuiz()">✏️ Düzelt</button>
+    </div>
+    <form id="bd-edit" hidden onsubmit="saveBuilderCorrection(event)" style="margin-top:14px">
+      <label style="display:block">İngilizce cümle <input class="quiz-input" id="bd-edit-en" style="width:100%;margin-bottom:8px" required></label>
+      <label style="display:block">Türkçe ipucu <input class="quiz-input" id="bd-edit-tr" style="width:100%;margin-bottom:8px" required></label>
+      <button class="pill primary" type="submit">Kaydet</button>
+      <button class="pill" type="button" onclick="closeBuilderCorrection(true)">Vazgeç</button>
+    </form>
+    <div role="status" id="bd-edit-status" class="hint">
     </div>
     <div class="quiz-feedback" id="bd-feedback"></div>
   </div>`;
@@ -6117,6 +6130,12 @@ function viewBuilder(){
 function nextBuilder(){
   const pool = applyDifficultyFilter(getAllSentences(), s=>s.en, sentenceDifficulty);
   const s = pool[Math.floor(Math.random()*pool.length)];
+  if(s) loadBuilderSentence(s);
+}
+function loadBuilderSentence(s){
+  closeBuilderCorrection();
+  const status = document.getElementById('bd-edit-status');
+  if(status) status.textContent = '';
   const tokens = s.en.split(/\s+/);
   builderState = { tokens: shuffleArr(tokens.map((t,i)=>({t,i}))), answer:[], original:s };
   const src = document.getElementById('bd-source');
@@ -6174,10 +6193,9 @@ function checkBuilder(){
       + `<div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;">
           <button class="pill" id="bd-explain-btn" onclick="explainBuilderMistake(this)">🤖 Neden Yanlış? (Açıkla)</button>
           <button class="pill" onclick="navigate('lesson', ${builderState.original.lesson})">📍 ${builderState.original.lesson}. Derse Git</button>
-          <button class="pill" onclick="editBuilderSentenceFromQuiz()">✏️ Cümleyi Düzelt</button>
         </div>`
       + `<div id="bd-explain-result"></div>`
-      + `<div id="bd-edit-result"></div>`;
+;
     fb.className='quiz-feedback bad';
     addMistake(builderState.original.en, builderState.original.tr, 'cümle kur');
   }
@@ -6189,20 +6207,44 @@ function checkBuilder(){
   document.getElementById('bd-total').textContent = progress.builderScore.total;
   document.getElementById('bd-rate').textContent = Math.round(100*progress.builderScore.correct/progress.builderScore.total)+'%';
 }
-// Cümle kur testinde bir cümle hatalı çıkarsa, dersine gitmeden doğrudan
-// burada İngilizce/Türkçe metnini düzeltebilmek için editSentence'ı çağırır
-// ve ekrandaki soruyu (varsa güncellenmiş haliyle) tazeler.
 function editBuilderSentenceFromQuiz(){
-  const o = builderState.original;
-  if(!o) return;
-  editSentence(o.lesson, o.sIdx);
-  const l = DATA.lessons.find(x=>x.no===o.lesson);
-  const box = document.getElementById('bd-edit-result');
-  if(l && l.sentences[o.sIdx]){
-    o.en = l.sentences[o.sIdx][0];
-    o.tr = l.sentences[o.sIdx][1];
-    if(box) box.innerHTML = `<div class="card" style="margin-top:8px; border-left:4px solid var(--leaf); padding:12px 14px;"><div class="hint" style="margin:0;">✓ Güncellendi: <b>${esc(o.en)}</b> — ${esc(o.tr)}</div></div>`;
+  const current = builderState.original;
+  const form = document.getElementById('bd-edit');
+  if(!current || !form) return;
+  if(!form.hidden) { closeBuilderCorrection(true); return; }
+  const english = document.getElementById('bd-edit-en');
+  english.value = current.en;
+  document.getElementById('bd-edit-tr').value = current.tr;
+  document.getElementById('bd-edit-status').textContent = '';
+  form.hidden = false;
+  document.getElementById('bd-edit-toggle').setAttribute('aria-expanded', 'true');
+  english.focus();
+}
+function closeBuilderCorrection(restoreFocus = false){
+  const form = document.getElementById('bd-edit');
+  const toggle = document.getElementById('bd-edit-toggle');
+  if(form) form.hidden = true;
+  if(toggle) {
+    toggle.setAttribute('aria-expanded', 'false');
+    if(restoreFocus) toggle.focus();
   }
+}
+function saveBuilderCorrection(event){
+  event.preventDefault();
+  const current = builderState.original;
+  if(!current) return;
+  const en = document.getElementById('bd-edit-en').value.trim();
+  const tr = document.getElementById('bd-edit-tr').value.trim();
+  const status = document.getElementById('bd-edit-status');
+  if(!en || !tr) { status.textContent = 'İki alanı da doldur.'; return; }
+  const lesson = DATA.lessons.find(x => x.no === current.lesson);
+  if(!lesson?.sentences[current.sIdx]) { status.textContent = 'Ders cümlesi bulunamadı.'; return; }
+  if(en !== current.en || tr !== current.tr) {
+    saveSentenceEdit(lesson, current.sIdx, en, tr);
+    loadBuilderSentence({...current, en, tr});
+  }
+  closeBuilderCorrection(true);
+  status.textContent = '✓ Kaydedildi: ' + en + ' — ' + tr;
 }
 function builderFallbackExplanation(built, correct){
   const b=normalizePracticeText(built).split(' ').filter(Boolean);
