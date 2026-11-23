@@ -1501,11 +1501,39 @@ let currentCustomTopicId = null;
 let customTopicGroupFilter = {}; // { [customTopicId]: selectedCategoryName }
 let customTopicSubFilter = {}; // { [customTopicId]: { [categoryName]: selectedSubheadingName } }
 
-function navigate(view, lessonNo, sentenceIdx){
+let currentHubSection = null;
+let currentSearchQuery = '';
+const appBackStack = [];
+
+function rememberAppScreen(){
+  appBackStack.push({
+    view: currentView, lesson: currentLesson, section: currentHubSection,
+    topic: currentCustomTopicId, query: currentSearchQuery,
+    phrasalCategory: phrasalState.category, scroll: window.scrollY
+  });
+  if(appBackStack.length > 60) appBackStack.shift();
+}
+
+function goBackInApp(){
+  const previous = appBackStack.pop();
+  if(!previous) return;
+  currentCustomTopicId = previous.topic;
+  phrasalState.category = previous.phrasalCategory;
+  navigate(previous.view, previous.lesson, previous.section, false);
+  if(previous.view === 'search') doSearch(previous.query);
+  requestAnimationFrame(() => window.scrollTo(0, previous.scroll));
+}
+
+function navigate(view, lessonNo, sentenceIdx, remember = true){
+  const isHub = /^languagehubunit\d+$/.test(view);
+  const section = isHub && Number.isInteger(sentenceIdx) ? sentenceIdx : null;
+  if(remember && (view !== currentView || (lessonNo || null) !== currentLesson ||
+    section !== currentHubSection || (!isHub && sentenceIdx != null))) rememberAppScreen();
+  currentHubSection = section;
   currentView = view;
   updateTopActionButton();
   currentLesson = lessonNo || null;
-  highlightSentenceIdx = (sentenceIdx===undefined || sentenceIdx===null) ? null : sentenceIdx;
+  highlightSentenceIdx = (isHub || sentenceIdx == null) ? null : sentenceIdx;
   document.querySelectorAll('.navitem[data-view]').forEach(el=>{
     el.classList.toggle('active', el.dataset.view===view && !lessonNo);
   });
@@ -1515,6 +1543,8 @@ function navigate(view, lessonNo, sentenceIdx){
   document.querySelectorAll('.custom-topic-item').forEach(el=> el.classList.remove('active'));
   if(window.innerWidth<=820) document.getElementById('sidebar').classList.remove('open');
   render();
+  if(view === 'customtopic') renderCustomTopicsNav();
+  if(remember && (isHub || view === 'languagehub')) window.scrollTo(0, 0);
 }
 // Ders görünümü çizildikten sonra, aranan/işaretli cümleye kaydırıp kısa süreliğine vurgular.
 function scrollToHighlightedSentence(){
@@ -1557,12 +1587,9 @@ function renderCustomTopicsNav(){
   }).join('');
 }
 function openCustomTopic(id){
-  currentView = 'customtopic';
+  if(currentView !== 'customtopic' || currentCustomTopicId !== id) rememberAppScreen();
   currentCustomTopicId = id;
-  document.querySelectorAll('.navitem[data-view]').forEach(el=> el.classList.remove('active'));
-  if(window.innerWidth<=820) document.getElementById('sidebar').classList.remove('open');
-  render();
-  renderCustomTopicsNav();
+  navigate('customtopic', null, null, false);
 }
 function addCustomTopic(){
   const title = prompt('Yeni başlık adı (ör. "İş Görüşmesi Kalıpları"):');
@@ -2710,7 +2737,7 @@ function lhCheckText(id,answers){
   const fb=document.getElementById('lh-fb-'+id);fb.textContent=ok?'✓ Doğru':'✗ Örnek cevap: '+answers[0];fb.style.color=ok?'var(--leaf)':'var(--accent)';
   const sc=document.getElementById('lh-unit1-score'); if(sc)sc.textContent=lhQuizState.score+' / '+lhQuizState.total;
 }
-function lhResetUnit1(){lhQuizState={score:0,total:0,answered:{}};navigate('languagehubunit1');}
+function lhResetUnit1(){lhQuizState={score:0,total:0,answered:{}};render();}
 function lhMC(id,q,opts,correct){return `<div id="lhq-${id}" style="padding:14px 0;border-bottom:1px solid var(--paper-dark)"><b>${q}</b><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">${opts.map(o=>`<button class="pill" data-lh-answer="${o.replace(/"/g,'&quot;')}" onclick='lhCheck(${JSON.stringify(id)},${JSON.stringify(o)},${JSON.stringify(correct)})'>${o}</button>`).join('')}</div><div class="lh-feedback hint" style="margin-top:8px;font-weight:700"></div></div>`;}
 function lhText(id,q,answers,placeholder='Cevabını yaz…'){return `<div style="padding:14px 0;border-bottom:1px solid var(--paper-dark)"><b>${q}</b><input id="lh-input-${id}" class="quiz-input" style="margin-top:10px" placeholder="${placeholder}"><button class="pill primary" onclick='lhCheckText(${JSON.stringify(id)},${JSON.stringify(answers)})'>Kontrol Et</button><div id="lh-fb-${id}" class="hint" style="margin-top:8px;font-weight:700"></div></div>`;}
 function lhExerciseBlock(title,subtitle,html){return `<details class="card" style="margin-top:16px" open><summary style="cursor:pointer;font-weight:800;font-size:18px">${title}</summary><p class="hint">${subtitle}</p>${html}</details>`;}
@@ -2739,15 +2766,23 @@ function lhLessonNav(n){
 function lhSectionHead(id,icon,title,sub=''){
  return `<div id="${id}" style="scroll-margin-top:90px;margin:20px 0 10px;padding:14px 16px;border-left:4px solid var(--accent);background:var(--paper-dark);border-radius:10px"><div style="font-weight:900;font-size:18px">${icon} ${title}</div>${sub?`<div class="hint" style="margin-top:4px">${sub}</div>`:''}</div>`;
 }
+function lhUnitLessons(unit, lessons){
+ const view = 'languagehubunit' + unit;
+ const buttons = lessons.map(([title], index) => {
+   const selected = currentHubSection === index;
+   return `<button type="button" class="pill ${selected ? 'primary' : ''}" aria-pressed="${selected}" onclick="navigate('${view}', null, ${index})">${esc(title)}</button>`;
+ }).join('');
+ const menu = `<nav class="card" aria-label="Ünite bölümleri">
+   <div class="row" style="flex-wrap:wrap;gap:8px">${buttons}</div>
+ </nav>`;
+ const section = lessons[currentHubSection];
+ return menu + (section ? section[1]() : lhActivePanel(unit));
+}
 function viewLanguageHubUnit1(){
  const phrase=(en,tr)=>`<div style="padding:10px 0;border-bottom:1px solid var(--paper-dark)"><button class="spk" onclick='lhSpeak(${JSON.stringify(en)})'>🔊</button><b>${en}</b><div class="hint" style="margin-left:30px">${tr}</div></div>`;
  const speakBtns=(lesson)=>`<div class="row" style="margin-top:14px"><button class="pill primary" onclick="lhFriendSpeak('${lesson}')">🗣️ Arkadaşlarla Pratik</button><button class="pill" onclick="lhTheresa('${lesson}')">👩‍🏫 Theresa ile Kontrol</button></div>`;
- return `<div class="card" style="border-left:4px solid var(--accent)">
-   <div class="hint" style="font-weight:800;letter-spacing:.08em">LANGUAGE HUB B1 · UNIT 1 · RELATIONSHIPS</div>
-   <h3 style="font-family:var(--serif);font-size:27px;margin:6px 0">Learn → Practise → Personalise → Speak → Check</h3>
-   <p class="hint">Kitaptaki Unit 1 akışını Ares içinde tam çalış: vocabulary → grammar → reading/listening → comprehension → exercises → kendi hayatına uyarlama → speaking → Theresa kontrolü.</p>
- </div>
- <div class="card"><h3 class="section-title" style="margin-top:0">1.1 · Breaking the Ice</h3>
+ return lhUnitLessons(1, [
+   ["1.1 · Breaking the Ice", () => `<div class="card"><h3 class="section-title" style="margin-top:0">1.1 · Breaking the Ice</h3>
    <p class="hint"><b>Hedef:</b> Yeni biri hakkında bilgi edinmek · <b>Grammar:</b> question forms · <b>Vocabulary:</b> people</p>
    ${lhLessonNav('11')}
    ${lhSectionHead('lh-11-vocab','📚','VOCABULARY — People & Ice Breakers','Yeni tanıştığın insanlarla konuşurken kullanacağın kelime ve kalıplar.')}
@@ -2774,8 +2809,8 @@ function viewLanguageHubUnit1(){
    <div id="lh-11-personal" style="scroll-margin-top:90px"></div>${lhExerciseBlock('✍️ PERSONAL — Make it yours','Cevaplarını İngilizce yaz. Bunlar daha sonra speaking pratiğinde kullanabileceğin kişisel malzemen olacak.',
      lhPersonal('11p1','Why are you studying English?')+lhPersonal('11p2','What did you do last weekend?')+lhPersonal('11p3','What is a good question to ask someone you have just met?'))}
    <div id="lh-11-speak" style="scroll-margin-top:90px"></div>${lhSectionHead('lh-11-speaking-title','🗣️','SPEAKING','Arkadaşlarınla pratik yap veya Theresa ile kontrol et.')} ${speakBtns('1.1')}
- </div>
- <div class="card"><h3 class="section-title" style="margin-top:0">1.2 · Blogs and Bloggers</h3>
+ </div>`],
+   ["1.2 · Blogs and Bloggers", () => `<div class="card"><h3 class="section-title" style="margin-top:0">1.2 · Blogs and Bloggers</h3>
    <p class="hint"><b>Hedef:</b> Farklı insan tiplerinden ve alışkanlıklardan söz etmek · <b>Grammar:</b> frequency words & phrases</p>
    ${lhLessonNav('12')}
    ${lhSectionHead('lh-12-vocab','📚','VOCABULARY — Types of People','İnsanları ilgi alanlarına göre tarif et.')}
@@ -2801,8 +2836,8 @@ function viewLanguageHubUnit1(){
    <div id="lh-12-personal" style="scroll-margin-top:90px"></div>${lhExerciseBlock('✍️ PERSONAL — Your online life','Kendi rutinini kitaptaki sıklık diliyle anlat.',
      lhPersonal('12p1','What type of person are you: traveller, foodie, music fan, gamer, book lover…? Why?')+lhPersonal('12p2','What websites, blogs or videos do you usually follow?')+lhPersonal('12p3','Write three true sentences about your weekly routine using different frequency expressions.'))}
    <div id="lh-12-speak" style="scroll-margin-top:90px"></div>${lhSectionHead('lh-12-speaking-title','🗣️','SPEAKING','Arkadaşlarınla pratik yap veya Theresa ile kontrol et.')} ${speakBtns('1.2')}
- </div>
- <div class="card"><h3 class="section-title" style="margin-top:0">1.3 · Personality</h3>
+ </div>`],
+   ["1.3 · Personality", () => `<div class="card"><h3 class="section-title" style="margin-top:0">1.3 · Personality</h3>
    <p class="hint"><b>Hedef:</b> Birinin kişiliğini tarif etmek · <b>Grammar:</b> indefinite pronouns · <b>Vocabulary:</b> personality + adjective/preposition</p>
    ${lhLessonNav('13')}
    ${lhSectionHead('lh-13-vocab','📚','VOCABULARY — Personality','Kişilik sıfatları ve adjective + preposition kalıpları.')}
@@ -2828,8 +2863,8 @@ function viewLanguageHubUnit1(){
    <div id="lh-13-personal" style="scroll-margin-top:90px"></div>${lhExerciseBlock('✍️ PERSONAL — Describe real people','Gerçek hayatına bağla.',
      lhPersonal('13p1','Describe yourself with at least three personality adjectives.')+lhPersonal('13p2','Describe one of your friends. What is this person good at or interested in?')+lhPersonal('13p3','Write one true sentence with everyone/someone/anyone/no one.'))}
    <div id="lh-13-speak" style="scroll-margin-top:90px"></div>${lhSectionHead('lh-13-speaking-title','🗣️','SPEAKING','Arkadaşlarınla pratik yap veya Theresa ile kontrol et.')} ${speakBtns('1.3')}
- </div>
- <div class="card"><h3 class="section-title" style="margin-top:0">1.4 · Hello Again</h3>
+ </div>`],
+   ["1.4 · Hello Again", () => `<div class="card"><h3 class="section-title" style="margin-top:0">1.4 · Hello Again</h3>
    <p class="hint"><b>Hedef:</b> İnsanları selamlamak, kişisel bilgi vermek, tanıştırmak ve doğal vedalaşmak · <b>Functional language</b></p>
    ${lhLessonNav('14').replace('🧠 Grammar','💬 Functional Language')}
    ${lhSectionHead('lh-14-vocab','📚','VOCABULARY — Greetings & Introductions','Selamlaşma, yeniden karşılaşma ve vedalaşma ifadeleri.')}
@@ -2850,8 +2885,8 @@ function viewLanguageHubUnit1(){
    <div id="lh-14-personal" style="scroll-margin-top:90px"></div>${lhExerciseBlock('✍️ PERSONAL — Selfie introduction','Kısa bir kişisel tanıtım hazırla.',
      lhPersonal('14p1','Introduce yourself: name, where you are from, work/study, and something you like.')+lhPersonal('14p2','Imagine you unexpectedly meet a friend in a café. Write your first 3 lines.'))}
    <div id="lh-14-speak" style="scroll-margin-top:90px"></div>${lhSectionHead('lh-14-speaking-title','🗣️','SPEAKING','Arkadaşlarınla pratik yap veya Theresa ile kontrol et.')} ${speakBtns('1.4')}
- </div>
- <div class="card"><h3 class="section-title" style="margin-top:0">🏆 Unit 1 · Review & Real-Life Challenge</h3>
+ </div>`],
+   ["Unit Review", () => `<div class="card"><h3 class="section-title" style="margin-top:0">🏆 Unit 1 · Review & Real-Life Challenge</h3>
    <p class="hint">Amaç: Unit 1 dilini ezberden değil, gerçek konuşmada kullanabilmek.</p>
    ${lhExerciseBlock('✅ Unit 1 Review','Vocabulary + grammar + reading/listening mantığı + functional language.',
      lhMC('1ra','___ you ever met a famous person?',['Did','Have','Are'],'Have')+
@@ -2863,15 +2898,16 @@ function viewLanguageHubUnit1(){
    <div class="card" style="background:var(--paper-dark)"><b>🌍 Final Mission</b><ol style="line-height:1.8"><li>Yeni biriyle tanış ve en az 5 doğal soru sor.</li><li>Rutinini en az 4 farklı sıklık ifadesiyle anlat.</li><li>Kendini ve bir arkadaşını personality vocabulary ile tarif et.</li><li>Eski bir arkadaşla karşılaşma diyaloğu yap ve doğal şekilde vedalaş.</li></ol></div>
    <div class="card" style="background:var(--paper-dark);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div><b>📊 Alıştırma Skoru</b><div id="lh-unit1-score" style="font-size:24px;font-family:var(--serif);margin-top:4px">0 / 0</div></div><button class="pill" onclick="lhResetUnit1()">↻ Alıştırmaları Sıfırla</button></div>
    <div class="row"><button class="pill primary" onclick="lhFriendSpeak('review')">🗣️ Unit 1 Speaking Challenge</button><button class="pill" onclick="lhTheresa('review')">👩‍🏫 Theresa's Unit Check</button><button class="pill" onclick="navigate('languagehub')">← Tüm Ünitelere Dön</button></div>
- </div>`;
+ </div>`]
+ ]);
 }
 
 
 function viewLanguageHubUnit2(){
  const phrase=(en,tr)=>`<div style="padding:10px 0;border-bottom:1px solid var(--paper-dark)"><button class="spk" onclick='lhSpeak(${JSON.stringify(en)})'>🔊</button><b>${en}</b><div class="hint" style="margin-left:30px">${tr}</div></div>`;
  const speakBtns=(lesson)=>`<div class="row" style="margin-top:14px"><button class="pill primary" onclick="lhFriendSpeak('${lesson}')">🗣️ Arkadaşlarla Pratik</button><button class="pill" onclick="lhTheresa('${lesson}')">👩‍🏫 Theresa ile Kontrol</button></div>`;
- return `<div class="card" style="border-left:4px solid var(--accent)"><div class="hint" style="font-weight:800;letter-spacing:.08em">LANGUAGE HUB B1 · UNIT 2 · LIVING</div><h3 style="font-family:var(--serif);font-size:28px;margin:6px 0">Living</h3><p class="hint">Mahalleni anlat → günlük yaşam ve rutinlerden konuş → geçmişteki yaşam olaylarını anlat → tavsiye iste ve ver.</p></div>
- <div class="card"><h3 class="section-title" style="margin-top:0">2.1 · Love where you live</h3><p class="hint"><b>Hedef:</b> Talk about your neighbourhood · <b>Grammar:</b> adverbs of degree · <b>Vocabulary:</b> describing places</p>${lhLessonNav('21')}
+ return lhUnitLessons(2, [
+   ["2.1 · Love where you live", () => `<div class="card"><h3 class="section-title" style="margin-top:0">2.1 · Love where you live</h3><p class="hint"><b>Hedef:</b> Talk about your neighbourhood · <b>Grammar:</b> adverbs of degree · <b>Vocabulary:</b> describing places</p>${lhLessonNav('21')}
  ${lhSectionHead('lh-21-vocab','📚','VOCABULARY — Describing places','Mahalleni ve yaşadığın yeri daha doğal sıfatlarla anlat.')}
  <div class="cols"><div>${phrase('clean','temiz')}${phrase('quiet','sessiz')}${phrase('convenient','elverişli / ulaşımı kolay')}${phrase('modern','modern')}${phrase('attractive','çekici / hoş')}</div><div>${phrase('dirty','kirli')}${phrase('noisy','gürültülü')}${phrase('inconvenient','elverişsiz')}${phrase('old-fashioned','eski moda')}${phrase('ugly','çirkin')}</div></div>
  ${lhSectionHead('lh-21-grammar','🧠','GRAMMAR — Adverbs of degree','Sıfatın gücünü artırır veya azaltır: really / extremely / totally / quite / a bit / almost.')}
@@ -2881,9 +2917,8 @@ function viewLanguageHubUnit2(){
  ${lhExerciseBlock('📖 READING CHECK','Ana fikir ve ayrıntıları kontrol et.',lhMC('21r1','What is one benefit of plants on high-rise buildings?',['They can reduce noise','They make traffic faster','They remove all costs'],'They can reduce noise')+lhMC('21r2','What is the main disadvantage mentioned?',['They are expensive','They are too small','They have no balconies'],'They are expensive')+lhMC('21r3','Which idea best summarizes the text?',['Green buildings can improve city living but cost more','All cities should remove high-rises','Living outside cities is always better'],'Green buildings can improve city living but cost more'))}
  <div id="lh-21-ex" style="scroll-margin-top:90px"></div>${lhExerciseBlock('🧩 EXERCISES','Adverbs of degree + describing places.',lhMC('21a','The area is ___ peaceful. I hardly hear traffic.',['really','a bit','almost'],'really')+lhMC('21b','My flat is far from transport. It is quite ___.',['inconvenient','modern','clean'],'inconvenient')+lhMC('21c','Choose the natural phrase.',['extremely expensive','extremely a bit','very impossible'],'extremely expensive'))}
  <div id="lh-21-personal" style="scroll-margin-top:90px"></div>${lhExerciseBlock('✍️ PERSONAL — Your neighbourhood','Kendi yaşadığın yeri anlat.',lhPersonal('21p1','Describe your neighbourhood with at least five adjectives.')+lhPersonal('21p2','Is your area convenient for transport, shopping and daily life? Why?')+lhPersonal('21p3','Would you like to live in a green high-rise building? Why / why not?'))}
- <div id="lh-21-speak" style="scroll-margin-top:90px"></div>${lhSectionHead('lh-21-speaking-title','🗣️','SPEAKING','Mahalleni bir arkadaşına anlat ve sorulara cevap ver.')} ${speakBtns('2.1')}</div>
-
- <div class="card"><h3 class="section-title" style="margin-top:0">2.2 · The boomerang generation</h3><p class="hint"><b>Hedef:</b> Talk about your life and routine · <b>Grammar:</b> present simple vs present continuous · <b>Vocabulary:</b> verb + preposition</p>${lhLessonNav('22')}
+ <div id="lh-21-speak" style="scroll-margin-top:90px"></div>${lhSectionHead('lh-21-speaking-title','🗣️','SPEAKING','Mahalleni bir arkadaşına anlat ve sorulara cevap ver.')} ${speakBtns('2.1')}</div>`],
+   ["2.2 · The boomerang generation", () => `<div class="card"><h3 class="section-title" style="margin-top:0">2.2 · The boomerang generation</h3><p class="hint"><b>Hedef:</b> Talk about your life and routine · <b>Grammar:</b> present simple vs present continuous · <b>Vocabulary:</b> verb + preposition</p>${lhLessonNav('22')}
  ${lhSectionHead('lh-22-vocab','📚','VOCABULARY — Verb + preposition','Fiille birlikte kullanılan doğru edatı öğren.')}
  <div class="cols"><div>${phrase('look for a job','iş aramak')}${phrase('argue about the rules','kurallar hakkında tartışmak')}${phrase('argue with someone','biriyle tartışmak')}${phrase('rely on someone','birine güvenmek / dayanmak')}</div><div>${phrase('help with the housework','ev işlerine yardım etmek')}${phrase('talk to someone','biriyle konuşmak')}${phrase('pay for something','bir şeyin parasını ödemek')}${phrase('think about something','bir şeyi düşünmek')}</div></div>
  ${lhSectionHead('lh-22-grammar','🧠','GRAMMAR — Present simple vs present continuous','Rutin ve genel gerçekler için present simple; şu an olanlar ve geçici/trend durumlar için present continuous.')}
@@ -2893,9 +2928,8 @@ function viewLanguageHubUnit2(){
  ${lhExerciseBlock('🎧 LISTENING CHECK','Gist + detail.',lhMC('22r1','What does “boomerang generation” refer to here?',['Adults who return to live with their parents','People who travel every week','Parents who change jobs'],'Adults who return to live with their parents')+lhMC('22r2','What can be an advantage of moving home?',['Saving money and getting support','Having no responsibilities','Never needing a job'],'Saving money and getting support')+lhMC('22r3','What can cause problems?',['Housework and house rules','Learning languages','Public transport'],'Housework and house rules'))}
  <div id="lh-22-ex" style="scroll-margin-top:90px"></div>${lhExerciseBlock('🧩 EXERCISES','Present simple/continuous + prepositions.',lhMC('22a','I ___ for a permanent job at the moment.',['am looking','look','looked'],'am looking')+lhMC('22b','My parents usually ___ dinner at home.',['cook','are cooking','cooked'],'cook')+lhMC('22c','You can rely ___ me.',['on','at','for'],'on')+lhMC('22d','We sometimes argue ___ the rules.',['about','to','for'],'about'))}
  <div id="lh-22-personal" style="scroll-margin-top:90px"></div>${lhExerciseBlock('✍️ PERSONAL — Your life & routine','Kendi hayatına bağla.',lhPersonal('22p1','Describe three things you usually do in your daily routine.')+lhPersonal('22p2','What are you doing differently these days?')+lhPersonal('22p3','What are the advantages and disadvantages of living with parents as an adult?'))}
- <div id="lh-22-speak" style="scroll-margin-top:90px"></div>${lhSectionHead('lh-22-speaking-title','🗣️','SPEAKING','Rutinlerin ve şu sıralar hayatında değişen şeyler hakkında konuş.')} ${speakBtns('2.2')}</div>
-
- <div class="card"><h3 class="section-title" style="margin-top:0">2.3 · Time flies</h3><p class="hint"><b>Hedef:</b> Talk about life events · <b>Grammar:</b> past simple regular & irregular verbs · <b>Vocabulary:</b> life events</p>${lhLessonNav('23')}
+ <div id="lh-22-speak" style="scroll-margin-top:90px"></div>${lhSectionHead('lh-22-speaking-title','🗣️','SPEAKING','Rutinlerin ve şu sıralar hayatında değişen şeyler hakkında konuş.')} ${speakBtns('2.2')}</div>`],
+   ["2.3 · Time flies", () => `<div class="card"><h3 class="section-title" style="margin-top:0">2.3 · Time flies</h3><p class="hint"><b>Hedef:</b> Talk about life events · <b>Grammar:</b> past simple regular & irregular verbs · <b>Vocabulary:</b> life events</p>${lhLessonNav('23')}
  ${lhSectionHead('lh-23-vocab','📚','VOCABULARY — Life events','Hayattaki önemli ilkleri ve dönüm noktalarını anlat.')}
  <div class="cols"><div>${phrase('start school','okula başlamak')}${phrase('learn to swim','yüzmeyi öğrenmek')}${phrase('learn to drive','araba kullanmayı öğrenmek')}${phrase('leave home','evden ayrılmak')}</div><div>${phrase('get married','evlenmek')}${phrase('have a baby','çocuk sahibi olmak')}${phrase('get your first job','ilk işini almak')}${phrase('retire','emekli olmak')}</div></div>
  ${lhSectionHead('lh-23-grammar','🧠','GRAMMAR — Past simple','Geçmişte tamamlanmış olaylar. Regular: -ed; irregular: özel ikinci form. Negative: didn’t + infinitive. Question: Did + subject + infinitive?')}
@@ -2905,9 +2939,8 @@ function viewLanguageHubUnit2(){
  ${lhExerciseBlock('📖 READING CHECK','Ana fikir ve teorileri anla.',lhMC('23r1','What is the text mainly about?',['Why time can seem faster as we get older','How clocks work','Why children sleep more'],'Why time can seem faster as we get older')+lhMC('23r2','Why can routine make time seem faster?',['Days can feel similar and less memorable','Adults stop using calendars','Children have more clocks'],'Days can feel similar and less memorable')+lhMC('23r3','What may make a period feel richer in memory?',['New experiences','Doing exactly the same thing','Avoiding all change'],'New experiences'))}
  <div id="lh-23-ex" style="scroll-margin-top:90px"></div>${lhExerciseBlock('🧩 EXERCISES','Past simple + life events.',lhMC('23a','As a child, I ___ to school every day.',['went','goed','go'],'went')+lhMC('23b','My father ___ me how to drive.',['taught','teached','teach'],'taught')+lhMC('23c','___ you enjoy school?',['Did','Were','Do'],'Did')+lhMC('23d',"I ___ meet my partner at work.",["didn't",'wasn’t','don’t'],"didn't"))}
  <div id="lh-23-personal" style="scroll-margin-top:90px"></div>${lhExerciseBlock('✍️ PERSONAL — Your life events','Geçmişindeki gerçek olayları anlat.',lhPersonal('23p1','Write about three important first-time experiences in your life.')+lhPersonal('23p2','Where and when did you meet your best friend?')+lhPersonal('23p3','Do you feel time passes faster now than when you were a child? Explain.'))}
- <div id="lh-23-speak" style="scroll-margin-top:90px"></div>${lhSectionHead('lh-23-speaking-title','🗣️','SPEAKING HUB','Üç first-time experience anlat; konuşma partnerin hangilerinin doğru olduğunu tahmin etsin.')} ${speakBtns('2.3')}</div>
-
- <div class="card"><h3 class="section-title" style="margin-top:0">2.4 · Café Hub — Noisy neighbours</h3><p class="hint"><b>Hedef:</b> Ask for and give advice · <b>Functional language:</b> advice · <b>Pronunciation:</b> disagreeing</p>${lhLessonNav('24').replace('🧠 Grammar','💬 Functional Language')}
+ <div id="lh-23-speak" style="scroll-margin-top:90px"></div>${lhSectionHead('lh-23-speaking-title','🗣️','SPEAKING HUB','Üç first-time experience anlat; konuşma partnerin hangilerinin doğru olduğunu tahmin etsin.')} ${speakBtns('2.3')}</div>`],
+   ["2.4 · Café Hub — Noisy neighbours", () => `<div class="card"><h3 class="section-title" style="margin-top:0">2.4 · Café Hub — Noisy neighbours</h3><p class="hint"><b>Hedef:</b> Ask for and give advice · <b>Functional language:</b> advice · <b>Pronunciation:</b> disagreeing</p>${lhLessonNav('24').replace('🧠 Grammar','💬 Functional Language')}
  ${lhSectionHead('lh-24-vocab','📚','USEFUL PHRASES','Günlük sorunlarda doğal tepki ve destek ifadeleri.')}
  <div class="cols"><div>${phrase("What's wrong?",'Ne oldu? / Sorun ne?')}${phrase("What's the problem?",'Sorun ne?')}${phrase('You can rely on us.','Bize güvenebilirsin.')}</div><div>${phrase('Seriously?!','Cidden mi?!')}${phrase('Cool!','Harika!')}${phrase('Here you go.','Buyur.')}</div></div>
  ${lhSectionHead('lh-24-grammar','💬','FUNCTIONAL LANGUAGE — Ask for & give advice','What should I do? / You should… / You could… / How about + -ing? / Why don’t you…?')}
@@ -2917,21 +2950,20 @@ function viewLanguageHubUnit2(){
  ${lhExerciseBlock('🎬 COMPREHENSION CHECK','Problem → advice → response.',lhMC('24r1','What is the main problem?',['Loud music from a neighbour','A broken phone','No public transport'],'Loud music from a neighbour')+lhMC('24r2','Which is a natural way to give advice?',["Why don't you talk to them?",'Why you not talk them?','You talking them.'],"Why don't you talk to them?")+lhMC('24r3','Which reply politely disagrees?', ["I'm not sure it's a good idea.",'No. Bad.','Never speak.'],"I'm not sure it's a good idea."))}
  <div id="lh-24-ex" style="scroll-margin-top:90px"></div>${lhExerciseBlock('🧩 EXERCISES — Advice','Doğru yapıyı seç.',lhMC('24a','How about ___ some earplugs?',['using','use','to use'],'using')+lhMC('24b','I think you should ___ to them.',['talk','to talk','talking'],'talk')+lhMC('24c','You could ___ them to turn it down.',['ask','asking','to asking'],'ask')+lhMC('24d',"Why don't you ___ upstairs?",['go','to go','going'],'go'))}
  <div id="lh-24-personal" style="scroll-margin-top:90px"></div>${lhExerciseBlock('✍️ PERSONAL — Give real advice','Kendi günlük hayatından sorunlarla çalış.',lhPersonal('24p1','Your neighbour is very noisy. What would you do?')+lhPersonal('24p2','Write one real problem you have and give yourself two pieces of advice.')+lhPersonal('24p3','Write one polite sentence for disagreeing with advice.'))}
- <div id="lh-24-speak" style="scroll-margin-top:90px"></div>${lhSectionHead('lh-24-speaking-title','🗣️','SPEAKING','Bir problem seç, arkadaşından tavsiye iste ve tavsiyeye doğal cevap ver.')} ${speakBtns('2.4')}</div>
-
- <div class="card"><h3 class="section-title" style="margin-top:0">🏆 Unit 2 · Review & Real-Life Challenge</h3><p class="hint">Describing places + adverbs of degree + present simple/continuous + past simple + advice.</p>
+ <div id="lh-24-speak" style="scroll-margin-top:90px"></div>${lhSectionHead('lh-24-speaking-title','🗣️','SPEAKING','Bir problem seç, arkadaşından tavsiye iste ve tavsiyeye doğal cevap ver.')} ${speakBtns('2.4')}</div>`],
+   ["Unit Review", () => `<div class="card"><h3 class="section-title" style="margin-top:0">🏆 Unit 2 · Review & Real-Life Challenge</h3><p class="hint">Describing places + adverbs of degree + present simple/continuous + past simple + advice.</p>
  ${lhExerciseBlock('✅ Unit 2 Review','Kitaptaki Unit Review hedeflerini interaktif tekrar et.',lhMC('2ra','The building is ___ expensive. (strong)',['extremely','a bit','hardly'],'extremely')+lhMC('2rb','I ___ with my parents at the moment.',['am living','live always','lived'],'am living')+lhMC('2rc','When I was a child, my parents ___ me to swim.',['taught','teach','teached'],'taught')+lhMC('2rd','You can rely ___ me.',['on','with','about'],'on')+lhMC('2re','How about ___ to your neighbour?',['talking','talk','to talk'],'talking'))}
  <div class="card" style="background:var(--paper-dark)"><b>🌍 Final Mission</b><ol style="line-height:1.8"><li>Mahalleni en az 6 sıfat ve 2 degree adverb ile anlat.</li><li>Normal rutininle şu sıralar yaptığın şeyleri karşılaştır.</li><li>Geçmişinden üç önemli life event anlat.</li><li>Bir komşuluk problemi için tavsiye iste, tavsiye ver ve bir öneriye nazikçe katılma.</li></ol></div>
- <div class="row"><button class="pill primary" onclick="lhFriendSpeak('2-review')">🗣️ Unit 2 Speaking Challenge</button><button class="pill" onclick="lhTheresa('2-review')">👩‍🏫 Theresa's Unit Check</button><button class="pill" onclick="navigate('languagehub')">← Tüm Ünitelere Dön</button></div></div>`;
+ <div class="row"><button class="pill primary" onclick="lhFriendSpeak('2-review')">🗣️ Unit 2 Speaking Challenge</button><button class="pill" onclick="lhTheresa('2-review')">👩‍🏫 Theresa's Unit Check</button><button class="pill" onclick="navigate('languagehub')">← Tüm Ünitelere Dön</button></div></div>`]
+ ]);
 }
 
 
 function viewLanguageHubUnit3(){
  const phrase=(en,tr)=>`<div style="padding:10px 0;border-bottom:1px solid var(--paper-dark)"><button class="spk" onclick='lhSpeak(${JSON.stringify(en)})'>🔊</button><b>${en}</b><div class="hint" style="margin-left:30px">${tr}</div></div>`;
  const speakBtns=(lesson)=>`<div class="row" style="margin-top:14px"><button class="pill primary" onclick="lhFriendSpeak('${lesson}')">🗣️ Arkadaşlarla Pratik</button><button class="pill" onclick="lhTheresa('${lesson}')">👩‍🏫 Theresa ile Kontrol</button></div>`;
- return `<div class="card" style="border-left:4px solid var(--accent)"><div class="hint" style="font-weight:800;letter-spacing:.08em">LANGUAGE HUB B1 · UNIT 3 · TRAVEL</div><h3 style="font-family:var(--serif);font-size:27px;margin:6px 0">Travel — Kitaptan gerçek hayata</h3><p class="hint">Hedefler: journeys & transport → bir yolculuk hikâyesi anlat → sevdiğin tatil türünü anlat → seyahat bilgisi iste ve anladığını kontrol et.</p></div>
-
- <div class="card"><h3 class="section-title" style="margin-top:0">3.1 · The Four-Year Journey</h3><p class="hint"><b>Hedef:</b> Talk about journeys and transport · <b>Grammar:</b> all / some / most / no / none · <b>Vocabulary:</b> types of transport</p>${lhLessonNav('31')}
+ return lhUnitLessons(3, [
+   ["3.1 · The Four-Year Journey", () => `<div class="card"><h3 class="section-title" style="margin-top:0">3.1 · The Four-Year Journey</h3><p class="hint"><b>Hedef:</b> Talk about journeys and transport · <b>Grammar:</b> all / some / most / no / none · <b>Vocabulary:</b> types of transport</p>${lhLessonNav('31')}
  ${lhSectionHead('lh-31-vocab','📚','VOCABULARY — Types of transport','Ulaşım türleri ve doğal transport collocations.')}
  <div class="cols"><div>${phrase('travel by coach','otobüsle seyahat etmek')}${phrase('travel by ferry','feribotla seyahat etmek')}${phrase('travel by helicopter','helikopterle seyahat etmek')}${phrase('travel by minibus','minibüsle seyahat etmek')}${phrase('travel by tram','tramvayla seyahat etmek')}</div><div>${phrase('go by train','trenle gitmek')}${phrase('get a bus','otobüse binmek')}${phrase('take a taxi','taksiye binmek')}${phrase('fly to Portugal','Portekiz’e uçmak')}${phrase('give someone a lift','birini araçla götürmek')}</div></div>
  ${lhSectionHead('lh-31-grammar','🧠','GRAMMAR — all / some / most / no / none','Bir grubun ne kadarı hakkında konuşurken doğru yapıyı seç.')}
@@ -2941,9 +2973,8 @@ function viewLanguageHubUnit3(){
  ${lhExerciseBlock('📖 READING CHECK','Ana fikir ve detay.',lhMC('31r1','What was unusual about the journey?',['He travelled around the world without flying','He only travelled by plane','He stayed in one country'],'He travelled around the world without flying')+lhMC('31r2','Which phrase is correct?',['travel by ferry','travel with ferry','travel on ferry by'],'travel by ferry')+lhMC('31r3','Which word means zero people/things in a group?',['none','most','all'],'none'))}
  <div id="lh-31-ex" style="scroll-margin-top:90px"></div>${lhExerciseBlock('🧩 EXERCISES','Grammar + transport.',lhMC('31a','___ of my friends enjoy travelling.',['Most','No','None of'],'Most')+lhMC('31b','___ of my journeys were by helicopter.',['None','No','All of the'],'None')+lhMC('31c','I usually ___ a taxi to the airport.',['take','go','fly'],'take')+lhMC('31d','We travelled ___ train.',['by','with','at'],'by'))}
  <div id="lh-31-personal" style="scroll-margin-top:90px"></div>${lhExerciseBlock('✍️ PERSONAL — Your travel habits','Kendi hayatına uyarla.',lhPersonal('31p1','How do you usually travel in Türkiye?')+lhPersonal('31p2','What types of transport do you use when you go on holiday?')+lhPersonal('31p3','Would you travel around the world without flying? Why / why not?'))}
- <div id="lh-31-speak" style="scroll-margin-top:90px"></div>${lhSectionHead('lh-31-speaking-title','🗣️','SPEAKING — Travel interview','Partnerine ulaşım alışkanlıklarını anlat; hafta içi, hafta sonu ve tatil yolculuklarını karşılaştır.')} ${speakBtns('3.1')}</div>
-
- <div class="card"><h3 class="section-title" style="margin-top:0">3.2 · Lost at Sea</h3><p class="hint"><b>Hedef:</b> Tell a story about a journey · <b>Grammar:</b> past continuous + past simple · <b>Vocabulary:</b> prefixes</p>${lhLessonNav('32')}
+ <div id="lh-31-speak" style="scroll-margin-top:90px"></div>${lhSectionHead('lh-31-speaking-title','🗣️','SPEAKING — Travel interview','Partnerine ulaşım alışkanlıklarını anlat; hafta içi, hafta sonu ve tatil yolculuklarını karşılaştır.')} ${speakBtns('3.1')}</div>`],
+   ["3.2 · Lost at Sea", () => `<div class="card"><h3 class="section-title" style="margin-top:0">3.2 · Lost at Sea</h3><p class="hint"><b>Hedef:</b> Tell a story about a journey · <b>Grammar:</b> past continuous + past simple · <b>Vocabulary:</b> prefixes</p>${lhLessonNav('32')}
  ${lhSectionHead('lh-32-vocab','📚','VOCABULARY — Prefixes & survival','un-, im-, dis-, in- ile anlamı tersine çevir; yolculuk ve hayatta kalma kelimelerini öğren.')}
  <div class="cols"><div>${phrase('brave','cesur')}${phrase('life raft','can salı')}${phrase('survival expert','hayatta kalma uzmanı')}${phrase('survive','hayatta kalmak')}</div><div>${phrase('unlucky','şanssız')}${phrase('impossible','imkânsız')}${phrase('dishonest','dürüst olmayan')}${phrase('incorrect','yanlış')}</div></div>
  ${lhSectionHead('lh-32-grammar','🧠','GRAMMAR — Past continuous + past simple','Uzun süren arka plan eylemi + onu kesen kısa olay.')}
@@ -2953,9 +2984,8 @@ function viewLanguageHubUnit3(){
  ${lhExerciseBlock('🎧 STORY CHECK','Olay örgüsünü ve zamanı anla.',lhMC('32r1','Which tense gives the background action?',['past continuous','present perfect','future simple'],'past continuous')+lhMC('32r2','They ___ when something hit the boat.',['were sailing','sailed always','are sailing'],'were sailing')+lhMC('32r3','Which word is the opposite of possible?',['impossible','unpossible','dispossible'],'impossible'))}
  <div id="lh-32-ex" style="scroll-margin-top:90px"></div>${lhExerciseBlock('🧩 EXERCISES','Past simple / continuous + prefixes.',lhMC('32a','I ___ to the beach when I found a wallet.',['was walking','walked every day','am walking'],'was walking')+lhMC('32b','The accident ___ while they were travelling.',['happened','was happen','happens'],'happened')+lhMC('32c','honest → opposite',['dishonest','unhonest','inhonest'],'dishonest')+lhMC('32d','patient → opposite',['impatient','dispatient','inpatient'],'impatient'))}
  <div id="lh-32-personal" style="scroll-margin-top:90px"></div>${lhExerciseBlock('✍️ PERSONAL — Tell your story','Gerçek bir seyahat anını hikâyeye dönüştür.',lhPersonal('32p1','Where and when was your most memorable journey?')+lhPersonal('32p2','What were you doing when something unexpected happened?')+lhPersonal('32p3','How did the story end?'))}
- <div id="lh-32-speak" style="scroll-margin-top:90px"></div>${lhSectionHead('lh-32-speaking-title','🗣️','SPEAKING — Tell a journey story','Where/when → who with → what was happening → unexpected event → ending.')} ${speakBtns('3.2')}</div>
-
- <div class="card"><h3 class="section-title" style="margin-top:0">3.3 · Too Good to Be True</h3><p class="hint"><b>Hedef:</b> Talk about the kind of holidays you like · <b>Grammar:</b> verb + -ing / to + infinitive · <b>Vocabulary:</b> accommodation & facilities</p>${lhLessonNav('33')}
+ <div id="lh-32-speak" style="scroll-margin-top:90px"></div>${lhSectionHead('lh-32-speaking-title','🗣️','SPEAKING — Tell a journey story','Where/when → who with → what was happening → unexpected event → ending.')} ${speakBtns('3.2')}</div>`],
+   ["3.3 · Too Good to Be True", () => `<div class="card"><h3 class="section-title" style="margin-top:0">3.3 · Too Good to Be True</h3><p class="hint"><b>Hedef:</b> Talk about the kind of holidays you like · <b>Grammar:</b> verb + -ing / to + infinitive · <b>Vocabulary:</b> accommodation & facilities</p>${lhLessonNav('33')}
  ${lhSectionHead('lh-33-vocab','📚','VOCABULARY — Accommodation & facilities','Tatil konaklamasını seçmek ve değerlendirmek için temel kelimeler.')}
  <div class="cols"><div>${phrase('apartment','daire')}${phrase('beach resort','sahil tatil tesisi')}${phrase('campsite','kamp alanı')}${phrase('chalet','dağ evi')}</div><div>${phrase('cruise ship','kruvaziyer')}${phrase('guest house','pansiyon')}${phrase('hostel','hostel')}${phrase('facilities','olanaklar / tesisler')}</div></div>
  ${lhSectionHead('lh-33-grammar','🧠','GRAMMAR — verb + -ing / to + infinitive','Fiilden sonra gerund mu infinitive mi?')}
@@ -2965,9 +2995,8 @@ function viewLanguageHubUnit3(){
  ${lhExerciseBlock('📖 READING CHECK','Tone ve güvenilirlik.',lhMC('33r1','Which review sounds more useful?',['A balanced review with specific details','A review that only says AMAZING!!!','A review with no information'],'A balanced review with specific details')+lhMC('33r2','What can extreme punctuation suggest?',['An exaggerated tone','A train timetable','A grammar rule'],'An exaggerated tone')+lhMC('33r3','Which is accommodation?',['chalet','platform','tram'],'chalet'))}
  <div id="lh-33-ex" style="scroll-margin-top:90px"></div>${lhExerciseBlock('🧩 EXERCISES','Verb patterns + accommodation.',lhMC('33a','I hope ___ Barcelona next year.',['to visit','visiting','visit to'],'to visit')+lhMC('33b','I enjoy ___ near the sea.',['staying','to staying','stay to'],'staying')+lhMC('33c','I can’t afford ___ in a five-star hotel.',['to stay','staying to','stay'],'to stay')+lhMC('33d','A wooden holiday house in the mountains is a ___.',['chalet','ferry','platform'],'chalet'))}
  <div id="lh-33-personal" style="scroll-margin-top:90px"></div>${lhExerciseBlock('✍️ PERSONAL — Your ideal holiday','Tatil tercihlerini gerçek İngilizceyle anlat.',lhPersonal('33p1','What kind of accommodation do you prefer and why?')+lhPersonal('33p2','Which facilities are most important to you?')+lhPersonal('33p3','Write a short, balanced review of a place you stayed.'))}
- <div id="lh-33-speak" style="scroll-margin-top:90px"></div>${lhSectionHead('lh-33-speaking-title','🗣️','SPEAKING HUB — Plan a holiday','İki gecelik bir tatil planla: konaklama, bütçe, tesisler ve tercihlerini savun.')} ${speakBtns('3.3')}</div>
-
- <div class="card"><h3 class="section-title" style="margin-top:0">3.4 · Café Hub — Overslept</h3><p class="hint"><b>Hedef:</b> Ask for travel information and check understanding · <b>Functional language:</b> trains & directions · <b>Pronunciation:</b> word stress and intonation</p>${lhLessonNav('34').replace('🧠 Grammar','💬 Functional Language')}
+ <div id="lh-33-speak" style="scroll-margin-top:90px"></div>${lhSectionHead('lh-33-speaking-title','🗣️','SPEAKING HUB — Plan a holiday','İki gecelik bir tatil planla: konaklama, bütçe, tesisler ve tercihlerini savun.')} ${speakBtns('3.3')}</div>`],
+   ["3.4 · Café Hub — Overslept", () => `<div class="card"><h3 class="section-title" style="margin-top:0">3.4 · Café Hub — Overslept</h3><p class="hint"><b>Hedef:</b> Ask for travel information and check understanding · <b>Functional language:</b> trains & directions · <b>Pronunciation:</b> word stress and intonation</p>${lhLessonNav('34').replace('🧠 Grammar','💬 Functional Language')}
  ${lhSectionHead('lh-34-vocab','📚','USEFUL PHRASES — Station English','İstasyonda gerçekten kullanacağın kısa kalıplar.')}
  <div class="cols"><div>${phrase('Could I have a ticket to St Albans?','St Albans’a bir bilet alabilir miyim?')}${phrase('A single, please.','Tek yön, lütfen.')}${phrase('Do I have to change trains?','Tren değiştirmem gerekiyor mu?')}${phrase("What time's the next train?",'Sonraki tren saat kaçta?')}</div><div>${phrase("I'm sorry, did you say three minutes?",'Pardon, üç dakika mı dediniz?')}${phrase('So I need to go past the coffee shop. Is that right?','Yani kafeyi geçmem gerekiyor. Doğru mu?')}${phrase('How do I get to platform 9?','9. perona nasıl giderim?')}${phrase("You don't want to miss your train.",'Trenini kaçırmak istemezsin.')}</div></div>
  ${lhSectionHead('lh-34-grammar','💬','FUNCTIONAL LANGUAGE — Ask & check','Bilgi iste → cevabı dinle → kritik bilgiyi tekrar ederek doğrula.')}
@@ -2976,379 +3005,347 @@ function viewLanguageHubUnit3(){
  ${lhExerciseBlock('🎬 COMPREHENSION CHECK','Travel information + checking understanding.',lhMC('34r1','Which phrase checks understanding?',['Did you say platform four?','Platform four yesterday.','I platform four.'],'Did you say platform four?')+lhMC('34r2','What does “single” mean when buying a train ticket?',['one-way ticket','first class only','a ticket for one minute'],'one-way ticket')+lhMC('34r3','Which question asks about changing trains?',['Do I have to change trains?','Do I change my ticket?','Where change is?'],'Do I have to change trains?'))}
  <div id="lh-34-ex" style="scroll-margin-top:90px"></div>${lhExerciseBlock('🧩 EXERCISES — Real station English','Cümleyi doğal şekilde tamamla.',lhMC('34a','Could I ___ a ticket to Central Station?',['have','having','to have'],'have')+lhMC('34b','What time ___ the next train?',['is','does','has'],'is')+lhMC('34c','How do I get ___ platform 9?',['to','at','on'],'to')+lhMC('34d','Sorry, did you ___ platform 30?',['say','said','saying'],'say'))}
  <div id="lh-34-personal" style="scroll-margin-top:90px"></div>${lhExerciseBlock('✍️ PERSONAL — Your travel survival English','Kendi seyahat durumunu hazırla.',lhPersonal('34p1','Write three questions you might ask at a train station or airport.')+lhPersonal('34p2','Write two phrases for checking that you understood correctly.')+lhPersonal('34p3','Imagine you are late for a train. Explain your situation in 3–4 sentences.'))}
- <div id="lh-34-speak" style="scroll-margin-top:90px"></div>${lhSectionHead('lh-34-speaking-title','🗣️','SPEAKING — Customer & ticket officer','Bilet al, tren saatini sor, peronu bul ve duyduğun bilgiyi en az iki kez kontrol et.')} ${speakBtns('3.4')}</div>
-
- <div class="card"><h3 class="section-title" style="margin-top:0">🏆 Unit 3 · Review & Real-Life Challenge</h3><p class="hint">Transport + quantifiers + past story tenses + prefixes + verb patterns + accommodation + travel information.</p>
+ <div id="lh-34-speak" style="scroll-margin-top:90px"></div>${lhSectionHead('lh-34-speaking-title','🗣️','SPEAKING — Customer & ticket officer','Bilet al, tren saatini sor, peronu bul ve duyduğun bilgiyi en az iki kez kontrol et.')} ${speakBtns('3.4')}</div>`],
+   ["Unit Review", () => `<div class="card"><h3 class="section-title" style="margin-top:0">🏆 Unit 3 · Review & Real-Life Challenge</h3><p class="hint">Transport + quantifiers + past story tenses + prefixes + verb patterns + accommodation + travel information.</p>
  ${lhExerciseBlock('✅ UNIT 3 REVIEW','Ünite hedeflerini karışık tekrar et.',lhMC('3ra','___ of my trips are by plane.',['Most','None of','No of'],'Most')+lhMC('3rb','We ___ home when the storm started.',['were driving','drove always','are driving'],'were driving')+lhMC('3rc','I enjoy ___ new places.',['visiting','to visiting','visit to'],'visiting')+lhMC('3rd','The opposite of “possible” is ___.',['impossible','dispossible','unpossible'],'impossible')+lhMC('3re','How do I get ___ platform 7?',['to','in','at'],'to'))}
  <div class="card" style="background:var(--paper-dark)"><b>🌍 Final Mission — Your Travel Day</b><ol style="line-height:1.8"><li>Türkiye’de kullandığın ulaşım türlerini all/some/most/none ile anlat.</li><li>Geçmişte yaşadığın bir yolculuk olayını past continuous + past simple ile anlat.</li><li>İdeal tatil konaklamanı ve önemli tesisleri seç.</li><li>İstasyonda bilet al, tren/peron bilgisi iste ve duyduğun bilgiyi doğrula.</li></ol></div>
- <div class="row"><button class="pill primary" onclick="lhFriendSpeak('3-review')">🗣️ Unit 3 Speaking Challenge</button><button class="pill" onclick="lhTheresa('3-review')">👩‍🏫 Theresa's Unit Check</button><button class="pill" onclick="navigate('languagehub')">← Tüm Ünitelere Dön</button></div></div>`;
+ <div class="row"><button class="pill primary" onclick="lhFriendSpeak('3-review')">🗣️ Unit 3 Speaking Challenge</button><button class="pill" onclick="lhTheresa('3-review')">👩‍🏫 Theresa's Unit Check</button><button class="pill" onclick="navigate('languagehub')">← Tüm Ünitelere Dön</button></div></div>`]
+ ]);
 }
 
 
 function viewLanguageHubUnit4(){
  const speakBtns=(lesson)=>`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="pill primary" onclick="location.href='speaking.html?coursebook=language-hub-b1&lesson=${lesson}'">🗣️ Arkadaşlarla Pratik</button><button class="pill" onclick="location.href='speaking.html?coursebook=language-hub-b1&lesson=${lesson}&teacher=theresa'">🇲🇹 Theresa ile Kontrol</button></div>`;
- return `<div class="card" style="border-left:4px solid var(--accent)"><div class="hint" style="font-weight:800;letter-spacing:.08em">LANGUAGE HUB B1 · UNIT 4 · SOCIALISING</div><h3 style="font-family:var(--serif);font-size:27px;margin:6px 0">Socialising — Kitaptan gerçek hayata</h3><p class="hint">Plan yap → gelecek hakkında tahmin yürüt → boş zaman hakkında doğru sorular sor → davet et, cevap ver ve buluşma ayarla.</p></div>
-
- ${lhSectionHead('lh-41','📅','4.1 WHAT’S THE PLAN?','Talk about plans you have made for a weekend with visitors.')}
+ return lhUnitLessons(4, [
+   ["4.1 WHAT’S THE PLAN?", () => `${lhSectionHead('lh-41','📅','4.1 WHAT’S THE PLAN?','Talk about plans you have made for a weekend with visitors.')}
  <div class="card"><b>🎯 Lesson Goal</b><p>Hafta sonu için yaptığın planları doğal biçimde anlatmak.</p><b>Vocabulary · Free-time activities</b><p class="hint" style="line-height:1.8">go to the theatre / cinema · visit a museum or gallery · go to a market · meet friends · have a meal or drink · go to a party · have a barbecue · go shopping · go to a concert · play board games · hang out in the park</p><button class="pill" onclick='lhSpeak("We are going to visit a market. I am meeting my friends tonight. We are having a barbecue on Saturday.")'>🔊 Örnekleri dinle</button></div>
  <div class="card"><b>🧩 Grammar · be going to + infinitive / present continuous</b><p class="hint">Kitaptaki ayrım: <b>be going to</b> niyet ve planlar için; <b>present continuous</b> özellikle ayarlanmış, belirli gelecek planları için kullanılır.</p><p><b>I’m going to take them to the market.</b><br><b>I’m meeting the others tonight.</b><br><b>We’re having dinner tomorrow.</b></p></div>
  ${lhExerciseBlock('✍️ PRACTICE','Doğru gelecek yapısını seç.',lhMC('41a','I ___ my friends at the station tonight.',['am meeting','meet yesterday','meeting'],'am meeting')+lhMC('41b','We are going ___ a drink in town.',['to have','having','have to'],'to have')+lhMC('41c','She ___ her friend out for dinner tomorrow.',['is taking','take','took'],'is taking'))}
  ${lhPersonal('41','🧠 KENDİ HAYATINA UYARLA','Bu hafta sonu için gerçek planlarını yaz. Kimle görüşeceksin? Nereye gideceksin? Ne yapmayı planlıyorsun?')}
- ${speakBtns('4.1')}
-
- ${lhSectionHead('lh-42','🤖','4.2 THE FUTURE OF FREE TIME','Present reasons to support or argue against predictions.')}
+ ${speakBtns('4.1')}`],
+   ["4.2 THE FUTURE OF FREE TIME", () => `${lhSectionHead('lh-42','🤖','4.2 THE FUTURE OF FREE TIME','Present reasons to support or argue against predictions.')}
  <div class="card"><b>🔮 Grammar · Making predictions</b><p class="hint">Gelecek hakkında kesinlik derecesini değiştir.</p><p><b>will / won’t</b> → daha güçlü tahmin<br><b>may / might</b> → olasılık<br><b>probably / definitely</b> → tahminin gücünü belirtir</p><p>Robots <b>will probably</b> become more common.<br>People <b>might</b> socialise more in virtual worlds.<br>Technology <b>definitely won’t</b> replace every human activity.</p></div>
  <div class="card"><b>🧠 Vocabulary · Word families</b><p class="hint" style="line-height:1.8">active → activity · discuss → discussion · able → ability · happy → happiness · possible → possibility · intelligent → intelligence · predict → prediction</p></div>
  ${lhExerciseBlock('🎯 PREDICTION CHECK','Kitaptaki tahmin dilini uygula.',lhMC('42a','People ___ use more virtual reality in the future.',['might','did','are yesterday'],'might')+lhMC('42b','Which is a noun?',['prediction','predict','predicting quickly'],'prediction')+lhMC('42c','Which sentence is a strong negative prediction?',["It definitely won’t happen.","It might happen.","It happened yesterday."],"It definitely won’t happen."))}
  ${lhPersonal('42','💭 SENİN TAHMİNLERİN','50 yıl sonra insanların boş zamanlarını nasıl geçireceğine dair üç tahmin yaz. Her tahmin için nedenini de ekle.')}
- ${speakBtns('4.2')}
-
- ${lhSectionHead('lh-43','☕','4.3 HYGGE','Ask and answer questions about how you like to spend your free time.')}
+ ${speakBtns('4.2')}`],
+   ["4.3 HYGGE", () => `${lhSectionHead('lh-43','☕','4.3 HYGGE','Ask and answer questions about how you like to spend your free time.')}
  <div class="card"><b>🇩🇰 Reading idea · Hygge</b><p class="hint" style="line-height:1.75">Bu derste hygge; rahat, sıcak ve keyifli bir ortamda basit şeylerin tadını çıkarma fikri üzerinden ele alınıyor. Arkadaşlarla veya aileyle vakit geçirmek, sıcak içecekler, rahat bir ortam ve sakin aktiviteler buna örnek olabilir.</p></div>
  <div class="card"><b>❓ Grammar · Subject & object questions</b><p><b>Who called you?</b> → <i>who</i> özne; yardımcı fiil gerekmez.<br><b>Who did you call?</b> → <i>who</i> nesne; <i>did</i> kullanılır.</p><p class="hint">Aynı mantığı what/which gibi soru kelimelerinde de fark etmeyi öğren.</p></div>
  <div class="card"><b>🌙 Vocabulary · Relaxing</b><p class="hint">relax · feel comfortable · cosy · calm · peaceful · spend time with friends/family · enjoy simple things</p></div>
  ${lhExerciseBlock('❓ QUESTION CHECK','Subject ve object question farkını kontrol et.',lhMC('43a','___ called you last night?',['Who','Who did','Who does you'],'Who')+lhMC('43b','Who ___ you meet yesterday?',['did','was','has you'],'did')+lhMC('43c','Which question asks about the object?',['Who did you invite?','Who invited you?','Who is inviting?'],'Who did you invite?'))}
  ${lhPersonal('43','🏠 SENİN HYGGE’N','Seni gerçekten rahatlatan şeyleri yaz: nerede, kimlerle, ne yaparken ve neden?')}
- ${speakBtns('4.3')}
-
- ${lhSectionHead('lh-44','🤝','4.4 CAFÉ HUB — WOULD YOU?','Make arrangements to meet up with somebody.')}
+ ${speakBtns('4.3')}`],
+   ["4.4 CAFÉ HUB — WOULD YOU?", () => `${lhSectionHead('lh-44','🤝','4.4 CAFÉ HUB — WOULD YOU?','Make arrangements to meet up with somebody.')}
  <div class="card"><b>💬 Functional Language · Make arrangements</b><p class="hint" style="line-height:1.9"><b>Ask:</b> Are you doing anything this evening? · Do you fancy coming over? · Would you like to meet up?<br><b>Say yes:</b> Yes, that sounds great. · I’d love to. · Awesome!<br><b>Say no:</b> I’m sorry, I can’t. · Oh, what a shame.<br><b>Arrange:</b> What time? · How about seven o’clock? · Where shall we meet?</p></div>
  ${lhExerciseBlock('📱 ARRANGEMENT CHECK','En doğal cevabı seç.',lhMC('44a','Do you fancy coming over tonight?',['I’d love to.','I fancy yesterday.','At coming seven.'],'I’d love to.')+lhMC('44b','You cannot meet on Saturday. What can you say?',["I’m sorry, I can’t. How about Sunday?","Saturday no.","I didn’t Saturday."],"I’m sorry, I can’t. How about Sunday?")+lhMC('44c','Which phrase suggests a time?',["How about seven o’clock?","What a shame!","I’d love to."],"How about seven o’clock?"))}
  ${lhPersonal('44','📲 GERÇEK HAYAT GÖREVİ','Bir arkadaşını bu hafta buluşmaya davet eden kısa bir konuşma hazırla. Yer, gün ve saati netleştir; uygun değilse alternatif öner.')}
- ${speakBtns('4.4')}
-
- ${lhSectionHead('lh-4review','🏁','UNIT 4 REVIEW','Vocabulary + Grammar + Functional Language')}
+ ${speakBtns('4.4')}`],
+   ["Unit Review", () => `${lhSectionHead('lh-4review','🏁','UNIT 4 REVIEW','Vocabulary + Grammar + Functional Language')}
  ${lhExerciseBlock('🧪 MIXED REVIEW','Unit 4’ün ana yapılarını karışık test et.',lhMC('4r1','We ___ dinner with friends tonight.',['are having','have yesterday','having to'],'are having')+lhMC('4r2','Virtual reality ___ become more common.',['might','did','was'],'might')+lhMC('4r3','___ made the dinner?',['Who','Who did','Who does'],'Who')+lhMC('4r4','Who did you ___ at the party?',['meet','met','meeting'],'meet')+lhMC('4r5','Which is the best invitation?',["Would you like to come over?","You come over yesterday?","Come you maybe?"],"Would you like to come over?"))}
- <div class="card" style="background:var(--paper-dark)"><b>🌍 Final Mission — Your Social Weekend</b><ol style="line-height:1.8"><li>Gerçek bir hafta sonu planını anlat.</li><li>Gelecekte sosyalleşmenin nasıl değişeceğine dair iki tahmin yap ve nedenlerini söyle.</li><li>Boş zaman hakkında bir subject ve bir object question sor.</li><li>Bir arkadaşını davet et; gün, yer ve saati birlikte ayarlayın.</li></ol>${speakBtns('4-review')}</div>`;
+ <div class="card" style="background:var(--paper-dark)"><b>🌍 Final Mission — Your Social Weekend</b><ol style="line-height:1.8"><li>Gerçek bir hafta sonu planını anlat.</li><li>Gelecekte sosyalleşmenin nasıl değişeceğine dair iki tahmin yap ve nedenlerini söyle.</li><li>Boş zaman hakkında bir subject ve bir object question sor.</li><li>Bir arkadaşını davet et; gün, yer ve saati birlikte ayarlayın.</li></ol>${speakBtns('4-review')}</div>`]
+ ]);
 }
 
 
 function viewLanguageHubUnit5(){
  const speakBtns=(lesson)=>`<div class="row" style="margin-top:14px"><button class="pill primary" onclick="lhFriendSpeak('${lesson}')">🗣️ Arkadaşlarla Pratik</button><button class="pill" onclick="lhTheresa('${lesson}')">👩‍🏫 Theresa ile Kontrol</button></div>`;
- return `<div class="card" style="border-left:4px solid var(--accent)"><div class="hint" style="font-weight:800;letter-spacing:.08em">LANGUAGE HUB B1 · UNIT 5 · WORK</div><h3 style="font-family:var(--serif);font-size:27px;margin:6px 0">Work — Kitaptan gerçek hayata</h3><p class="hint">İşlerin artılarını ve eksilerini konuş → işyeri kurallarını anlat → uzmanlık alanında sorulara cevap ver → iş görüşmesinde deneyimini doğal biçimde sun.</p></div>
-
- ${lhSectionHead('lh-51','💼','5.1 WORK','Talk about the pros and cons of different jobs and say how they help society.')}
+ return lhUnitLessons(5, [
+   ["5.1 WORK", () => `${lhSectionHead('lh-51','💼','5.1 WORK','Talk about the pros and cons of different jobs and say how they help society.')}
  <div class="card"><b>🎯 Lesson Goal</b><p>Farklı mesleklerin iyi ve zor taraflarını anlatmak ve topluma nasıl katkı sağladıklarını söylemek.</p><b>Vocabulary · Work collocations</b><p class="hint" style="line-height:1.8">work shifts · earn a salary · earn a bonus · get/take a day off · work long hours · be self-employed · run a company · work for a company · be well-paid / badly paid · get promoted</p></div>
  <div class="card"><b>🧩 Grammar · can, could, be able to</b><p><b>can</b> → şimdiki yetenek/olasılık: I can choose my hours.<br><b>could</b> → geçmişte genel yetenek: I could choose when I wanted to work.<br><b>was/were able to</b> → geçmişte belirli bir durumda başarabildiğin şey: My manager was able to take an afternoon off.</p></div>
  <div class="card"><b>📖 Reading idea · What makes people happy at work?</b><p class="hint">Metindeki farklı çalışanlar; çalışma saatleri, özel beceriler, maaş/bonus, bağımsızlık, rahat yönetici ve aileye zaman ayırabilme gibi faktörlerin iş memnuniyetini nasıl etkilediğini karşılaştırıyor.</p></div>
  ${lhExerciseBlock('✍️ PRACTICE','İş dili ve yetenek yapılarını uygula.',lhMC('51a','When I was younger, I ___ work night shifts.',['could','can yesterday','am able'],'could')+lhMC('51b','Which phrase means you work for yourself?',['be self-employed','earn a shift','take a salary'],'be self-employed')+lhMC('51c','I ___ take tomorrow afternoon off.',['can','could last year tomorrow','salary'],'can'))}
  ${lhPersonal('51','🧠 KENDİ HAYATINA UYARLA','Yaptığın veya yapmak istediğin bir işi anlat. En iyi iki tarafı, en zor tarafı ve bu işin insanlara nasıl yardımcı olduğunu yaz.')}
- ${speakBtns('5.1')}
-
- ${lhSectionHead('lh-52','🩴','5.2 FLIP-FLOPRENEURS','Decide on the rules for a workplace or classroom.')}
+ ${speakBtns('5.1')}`],
+   ["5.2 FLIP-FLOPRENEURS", () => `${lhSectionHead('lh-52','🩴','5.2 FLIP-FLOPRENEURS','Decide on the rules for a workplace or classroom.')}
  <div class="card"><b>📖 Reading idea · A different workplace</b><p class="hint">Ders, Sri Lanka’daki flip-flop üretimi üzerinden bir işyerindeki kuralları ve insanların çalışma koşullarını tartışıyor. Odak; zorunluluk, gereklilik, izin ve yasakları doğru ifade etmek.</p></div>
  <div class="card"><b>🧩 Grammar · Obligation, necessity and permission</b><p><b>must / have to</b> → zorunluluk<br><b>don’t have to</b> → gerekli değil<br><b>can / be allowed to</b> → izin<br><b>can’t / mustn’t</b> → izin yok / yasak</p><p class="hint">Önemli fark: <b>don’t have to</b> “yapmak zorunda değilsin”; <b>mustn’t</b> “yapmamalısın / yasak” anlamına gelir.</p></div>
  <div class="card"><b>🧠 Vocabulary · Adjectives to describe workplaces</b><p class="hint" style="line-height:1.8">reliable · flexible · traditional · unusual · popular · colourful · comfortable · important</p></div>
  ${lhExerciseBlock('🏢 RULE CHECK','İşyeri kurallarını doğru ifade et.',lhMC('52a','Employees ___ wear an ID card. It is compulsory.',['have to','don’t have to','might'],'have to')+lhMC('52b','You ___ work on Sunday. It is optional.',['don’t have to','mustn’t','have to'],'don’t have to')+lhMC('52c','Smoking is forbidden here. You ___.',['mustn’t smoke','don’t have to smoke','can smoke'],'mustn’t smoke'))}
  ${lhPersonal('52','🏢 SENİN İDEAL İŞYERİN','İdeal işyerin için 5 kural yaz: çalışanlar ne yapmak zorunda, ne yapmak zorunda değil ve nelere izinli?')}
- ${speakBtns('5.2')}
-
- ${lhSectionHead('lh-53','🎙️','5.3 DON’T CALL US','Answer questions on topics in which you are an expert.')}
+ ${speakBtns('5.2')}`],
+   ["5.3 DON’T CALL US", () => `${lhSectionHead('lh-53','🎙️','5.3 DON’T CALL US','Answer questions on topics in which you are an expert.')}
  <div class="card"><b>🎧 Listening idea · Expert interviews</b><p class="hint">Ders, bir kişinin iyi bildiği bir konuda röportaj sorularına cevap vermesine odaklanıyor. Dinlerken ana fikir, örnek ve konuşmacının gerçekten ne demek istediğini çıkarma pratiği var.</p></div>
  <div class="card"><b>🧩 Grammar · Present perfect with for and since</b><p><b>for</b> + süre: I’ve worked here <b>for five years</b>.<br><b>since</b> + başlangıç noktası: I’ve worked here <b>since 2021</b>.</p><p class="hint">Geçmişte başlayıp şimdiye kadar devam eden durumlar için present perfect kullanılır.</p></div>
  <div class="card"><b>🔗 Vocabulary · work + preposition</b><p class="hint" style="line-height:1.8">work at a place · work for a company/person · work in an industry/department · work on a project · work with people/technology</p></div>
  ${lhExerciseBlock('⏳ FOR / SINCE CHECK','Süre ve başlangıç noktasını ayır.',lhMC('53a','I have worked here ___ 2022.',['since','for','at'],'since')+lhMC('53b','She has worked in marketing ___ three years.',['for','since','on'],'for')+lhMC('53c','He works ___ a software company.',['for','since','of'],'for'))}
  ${lhPersonal('53','🎓 SEN HANGİ KONUDA UZMANSIN?','İyi bildiğin bir konu seç. Ne kadar zamandır bununla ilgilendiğini ve bu konuda öğrendiğin üç şeyi İngilizce yaz.')}
- ${speakBtns('5.3')}
-
- ${lhSectionHead('lh-54','🐈','5.4 CAFÉ HUB — THE CAT','Give information about your work experience in a job interview.')}
+ ${speakBtns('5.3')}`],
+   ["5.4 CAFÉ HUB — THE CAT", () => `${lhSectionHead('lh-54','🐈','5.4 CAFÉ HUB — THE CAT','Give information about your work experience in a job interview.')}
  <div class="card"><b>💬 Functional Language · Job interview</b><p class="hint" style="line-height:1.9"><b>Experience:</b> I’m currently working as… · I have experience of… · I worked there for…<br><b>Strengths:</b> I’m good at… · I’m organised / reliable / flexible.<br><b>Weakness:</b> I sometimes… but I’m working on it.<br><b>Clarify:</b> Sorry, could you repeat the question? · Do you mean…?</p></div>
  <div class="card"><b>🗣️ Interview structure</b><p class="hint">1) current situation → 2) previous experience → 3) strengths with an example → 4) one realistic weakness → 5) why you are a good candidate.</p></div>
  ${lhExerciseBlock('🤝 INTERVIEW CHECK','İş görüşmesinde en doğal cevabı seç.',lhMC('54a','Tell me about your work experience.',['I have worked in customer service for three years.','I work yesterday three years.','Customer service yes.'],'I have worked in customer service for three years.')+lhMC('54b','Could you tell me about your strengths?',["I’m organised and I work well with people.","My strength was tomorrow.","Yes, strength."],"I’m organised and I work well with people.")+lhMC('54c','You did not understand the question.',['Could you repeat the question, please?','Repeat!','I no understand question.'],'Could you repeat the question, please?'))}
  ${lhPersonal('54','📝 GERÇEK İŞ GÖRÜŞMESİ HAZIRLIĞI','Kendin için kısa bir job interview cevabı hazırla: mevcut durumun, deneyimin, iki güçlü yönün ve geliştirmek istediğin bir yönün.')}
- ${speakBtns('5.4')}
-
- ${lhSectionHead('lh-5review','🏁','UNIT 5 REVIEW','Vocabulary + Grammar + Functional Language')}
+ ${speakBtns('5.4')}`],
+   ["Unit Review", () => `${lhSectionHead('lh-5review','🏁','UNIT 5 REVIEW','Vocabulary + Grammar + Functional Language')}
  ${lhExerciseBlock('🧪 MIXED REVIEW','Unit 5’in ana yapılarını karışık test et.',lhMC('5r1','When I was a child, I ___ speak two languages.',['could','can now yesterday','salary'],'could')+lhMC('5r2','You ___ wear a helmet here. It is compulsory.',['have to','don’t have to','might'],'have to')+lhMC('5r3','I have worked here ___ six months.',['for','since','at'],'for')+lhMC('5r4','She has lived here ___ 2024.',['since','for','with'],'since')+lhMC('5r5','Which is natural in an interview?',["I’m good at solving problems.","I good solve problem.","Good at I problems."],"I’m good at solving problems."))}
- <div class="card" style="background:var(--paper-dark)"><b>🌍 Final Mission — Your Work Profile</b><ol style="line-height:1.8"><li>Bir mesleğin artılarını ve eksilerini anlat.</li><li>İdeal işyerin için üç kural koy.</li><li>Bir becerini <i>can/could/be able to</i> ile anlat.</li><li><i>for/since</i> kullanarak deneyiminden bahset.</li><li>Theresa ile kısa bir iş görüşmesi yap.</li></ol>${speakBtns('5-review')}</div>`;
+ <div class="card" style="background:var(--paper-dark)"><b>🌍 Final Mission — Your Work Profile</b><ol style="line-height:1.8"><li>Bir mesleğin artılarını ve eksilerini anlat.</li><li>İdeal işyerin için üç kural koy.</li><li>Bir becerini <i>can/could/be able to</i> ile anlat.</li><li><i>for/since</i> kullanarak deneyiminden bahset.</li><li>Theresa ile kısa bir iş görüşmesi yap.</li></ol>${speakBtns('5-review')}</div>`]
+ ]);
 }
 
 
 function viewLanguageHubUnit6(){
  const speakBtns=(lesson)=>`<div class="card" style="background:linear-gradient(135deg,var(--paper-dark),var(--card))"><b>🎙️ Speaking</b><p class="hint">Önce kendi cümlelerinle konuş, sonra Theresa ile ders hedefini kontrol et.</p><div class="row"><button class="pill primary" onclick="location.href='speaking.html?coursebook=language-hub-b1&lesson=${lesson}'">Practice with Friends →</button><button class="pill" onclick="location.href='speaking.html?coursebook=language-hub-b1&lesson=${lesson}&teacher=theresa'">Check with Theresa →</button></div></div>`;
- return `${lhLessonNav(6,'Health')}
- ${lhSectionHead('lh-61','🩺','6.1 HEALTH MYTHS','Give a presentation on health dos and don’ts.')}
+ return lhUnitLessons(6, [
+   ["6.1 HEALTH MYTHS", () => `${lhSectionHead('lh-61','🩺','6.1 HEALTH MYTHS','Give a presentation on health dos and don’ts.')}
  <div class="card"><b>🧠 Lesson focus</b><p class="hint">Sağlıkla ilgili yaygın inanışları değerlendir, günlük sağlık tavsiyeleri ver ve küçük rahatsızlıkları doğru kelimelerle anlat.</p></div>
  <div class="card"><b>🧩 Grammar · Quantifiers</b><p><b>too much</b> + sayılamayan isim → too much sugar<br><b>too many</b> + çoğul isim → too many sweets<br><b>not enough</b> + isim → not enough water / not enough vegetables</p></div>
  <div class="card"><b>🤒 Vocabulary · Minor illnesses</b><p class="hint" style="line-height:1.8">a cold · a cough · a headache · a sore throat · a stomach ache · toothache · a temperature · feel sick</p></div>
  ${lhExerciseBlock('✍️ HEALTH CHECK','Miktar ifadelerini ve sağlık kelimelerini uygula.',lhMC('61a','You drink ___ coffee.',['too much','too many','not many enough'],'too much')+lhMC('61b','There are ___ unhealthy snacks in my diet.',['too many','too much','not enough much'],'too many')+lhMC('61c','I don’t drink ___ water.',['enough','too many','many enough'],'enough'))}
  ${lhPersonal('61','🧠 KENDİ HAYATINA UYARLA','Sağlıklı kalmak için yaptığın 3 şeyi ve değiştirmek istediğin 2 alışkanlığı İngilizce yaz.')}
- ${speakBtns('6.1')}
-
- ${lhSectionHead('lh-62','🏃','6.2 KEEP FIT!','Plan an exercise event for your local community.')}
+ ${speakBtns('6.1')}`],
+   ["6.2 KEEP FIT!", () => `${lhSectionHead('lh-62','🏃','6.2 KEEP FIT!','Plan an exercise event for your local community.')}
  <div class="card"><b>📖 Reading idea · Different ways to exercise</b><p class="hint">Ders; eğlenceli egzersiz fikirlerini, topluluk etkinliklerini ve insanların aktif kalmasını sağlayan farklı yolları karşılaştırıyor.</p></div>
  <div class="card"><b>🧩 Grammar · -ing forms</b><p><b>Verb + -ing:</b> I enjoy <b>running</b>.<br><b>-ing as subject:</b> <b>Walking</b> is good exercise.<br><b>Preposition + -ing:</b> I’m interested in <b>trying</b> yoga.</p></div>
  <div class="card"><b>🏋️ Vocabulary · Ways of exercising</b><p class="hint" style="line-height:1.8">go jogging · go for a walk · work out · join a gym · play a team sport · do yoga · run a marathon</p></div>
  ${lhExerciseBlock('🏃 FITNESS CHECK','-ing yapılarını ve egzersiz ifadelerini uygula.',lhMC('62a','I enjoy ___ in the park.',['running','run','to ran'],'running')+lhMC('62b','___ regularly is good for your health.',['Walking','Walk','Walked'],'Walking')+lhMC('62c','Which is natural?',['do yoga','play yoga','make yoga'],'do yoga'))}
  ${lhPersonal('62','📅 SENİN ETKİNLİĞİN','Mahallende/şehrinde yapılabilecek bir egzersiz etkinliği planla: etkinlik, yer, saat, kimler katılabilir ve neden eğlenceli?')}
- ${speakBtns('6.2')}
-
- ${lhSectionHead('lh-63','🥗','6.3 WE MAY NEVER “MEAT” AGAIN','Encourage people to make a lifestyle change.')}
+ ${speakBtns('6.2')}`],
+   ["6.3 WE MAY NEVER “MEAT” AGAIN", () => `${lhSectionHead('lh-63','🥗','6.3 WE MAY NEVER “MEAT” AGAIN','Encourage people to make a lifestyle change.')}
  <div class="card"><b>📖 Reading idea · A fresh start</b><p class="hint">Ders, et tüketimini azaltma ve vegan/vejetaryen yaşam gibi değişiklikleri; sağlık, çevre ve kişisel alışkanlıklar açısından tartışıyor.</p></div>
  <div class="card"><b>🧩 Grammar · Present perfect with just, already and yet</b><p><b>just</b> → çok kısa süre önce: I’ve <b>just</b> eaten.<br><b>already</b> → beklenenden önce: I’ve <b>already</b> tried it.<br><b>yet</b> → soru/olumsuzda, genellikle sonda: Have you tried it <b>yet</b>? / I haven’t tried it <b>yet</b>.</p></div>
  <div class="card"><b>🥑 Vocabulary · Food groups</b><p class="hint" style="line-height:1.8">fruit · vegetables · grains · dairy · meat · fish · nuts · beans / pulses</p></div>
  ${lhExerciseBlock('🥗 LIFESTYLE CHECK','just / already / yet kullanımını seç.',lhMC('63a','I’ve ___ had lunch, so I’m not hungry.',['just','yet','since'],'just')+lhMC('63b','Have you tried vegan food ___?',['yet','already yesterday','just ago'],'yet')+lhMC('63c','She has ___ joined a gym.',['already','yet not','for'],'already'))}
  ${lhPersonal('63','🌱 BİR DEĞİŞİKLİK SEÇ','Hayatında yapmak istediğin bir sağlıklı değişikliği yaz. Neden istediğini ve başlamak için atacağın 3 adımı anlat.')}
- ${speakBtns('6.3')}
-
- ${lhSectionHead('lh-64','💊','6.4 CAFÉ HUB — PAINFUL EXPERIENCE','Talk about your symptoms at a pharmacy.')}
+ ${speakBtns('6.3')}`],
+   ["6.4 CAFÉ HUB — PAINFUL EXPERIENCE", () => `${lhSectionHead('lh-64','💊','6.4 CAFÉ HUB — PAINFUL EXPERIENCE','Talk about your symptoms at a pharmacy.')}
  <div class="card"><b>💬 Functional Language · At a pharmacy</b><p class="hint" style="line-height:1.9"><b>Pharmacist:</b> Are you OK? · What are your symptoms? · Do you have anything for a sore throat?<br><b>Customer:</b> I’ve got a sore throat. · It’s very painful. · My nose is blocked. · I don’t feel very well.<br><b>Advice:</b> I suggest these tablets. · Take one every four hours. · You could try…</p></div>
  <div class="card"><b>🗣️ Survival pattern</b><p class="hint"><b>Explain → Add detail → Ask for help</b><br>“I’ve got a bad cough. I’ve had it for three days. Do you have anything for it?”</p></div>
  ${lhExerciseBlock('💊 PHARMACY CHECK','Eczanede en doğal ifadeyi seç.',lhMC('64a','The pharmacist asks about your problem.',['I’ve got a sore throat.','I am sore throat.','My throat got is.'],"I’ve got a sore throat.")+lhMC('64b','You want medicine.',['Do you have anything for a cough?','Have you cough thing?','Give cough.'],'Do you have anything for a cough?')+lhMC('64c','Which is natural advice?',['Take one tablet every four hours.','Take one tablet every four hour ago.','Taking one tablet yesterday.'],'Take one tablet every four hours.'))}
  ${lhPersonal('64','📝 ECZANE SENARYON','Bir rahatsızlık seç. Belirtilerini, ne kadar süredir devam ettiğini ve eczacıdan ne isteyeceğini 3–4 cümleyle yaz.')}
- ${speakBtns('6.4')}
-
- ${lhSectionHead('lh-6review','🏁','UNIT 6 REVIEW','Vocabulary + Grammar + Functional Language')}
+ ${speakBtns('6.4')}`],
+   ["Unit Review", () => `${lhSectionHead('lh-6review','🏁','UNIT 6 REVIEW','Vocabulary + Grammar + Functional Language')}
  ${lhExerciseBlock('🧪 MIXED REVIEW','Unit 6’nın ana yapılarını karışık test et.',lhMC('6r1','There is ___ sugar in this drink.',['too much','too many','not many'],'too much')+lhMC('6r2','I enjoy ___ after work.',['jogging','jog','jogged'],'jogging')+lhMC('6r3','I’ve ___ finished my workout.',['just','yet','for'],'just')+lhMC('6r4','Have you eaten dinner ___?',['yet','just ago','since'],'yet')+lhMC('6r5','At a pharmacy, which is natural?',["I’ve got a headache.","I am headache.","I have headache me."],"I’ve got a headache."))}
- <div class="card" style="background:var(--paper-dark)"><b>🌍 Final Mission — Health Coach</b><ol style="line-height:1.8"><li>3 health dos and don’ts ver.</li><li>Bir egzersiz etkinliği planla.</li><li><i>just/already/yet</i> ile yaşam tarzındaki değişikliklerden bahset.</li><li>Bir eczane role-play’i yap.</li><li>Theresa’dan Unit 6 değerlendirmesi al.</li></ol>${speakBtns('6-review')}</div>`;
+ <div class="card" style="background:var(--paper-dark)"><b>🌍 Final Mission — Health Coach</b><ol style="line-height:1.8"><li>3 health dos and don’ts ver.</li><li>Bir egzersiz etkinliği planla.</li><li><i>just/already/yet</i> ile yaşam tarzındaki değişikliklerden bahset.</li><li>Bir eczane role-play’i yap.</li><li>Theresa’dan Unit 6 değerlendirmesi al.</li></ol>${speakBtns('6-review')}</div>`]
+ ]);
 }
 
 
 function viewLanguageHubUnit7(){
  const speakBtns=(lesson)=>`<div class="card" style="background:var(--paper-dark)"><b>🎙️ Speaking Practice</b><p class="hint">Bu dersin hedefini gerçek konuşmaya dönüştür.</p><div class="row"><button class="pill primary" onclick="location.href='speaking.html?coursebook=language-hub-b1&lesson=${lesson}'">Practice with Friends →</button><button class="pill" onclick="location.href='speaking.html?coursebook=language-hub-b1&lesson=${lesson}&teacher=theresa'">Check with Theresa →</button></div></div>`;
- return `${lhLessonNav(7,'Mind')}
- ${lhSectionHead('lh-71','😊','7.1 SMILE','Discuss what makes you happy.')}
+ return lhUnitLessons(7, [
+   ["7.1 SMILE", () => `${lhSectionHead('lh-71','😊','7.1 SMILE','Discuss what makes you happy.')}
  <div class="card"><b>📖 Reading idea · A smile a day</b><p class="hint">Ders; gülmenin ruh hali, sağlık ve sosyal ilişkiler üzerindeki etkilerini tartışıyor. Ana hedef, seni mutlu eden günlük şeylerden doğal biçimde bahsetmek.</p></div>
  <div class="card"><b>🧩 Grammar · Articles</b><p><b>a / an</b> → ilk kez veya genel tekil bir şey: <i>a smile, an old friend</i><br><b>the</b> → konuşanların hangi şey olduğunu bildiği durum: <i>the doctor</i><br><b>no article</b> → genel anlamdaki çoğul ve sayılamayan isimler: <i>Smiles help people. Laughter is healthy.</i></p></div>
  <div class="card"><b>🙂 Vocabulary · Feelings</b><p class="hint" style="line-height:1.8">cheerful · anxious · confused · pleased · relaxed · scared · nervous · glad</p></div>
  ${lhExerciseBlock('😊 FEELINGS CHECK','Articles ve duygu kelimelerini uygula.',lhMC('71a','I had ___ great time yesterday.',['a','the','—'],'a')+lhMC('71b','Which feeling is positive?',['cheerful','anxious','scared'],'cheerful')+lhMC('71c','___ laughter can help people connect.',['—','A','An'],'—'))}
  ${lhPersonal('71','💛 SENİ NE MUTLU EDER?','Seni günlük hayatta mutlu eden 3 şeyi ve en son ne zaman gerçekten güldüğünü İngilizce anlat.')}
- ${speakBtns('7.1')}
-
- ${lhSectionHead('lh-72','🌐','7.2 THE INTERNET AND THE BRAIN','Write an online comment about the effects of the internet.')}
+ ${speakBtns('7.1')}`],
+   ["7.2 THE INTERNET AND THE BRAIN", () => `${lhSectionHead('lh-72','🌐','7.2 THE INTERNET AND THE BRAIN','Write an online comment about the effects of the internet.')}
  <div class="card"><b>📖 Reading idea · Internet habits</b><p class="hint">Ders; internetin dikkat, hafıza ve günlük alışkanlıklarımız üzerindeki olası etkileri hakkında farklı görüşleri karşılaştırıyor.</p></div>
  <div class="card"><b>🧩 Grammar · used to</b><p><b>used to + verb</b> → geçmişte düzenli olan ama artık olmayan durum: <i>I used to read comics.</i><br><b>didn’t use to</b> → geçmişte olmayan alışkanlık: <i>I didn’t use to go online much.</i><br><b>Did you use to…?</b> → geçmiş alışkanlık sorusu.</p></div>
  <div class="card"><b>📱 Vocabulary · Shortened words</b><p class="hint" style="line-height:1.8">phone ← telephone · info ← information · uni ← university · plane ← aeroplane · net ← internet · mic ← microphone · website ← web site</p></div>
  ${lhExerciseBlock('🌐 INTERNET CHECK','used to ve kısaltılmış kelimeleri uygula.',lhMC('72a','When I was younger, I ___ play video games a lot.',['used to','use to','used'],'used to')+lhMC('72b','Negative form?',["I didn’t use to go online much.","I didn’t used to go online much.","I not used to go online much."],"I didn’t use to go online much.")+lhMC('72c','“info” is short for…',['information','internet','informal'],'information'))}
  ${lhPersonal('72','📲 ESKİDEN / ŞİMDİ','Telefon, internet veya sosyal medya kullanımında geçmişten bugüne değişen 3 alışkanlığını “used to / didn’t use to” ile yaz.')}
- ${speakBtns('7.2')}
-
- ${lhSectionHead('lh-73','🧠','7.3 INTELLIGENCE','Talk about intelligence and achievements.')}
+ ${speakBtns('7.2')}`],
+   ["7.3 INTELLIGENCE", () => `${lhSectionHead('lh-73','🧠','7.3 INTELLIGENCE','Talk about intelligence and achievements.')}
  <div class="card"><b>🎧 Listening idea · William James Sidis</b><p class="hint">Ders, olağanüstü yetenek ve başarı kavramlarını bir kişinin yaşamındaki dönüm noktaları üzerinden ele alıyor; olayları doğru sırayla anlatmaya odaklanıyor.</p></div>
  <div class="card"><b>🧩 Grammar · No article: school, university, hospital, prison</b><p>Bir yerin <b>temel amacı/faaliyeti</b> kastediliyorsa çoğu zaman article kullanılmaz: <i>go to school, be at university, be in hospital/prison</i>.<br>Belirli fiziksel bina/yer kastediliyorsa article kullanılabilir: <i>the school, the university, the hospital</i>.</p></div>
  <div class="card"><b>🔗 Vocabulary · Phrasal verbs</b><p class="hint" style="line-height:1.8"><b>grow up</b> = çocukluğunu geçirmek/büyümek · <b>bring up</b> = çocuk yetiştirmek · <b>give up</b> = bırakmak · <b>drop out</b> = bitirmeden ayrılmak · <b>fall out</b> = biriyle ciddi biçimde tartışmak · <b>make up</b> = uydurmak / bağlama göre barışmak</p></div>
  ${lhExerciseBlock('🧠 INTELLIGENCE CHECK','Phrasal verbs ve article kullanımını uygula.',lhMC('73a','I ___ in Ankara.',['grew up','gave up','dropped out'],'grew up')+lhMC('73b','She goes to ___ university.',['—','the always','an'],'—')+lhMC('73c','He left university before finishing his degree. He…',['dropped out','grew up','brought up'],'dropped out'))}
  ${lhPersonal('73','🏆 BAŞARI HİKÂYEN','Hayatında öğrendiğin önemli bir beceriyi veya gurur duyduğun bir başarıyı anlat. Nasıl başladın, ne zordu, sonuç ne oldu?')}
- ${speakBtns('7.3')}
-
- ${lhSectionHead('lh-74','🍳','7.4 CAFÉ HUB — NEENA’S DINNER','Describe an object and say what you use it for.')}
+ ${speakBtns('7.3')}`],
+   ["7.4 CAFÉ HUB — NEENA’S DINNER", () => `${lhSectionHead('lh-74','🍳','7.4 CAFÉ HUB — NEENA’S DINNER','Describe an object and say what you use it for.')}
  <div class="card"><b>💬 Functional Language · When you don’t know the word</b><p class="hint" style="line-height:1.9"><b>Finding the word:</b> I’ve forgotten the name of it. · I can’t think of the word in English. · What’s it called?<br><b>Describing it:</b> You use it to… · It’s a thing you use to… · It’s made of metal/plastic/wood.<br><b>Checking:</b> Do you know what I mean?</p></div>
  <div class="card"><b>🍴 Object vocabulary</b><p class="hint" style="line-height:1.8">sieve · peeler · blender · frying pan · chopping board · food container · jug · teapot · whisk · basin</p></div>
  ${lhExerciseBlock('🍳 OBJECT CHECK','Bir kelimeyi bilmediğinde tarif ederek iletişimi sürdür.',lhMC('74a','You forgot an English word. What can you say?', ["I can’t think of the word in English.","I don’t word English.","English word no."],"I can’t think of the word in English.")+lhMC('74b','A whisk…',['is something you use to beat eggs.','is something you use to cut wood.','is a place to sleep.'],'is something you use to beat eggs.')+lhMC('74c','To check understanding:', ['Do you know what I mean?','Are you mean?','You know mean me?'],'Do you know what I mean?'))}
  ${lhPersonal('74','🔎 TARİF ET, ADINI SÖYLEME','Evinden bir nesne seç. Adını kullanmadan neyden yapıldığını, nasıl göründüğünü ve ne için kullandığını İngilizce tarif et.')}
- ${speakBtns('7.4')}
-
- ${lhSectionHead('lh-7review','🏁','UNIT 7 REVIEW','Vocabulary + Grammar + Functional Language')}
+ ${speakBtns('7.4')}`],
+   ["Unit Review", () => `${lhSectionHead('lh-7review','🏁','UNIT 7 REVIEW','Vocabulary + Grammar + Functional Language')}
  ${lhExerciseBlock('🧪 MIXED REVIEW','Unit 7’nin ana yapılarını karışık test et.',lhMC('7r1','Which word describes a positive feeling?',['pleased','scared','anxious'],'pleased')+lhMC('7r2','I ___ watch much TV when I was a child.',['didn’t use to','didn’t used to','not use to'],'didn’t use to')+lhMC('7r3','He ___ in London.',['grew up','dropped up','gave grow'],'grew up')+lhMC('7r4','She is studying at ___ university.',['—','an always','the always'],'—')+lhMC('7r5','You do not know an object’s name.',['What’s it called?','How it call?','What call this?'],"What’s it called?"))}
- <div class="card" style="background:var(--paper-dark)"><b>🌍 Final Mission — Mind & Memory</b><ol style="line-height:1.8"><li>Seni mutlu eden şeylerden bahset.</li><li><i>used to</i> ile geçmiş ve bugünkü internet alışkanlıklarını karşılaştır.</li><li>Bir başarı veya öğrenme hikâyesi anlat.</li><li>Adını söylemeden bir nesneyi tarif ettir.</li><li>Theresa’dan Unit 7 değerlendirmesi al.</li></ol>${speakBtns('7-review')}</div>`;
+ <div class="card" style="background:var(--paper-dark)"><b>🌍 Final Mission — Mind & Memory</b><ol style="line-height:1.8"><li>Seni mutlu eden şeylerden bahset.</li><li><i>used to</i> ile geçmiş ve bugünkü internet alışkanlıklarını karşılaştır.</li><li>Bir başarı veya öğrenme hikâyesi anlat.</li><li>Adını söylemeden bir nesneyi tarif ettir.</li><li>Theresa’dan Unit 7 değerlendirmesi al.</li></ol>${speakBtns('7-review')}</div>`]
+ ]);
 }
 
 
 function viewLanguageHubUnit8(){
  const speakBtns=(lesson)=>`<div class="card" style="background:var(--paper-dark)"><b>🎙️ Speaking Practice</b><p class="hint">Bu dersin hedefini gerçek konuşmaya dönüştür.</p><div class="row"><button class="pill primary" onclick="location.href='speaking.html?coursebook=language-hub-b1&lesson=${lesson}'">Practice with Friends →</button><button class="pill" onclick="location.href='speaking.html?coursebook=language-hub-b1&lesson=${lesson}&teacher=theresa'">Check with Theresa →</button></div></div>`;
- return `${lhLessonNav(8,'Art')}
- ${lhSectionHead('lh-81','🎵','8.1 MUSICAL TASTE','Talk about taste in music and your favourite songs.')}
+ return lhUnitLessons(8, [
+   ["8.1 MUSICAL TASTE", () => `${lhSectionHead('lh-81','🎵','8.1 MUSICAL TASTE','Talk about taste in music and your favourite songs.')}
  <div class="card"><b>🎧 Listening idea · Musical taste</b><p class="hint">Ders; müzik zevkimizi nelerin etkilediğini, farklı ruh hâllerinde neden farklı müzikler seçtiğimizi ve sevdiğimiz şarkıları nasıl anlattığımızı ele alıyor.</p></div>
  <div class="card"><b>🧩 Grammar · Reflexive pronouns</b><p><b>myself · yourself · himself · herself · itself · ourselves · yourselves · themselves</b><br>Nesne özneyle aynı kişiyse: <i>I taught myself.</i><br>Vurgu için: <i>I designed it myself.</i><br>Tek başına yapmayı vurgulamak için: <i>I did it by myself.</i></p></div>
  <div class="card"><b>🎶 Vocabulary · Music</b><p class="hint" style="line-height:1.8">lyrics · gig · cover song · catchy · album · on tour · live · band members · rap · jazz · rock · disco · blues · reggae · classical</p></div>
  ${lhExerciseBlock('🎵 MUSIC CHECK','Reflexive pronouns ve müzik kelimelerini uygula.',lhMC('81a','I learned to play the guitar by ___.',['myself','me','mine'],'myself')+lhMC('81b','A song that is easy to remember is…',['catchy','live','classical only'],'catchy')+lhMC('81c','The band wrote the song ___.',['themselves','theirself','themself'],'themselves'))}
  ${lhPersonal('81','🎧 SENİN MÜZİK ZEVKİN','En sevdiğin 3 şarkıyı veya sanatçıyı seç. Türünü, neden sevdiğini, ne zaman dinlediğini ve sana nasıl hissettirdiğini İngilizce anlat.')}
- ${speakBtns('8.1')}
-
- ${lhSectionHead('lh-82','🎨','8.2 UNUSUAL ART','Talk about art and artists.')}
+ ${speakBtns('8.1')}`],
+   ["8.2 UNUSUAL ART", () => `${lhSectionHead('lh-82','🎨','8.2 UNUSUAL ART','Talk about art and artists.')}
  <div class="card"><b>📖 Reading idea · Unusual art</b><p class="hint">Ders; gündelik veya sıra dışı malzemelerle yapılan sanat örneklerini inceliyor. Sanatçının ne kullandığını, eseri nasıl yaptığını ve amacını anlatmaya odaklanıyor.</p></div>
  <div class="card"><b>🧩 Grammar · Infinitive of purpose</b><p><b>to + verb</b> bir eylemin amacını açıklar: <i>Artists use unusual materials to create new effects.</i><br><i>I go to galleries to see new work.</i></p></div>
  <div class="card"><b>🖼️ Vocabulary · Types of art</b><p class="hint" style="line-height:1.8">abstract · exhibition · gallery · landscape · portrait · sculpture · still life · artificial · illuminate · layer · silhouette</p></div>
  ${lhExerciseBlock('🎨 ART CHECK','Sanat kelimelerini ve amaç bildiren infinitive yapısını uygula.',lhMC('82a','I went to the museum ___ the exhibition.',['to see','seeing','for see'],'to see')+lhMC('82b','A picture of a person is a…',['portrait','landscape','gallery'],'portrait')+lhMC('82c','A three-dimensional work of art is a…',['sculpture','still life','portrait'],'sculpture'))}
  ${lhPersonal('82','🖼️ BİR ESER SEÇ','Sevdiğin bir sanatçı veya sanat eseri seç. Ne olduğunu, hangi malzemelerin kullanıldığını, sana nasıl hissettirdiğini ve neden sevdiğini anlat.')}
- ${speakBtns('8.2')}
-
- ${lhSectionHead('lh-83','🎬','8.3 TELLING STORIES','Describe films and books.')}
+ ${speakBtns('8.2')}`],
+   ["8.3 TELLING STORIES", () => `${lhSectionHead('lh-83','🎬','8.3 TELLING STORIES','Describe films and books.')}
  <div class="card"><b>🎞️ Vocabulary · Film and book genres</b><p class="hint" style="line-height:1.8">adventure · animated · biography · comedy · fantasy · historical · musical · romantic comedy · science fiction · thriller · western</p></div>
  <div class="card"><b>✨ Describing films & books</b><p class="hint"><b>-ing</b> → şeyin sende oluşturduğu etki: <i>engaging, exciting, gripping, moving, boring, disappointing, amazing</i>.<br><b>-ed</b> → senin hissettiğin: <i>engaged, excited, moved, bored, disappointed, amazed</i>.</p></div>
  <div class="card"><b>🧩 Grammar · First conditional</b><p><b>If + present simple, will + verb</b>: <i>If you watch this film, you’ll love it.</i><br>Sonuç bölümünde <i>can, could, might, should</i> gibi modal fiiller de kullanılabilir: <i>If you want a great night out, you should see it.</i></p></div>
  ${lhExerciseBlock('🎬 STORY CHECK','Film/kitap dili ve first conditional yapısını uygula.',lhMC('83a','The film kept my attention from start to finish. It was…',['gripping','gripped','boringly'],'gripping')+lhMC('83b','I felt ___ by the ending.',['moved','moving','move'],'moved')+lhMC('83c','If you ___ this book, you’ll enjoy it.',['read','will read','reading'],'read'))}
  ${lhPersonal('83','🍿 ÖNERİN','Sevdiğin bir film veya kitabı seç. Türünü, hikâyeyi, neden sevdiğini ve kime önereceğini anlat. En az bir first conditional cümlesi kullan.')}
- ${speakBtns('8.3')}
-
- ${lhSectionHead('lh-84','💬','8.4 CAFÉ HUB — FIRST DATE','Show interest in a topic.')}
+ ${speakBtns('8.3')}`],
+   ["8.4 CAFÉ HUB — FIRST DATE", () => `${lhSectionHead('lh-84','💬','8.4 CAFÉ HUB — FIRST DATE','Show interest in a topic.')}
  <div class="card"><b>💬 Functional Language · Show interest</b><p class="hint" style="line-height:1.9"><b>Surprise:</b> No way! · Really? · For real? · You’re kidding!<br><b>Interest:</b> Do you? · Did she? · Is it? · That’s great!<br><b>Agreement / understanding:</b> Me too. · Neither do I. · I know what you mean.</p></div>
  <div class="card"><b>🗣️ Conversation skill</b><p class="hint"><b>Listen → react → ask/follow up.</b> Karşındaki kişinin söylediğine kısa ve doğal bir tepki vererek konuşmayı canlı tut.</p></div>
  ${lhExerciseBlock('💬 INTEREST CHECK','Doğal tepki ifadelerini seç.',lhMC('84a','“I got tickets for the concert!”',['No way!','No interest.','I ticket too?'],'No way!')+lhMC('84b','“I love musicals.”',['Me too.','Me neither do.','For real I no.'],'Me too.')+lhMC('84c','“I’m not crazy about English food.”',['Neither am I.','So am I not.','Me too not.'],'Neither am I.'))}
  ${lhPersonal('84','☕ SOHBETİ SÜRDÜR','Müzik, aile, iş, seyahat veya yemek hakkında 5 kısa bilgi yaz. Her bilgiye karşı tarafın verebileceği doğal bir ilgi/şaşkınlık tepkisi ekle.')}
- ${speakBtns('8.4')}
-
- ${lhSectionHead('lh-8review','🏁','UNIT 8 REVIEW','Vocabulary + Grammar + Functional Language')}
+ ${speakBtns('8.4')}`],
+   ["Unit Review", () => `${lhSectionHead('lh-8review','🏁','UNIT 8 REVIEW','Vocabulary + Grammar + Functional Language')}
  ${lhExerciseBlock('🧪 MIXED REVIEW','Unit 8’in ana yapılarını karışık test et.',lhMC('8r1','She designed the website ___.',['herself','her','hers'],'herself')+lhMC('8r2','We went to the gallery ___ the new exhibition.',['to see','seeing','see to'],'to see')+lhMC('8r3','The book was so ___ that I couldn’t stop reading.',['gripping','gripped','grip'],'gripping')+lhMC('8r4','If it ___ raining, we’ll walk home.',['stops','will stop','stopped'],'stops')+lhMC('8r5','Someone tells you surprising news.',['No way!','I no way.','No topic.'],'No way!'))}
- <div class="card" style="background:var(--paper-dark)"><b>🌍 Final Mission — Art & Culture</b><ol style="line-height:1.8"><li>Müzik zevkini ve favori şarkılarını anlat.</li><li>Bir sanatçı veya sanat eserini tanıt.</li><li>Bir film/kitap öner ve first conditional kullan.</li><li>Bir sohbette ilgi gösteren doğal tepkiler ver.</li><li>Theresa’dan Unit 8 değerlendirmesi al.</li></ol>${speakBtns('8-review')}</div>`;
+ <div class="card" style="background:var(--paper-dark)"><b>🌍 Final Mission — Art & Culture</b><ol style="line-height:1.8"><li>Müzik zevkini ve favori şarkılarını anlat.</li><li>Bir sanatçı veya sanat eserini tanıt.</li><li>Bir film/kitap öner ve first conditional kullan.</li><li>Bir sohbette ilgi gösteren doğal tepkiler ver.</li><li>Theresa’dan Unit 8 değerlendirmesi al.</li></ol>${speakBtns('8-review')}</div>`]
+ ]);
 }
 
 
 function viewLanguageHubUnit9(){
  const speakBtns=(lesson)=>`<div class="card" style="background:var(--paper-dark)"><b>🎙️ Speaking Practice</b><p class="hint">Bu dersin hedefini gerçek konuşmaya dönüştür.</p><div class="row"><button class="pill primary" onclick="location.href='speaking.html?coursebook=language-hub-b1&lesson=${lesson}'">Practice with Friends →</button><button class="pill" onclick="location.href='speaking.html?coursebook=language-hub-b1&lesson=${lesson}&teacher=theresa'">Check with Theresa →</button></div></div>`;
- return `${lhLessonNav(9,'Money')}
- ${lhSectionHead('lh-91','💳','9.1 SPENDING MONEY','Talk about attitudes to money and about spending money.')}
+ return lhUnitLessons(9, [
+   ["9.1 SPENDING MONEY", () => `${lhSectionHead('lh-91','💳','9.1 SPENDING MONEY','Talk about attitudes to money and about spending money.')}
  <div class="card"><b>📖 Reading idea · How to buy happiness</b><p class="hint">Ders, para harcarken sadece eşyalara değil deneyimlere de odaklanmayı tartışıyor. Seyahat gibi deneyimlerin ilgi alanlarımızı keşfetmeye, farklı insanlarla tanışmaya ve yeni şeyler denemeye nasıl katkı sağlayabileceğini ele alıyor.</p></div>
  <div class="card"><b>🧩 Grammar · Second conditional</b><p><b>If + past simple, would + verb</b> → şu an veya gelecek için gerçek dışı / düşük ihtimalli durumlar: <i>If I had more money, I would travel more.</i><br><b>would</b> yerine bağlama göre <i>could / might / should</i> da kullanılabilir.</p></div>
  <div class="card"><b>💰 Vocabulary · Money phrases</b><p class="hint" style="line-height:1.8">save money · spend money on something · spend money on experiences · pay by card · pay in cash · take money out of the ATM · borrow money from someone · lend money to someone · attitude to money · possession</p></div>
  ${lhExerciseBlock('💳 MONEY CHECK','Second conditional ve para ifadelerini uygula.',lhMC('91a','If I ___ more money, I would travel more.',['had','have','would have'],'had')+lhMC('91b','I spend a lot of money ___ travelling.',['on','at','for'],'on')+lhMC('91c','I need cash, so I’ll take some money ___ of the ATM.',['out','from to','off'],'out'))}
  ${lhPersonal('91','💭 PARA VE SEN','Paranı en çok neye harcadığını, ne için para biriktirdiğini ve daha fazla paran olsaydı ne yapacağını İngilizce anlat. En az iki second conditional cümlesi kullan.')}
- ${speakBtns('9.1')}
-
- ${lhSectionHead('lh-92','🤝','9.2 GETTING AND GIVING','Talk about philanthropy and charities.')}
+ ${speakBtns('9.1')}`],
+   ["9.2 GETTING AND GIVING", () => `${lhSectionHead('lh-92','🤝','9.2 GETTING AND GIVING','Talk about philanthropy and charities.')}
  <div class="card"><b>🎧 Listening idea · Philanthropy</b><p class="hint">Ders, hayırseverlik ve bağış kültürünü; geçmişten ve günümüzden yardım faaliyetleri üzerinden ele alıyor. İnsanların para kazanması, bağışlaması ve ihtiyaç sahiplerini desteklemesiyle ilgili kelimeler kullanılıyor.</p></div>
  <div class="card"><b>💵 Vocabulary · Verbs connected with money</b><p class="hint" style="line-height:1.8">donate · earn · give away · lose · make · owe · raise · support · give money to charity · raise money for a cause</p></div>
  <div class="card"><b>🧩 Grammar · Defining relative clauses</b><p><b>who</b> → insanlar: <i>People who help others…</i><br><b>which</b> → şeyler: <i>A charity which supports children…</i><br><b>that</b> → insan veya şey için kullanılabilir. Nesne durumunda relative pronoun bazen atılabilir.</p></div>
  ${lhExerciseBlock('🤝 CHARITY CHECK','Money verbs ve relative clauses.',lhMC('92a','A person ___ gives money to good causes is a philanthropist.',['who','where','what'],'who')+lhMC('92b','We want to ___ money for the charity.',['raise','owe','lose'],'raise')+lhMC('92c','A charity is an organisation ___ helps people.',['that','when','whose only'],'that'))}
  ${lhPersonal('92','❤️ YARDIM ETMEK','Desteklemek istediğin bir yardım alanını seç. Kime yardım ediyor, neden önemli ve sen nasıl destek olabilirsin? who/which/that kullanarak anlat.')}
- ${speakBtns('9.2')}
-
- ${lhSectionHead('lh-93','🔄','9.3 WHO NEEDS MONEY?','Discuss your skills and how they could help others.')}
+ ${speakBtns('9.2')}`],
+   ["9.3 WHO NEEDS MONEY?", () => `${lhSectionHead('lh-93','🔄','9.3 WHO NEEDS MONEY?','Discuss your skills and how they could help others.')}
  <div class="card"><b>📖 Reading idea · Bartering is back</b><p class="hint">Ders, para kullanmadan ürün, beceri veya hizmet değiş tokuşu yapma fikrini inceliyor. Barter sistemleri ve time bank gibi modellerde insanların bir hizmet verip karşılığında başka bir hizmet alması ele alınıyor.</p></div>
  <div class="card"><b>🧩 Grammar · Gerunds</b><p><b>verb + -ing</b> isim gibi kullanılabilir: <i>Travelling is expensive.</i><br>Preposition sonrasında: <i>the dream of owning a house</i>.<br>Bazı fiillerden sonra: <i>enjoy doing, stop working</i>.</p></div>
  <div class="card"><b>🛠️ Vocabulary · make / do expressions</b><p class="hint" style="line-height:1.8">make a living · make an offer · make a profit · do your shopping · do research · do someone a favour · do the ironing · make a decision</p></div>
  ${lhExerciseBlock('🔄 SKILLS CHECK','Gerunds ve make/do kalıplarını uygula.',lhMC('93a','___ new skills can help you find work.',['Learning','Learn','To learned'],'Learning')+lhMC('93b','She ___ a living by teaching online.',['makes','does','takes'],'makes')+lhMC('93c','Could you ___ me a favour?',['do','make','give doing'],'do'))}
  ${lhPersonal('93','🧰 SENİN BECERİLERİN','Başka biriyle değiş tokuş edebileceğin 3 beceri veya hizmetini yaz. Karşılığında hangi hizmetleri almak istediğini de anlat.')}
- ${speakBtns('9.3')}
-
- ${lhSectionHead('lh-94','🛍️','9.4 CAFÉ HUB — DIFFICULT CUSTOMER','Go shopping for clothes and ask for a refund.')}
+ ${speakBtns('9.3')}`],
+   ["9.4 CAFÉ HUB — DIFFICULT CUSTOMER", () => `${lhSectionHead('lh-94','🛍️','9.4 CAFÉ HUB — DIFFICULT CUSTOMER','Go shopping for clothes and ask for a refund.')}
  <div class="card"><b>💬 Functional Language · Shopping</b><p class="hint" style="line-height:1.9"><b>Shop assistant:</b> Can I help you? · What exactly are you looking for? · Would you like me to gift-wrap it for you?<br><b>Customer:</b> I’m looking for… · How much is this? · I’d like to return this, please. · It’s the wrong size. · Can I have my money back, please?</p></div>
  <div class="card"><b>🧾 Refund language</b><p class="hint">İade konuşmasında problemi açıkla → ürünü/fişi belirt → istediğin çözümü nazikçe söyle. Örnek: <i>I’d like to return this, please. It doesn’t fit. Can I have a refund?</i></p></div>
  <div class="card"><b>🔊 Pronunciation · Adding emphasis</b><p class="hint">Vurgulanan kelime anlamın odağını değiştirir: <i>These shoes are VERY comfortable.</i> / <i>THESE shoes are very comfortable.</i></p></div>
  ${lhExerciseBlock('🛍️ SHOPPING CHECK','Mağazada doğal ve nazik ifadeyi seç.',lhMC('94a','You want to return a sweater.',['I’d like to return this, please.','Give back this.','I return want.'],"I’d like to return this, please.")+lhMC('94b','The size is not correct.',['It’s the wrong size.','It has wrong tall.','Size no.'],"It’s the wrong size.")+lhMC('94c','Ask politely for your money back.',['Can I have a refund, please?','Give my cash.','Refund me now.'],'Can I have a refund, please?'))}
  ${lhPersonal('94','👕 GERÇEK HAYAT ROLE PLAY','Bir mağazadan aldığın kıyafette sorun olduğunu düşün. Ürünü, sorunu, fiş durumunu ve istediğin çözümü İngilizce hazırla.')}
- ${speakBtns('9.4')}
-
- ${lhSectionHead('lh-9review','🏁','UNIT 9 REVIEW','Vocabulary + Grammar + Functional Language')}
+ ${speakBtns('9.4')}`],
+   ["Unit Review", () => `${lhSectionHead('lh-9review','🏁','UNIT 9 REVIEW','Vocabulary + Grammar + Functional Language')}
  ${lhExerciseBlock('🧪 MIXED REVIEW','Unit 9’un ana yapılarını karışık test et.',lhMC('9r1','If I ___ €1,000, I would save some of it.',['found','find','would find'],'found')+lhMC('9r2','An organisation ___ helps homeless people is a charity.',['that','where','when'],'that')+lhMC('9r3','I’m looking forward to ___ on holiday.',['going','go','went'],'going')+lhMC('9r4','Which is correct?',['make a living','do a living','make a shopping'],'make a living')+lhMC('9r5','You want your money back.',['I’d like a refund, please.','I like refund yesterday.','Money return me.'],"I’d like a refund, please."))}
- <div class="card" style="background:var(--paper-dark)"><b>🌍 Final Mission — Money in Real Life</b><ol style="line-height:1.8"><li>Para harcama ve biriktirme alışkanlıklarını anlat.</li><li><i>If I had… I would…</i> ile para üzerine varsayımsal durumlar kur.</li><li>Bir yardım kuruluşunu veya desteklemek istediğin amacı anlat.</li><li>Becerilerini bir barter/time-bank senaryosunda teklif et.</li><li>Mağazada alışveriş yap ve sorunlu bir ürünü iade et.</li><li>Theresa’dan Unit 9 değerlendirmesi al.</li></ol>${speakBtns('9-review')}</div>`;
+ <div class="card" style="background:var(--paper-dark)"><b>🌍 Final Mission — Money in Real Life</b><ol style="line-height:1.8"><li>Para harcama ve biriktirme alışkanlıklarını anlat.</li><li><i>If I had… I would…</i> ile para üzerine varsayımsal durumlar kur.</li><li>Bir yardım kuruluşunu veya desteklemek istediğin amacı anlat.</li><li>Becerilerini bir barter/time-bank senaryosunda teklif et.</li><li>Mağazada alışveriş yap ve sorunlu bir ürünü iade et.</li><li>Theresa’dan Unit 9 değerlendirmesi al.</li></ol>${speakBtns('9-review')}</div>`]
+ ]);
 }
 
 
 function viewLanguageHubUnit10(){
  const speakBtns=(lesson)=>`<div id="lh-${lesson}-speak" class="card" style="background:var(--paper-dark)"><b>🗣️ Speaking Practice</b><p class="hint">Önce arkadaşlarınla pratik yap, sonra Theresa ile ders hedefini kontrol et.</p><div class="row"><button class="pill primary" onclick="lhFriendSpeak('${lesson}')">👥 Practice with Friends</button><button class="pill" onclick="lhTheresa('${lesson}')">🇲🇹 Check with Theresa</button></div></div>`;
- return `<div class="card" style="border-left:4px solid var(--accent);background:linear-gradient(135deg,var(--card),var(--paper-dark))"><div class="hint" style="font-weight:800;letter-spacing:.08em">LANGUAGE HUB B1 · UNIT 10</div><h3 style="font-family:var(--serif);font-size:28px;margin:6px 0">Science & Technology</h3><p class="hint">Elektronik cihazları karşılaştır → teknoloji hakkında konuş → bilim ve araştırma dilini kullan → iş gereksinimlerini tartış → telefonda resmi ve günlük konuş.</p></div>
-
- ${lhSectionHead('lh-101','📱','10.1 DEVICES','Describe and compare personal possessions.')}
+ return lhUnitLessons(10, [
+   ["10.1 DEVICES", () => `${lhSectionHead('lh-101','📱','10.1 DEVICES','Describe and compare personal possessions.')}
  <div class="card"><b>📚 Vocabulary · Electronic devices</b><p class="hint" style="line-height:1.9">drone · e-reader · fitness tracker · GPS · laptop · power bank · tablet · USB drive · mobile phone</p><p class="hint">Kendi cihazlarını anlatırken <b>useful, reliable, light, heavy, expensive, cheap, fast</b> gibi sıfatları kullan.</p></div>
  <div class="card"><b>🧠 Grammar · Comparatives & Superlatives</b><p><b>Comparative:</b> lighter than · more useful than · heavier than · better than · worse than</p><p><b>Superlative:</b> the lightest · the most useful · the heaviest · the best · the worst</p><p class="hint">Uzun sıfatlarda <i>more / the most</i>; kısa sıfatlarda çoğunlukla <i>-er / -est</i> kullanılır.</p></div>
  <div class="card"><b>🔊 Pronunciation</b><p class="hint">Superlative yapılarda <b>-est</b> sesine dikkat: <i>lightest, strongest, fastest</i>.</p></div>
  ${lhExerciseBlock('📱 DEVICE CHECK','Cihazları doğru karşılaştır.',lhMC('101a','My tablet is ___ than my old one.',['lighter','lightest','more light'],'lighter')+lhMC('101b','This is ___ useful device I own.',['the most','more','most than'],'the most')+lhMC('101c','Which is correct?',['My phone is better than my old phone.','My phone is more better.','My phone is the better than.'],'My phone is better than my old phone.'))}
  ${lhPersonal('101','📲 SENİN CİHAZLARIN','Telefonunu veya kullandığın başka bir cihazı anlat. Ne zaman aldın, neyi seviyorsun/sevmiyorsun? Sonra iki cihazını comparative ve superlative kullanarak karşılaştır.')}
- ${speakBtns('10.1')}
-
- ${lhSectionHead('lh-102','🌐','10.2 IT’S ONLY GOOD WHEN IT WORKS','Describe types of technology.')}
+ ${speakBtns('10.1')}`],
+   ["10.2 IT’S ONLY GOOD WHEN IT WORKS", () => `${lhSectionHead('lh-102','🌐','10.2 IT’S ONLY GOOD WHEN IT WORKS','Describe types of technology.')}
  <div class="card"><b>📖 Reading idea · Is it just me?</b><p class="hint">Ders, internet ve teknolojinin hayatı kolaylaştırırken bizi rahatsız eden yönlerini tartışıyor: cihazların bozulması, reklamlar, dikkat dağınıklığı, şifreleri unutmak ve çevrimiçi güvenlik gibi günlük sorunlar.</p></div>
  <div class="card"><b>🌐 Vocabulary · Using devices and the internet</b><p class="hint" style="line-height:1.9">make a video call · set up your account · enter your password · use a USB drive · click on a link · restart your computer · refresh the screen · download an app</p></div>
  <div class="card"><b>🧠 Grammar · More comparative structures</b><p><b>as … as:</b> Online banking is <i>as secure as</i> personal banking.</p><p><b>not as … as:</b> My old phone is <i>not as fast as</i> my new phone.</p><p><b>comparative + than:</b> I get <i>more annoyed than</i> my friend.</p></div>
  ${lhExerciseBlock('🌐 TECHNOLOGY CHECK','Günlük teknoloji dilini uygula.',lhMC('102a','My old laptop is not ___ fast as this one.',['as','than','more'],'as')+lhMC('102b','To start using a new account, you often need to ___ it up.',['set','make','putting'],'set')+lhMC('102c','When a page does not update, you can ___ the screen.',['refresh','repairing','collect'],'refresh'))}
  ${lhPersonal('102','😤 TEKNOLOJİ VE SEN','Teknolojide seni en çok rahatsız eden 3 şeyi yaz. Sonra iki cihazı veya iki teknoloji türünü as…as / not as…as kullanarak karşılaştır.')}
- ${speakBtns('10.2')}
-
- ${lhSectionHead('lh-103','🚀','10.3 THE BEST VIEW IN THE UNIVERSE','Discuss the requirements for a job.')}
+ ${speakBtns('10.2')}`],
+   ["10.3 THE BEST VIEW IN THE UNIVERSE", () => `${lhSectionHead('lh-103','🚀','10.3 THE BEST VIEW IN THE UNIVERSE','Discuss the requirements for a job.')}
  <div class="card"><b>📖 Reading · International Space Station</b><p class="hint">Ders ISS’de günlük yaşamı ve astronotların çalışma koşullarını inceliyor: sıkı program, egzersiz, deneyler, araştırma, bakım/onarım, uzay yürüyüşleri ve Dünya’dan uzakta yaşamanın zorlukları.</p></div>
  <div class="card"><b>🧠 Grammar · need to</b><p><i>The crew needs to follow a detailed schedule.</i><br><i>Astronauts need to exercise.</i><br><i>They don’t need to do any other tasks.</i><br><i>Do you need to wear special equipment?</i></p><p class="hint"><b>need to + verb</b> = bir şeyin gerekli olduğunu anlatır.</p></div>
  <div class="card"><b>🔬 Vocabulary · Science and research collocations</b><p class="hint" style="line-height:1.9">follow a schedule · repair equipment · make discoveries · develop drugs · make new technologies · look for solutions · do research · do experiments · collect data · solve problems · make preparations</p></div>
  <div class="card"><b>🧭 Facts & opinions</b><p class="hint"><b>Fact:</b> report, confirm, show, prove, find. <b>Opinion:</b> think, believe, feel, hope. Bilimsel bir bilgiyi kişisel görüşten ayırmaya çalış.</p></div>
  ${lhExerciseBlock('🚀 SPACE JOB CHECK','need to ve araştırma kalıplarını uygula.',lhMC('103a','Astronauts ___ follow a detailed schedule.',['need to','need','needs to'],'need to')+lhMC('103b','Scientists ___ experiments and collect data.',['do','make a','take'],'do')+lhMC('103c','Which is an opinion?',['I think living in space is exciting.','The ISS travels around Earth.','Astronauts collect data.'],'I think living in space is exciting.'))}
  ${lhPersonal('103','🧑‍🚀 İŞ GEREKSİNİMLERİ','Bir iş seç. Bu işi yapan kişinin ne yapması gerektiğini 5 cümleyle need to kullanarak anlat. İstersen astronotlukla karşılaştır.')}
- ${speakBtns('10.3')}
-
- ${lhSectionHead('lh-104','☎️','10.4 CAFÉ HUB — LOCKED OUT','Make and receive formal and informal phone calls.')}
+ ${speakBtns('10.3')}`],
+   ["10.4 CAFÉ HUB — LOCKED OUT", () => `${lhSectionHead('lh-104','☎️','10.4 CAFÉ HUB — LOCKED OUT','Make and receive formal and informal phone calls.')}
  <div class="card"><b>☎️ Functional Language · Phone calls</b><p class="hint" style="line-height:1.9"><b>Phone problem:</b> You’re breaking up. · I can’t hear you. · Can you hear me? · You’ve gone again. · The signal isn’t very good.<br><b>Formal call:</b> Good morning. How can I help? · Is it possible to speak to …? · Of course. I’ll put you through. · Would you like to hold?<br><b>Clarification:</b> Sorry, what was that? · Could you say that again?</p></div>
  <div class="card"><b>🎙️ Voicemail</b><p class="hint">Kısa ve anlaşılır bir mesaj bırak: kim olduğunu söyle → neden aradığını belirt → geri dönüş iste. Örnek: <i>Hi, this is Erhan. I can’t talk right now. Please leave a message after the beep.</i></p></div>
  <div class="card"><b>🔊 Pronunciation · Word stress & intonation</b><p class="hint">Telefon konuşmasında önemli kelimeleri vurgula ve açıklama isterken doğal yükselen/alçalan tonlamayı kullan.</p></div>
  ${lhExerciseBlock('☎️ PHONE CALL CHECK','Telefonda doğru ifadeyi seç.',lhMC('104a','The connection is bad.',['You’re breaking up.','You are breaking phone.','Your call broke me.'],"You’re breaking up.")+lhMC('104b','Ask to speak to someone formally.',['Is it possible to speak to Neena Patel?','Give me Neena.','I speak Neena now.'],'Is it possible to speak to Neena Patel?')+lhMC('104c','You did not understand.',['Could you say that again?','Say again you.','What you said now?'],'Could you say that again?'))}
  ${lhPersonal('104','📞 GERÇEK HAYAT TELEFON SENARYOSU','Bir resmi ve bir günlük telefon görüşmesi hazırla. Birinde bağlantı sorunu olsun; diğerinde birini telefona istemen ve mesaj bırakman gereksin.')}
- ${speakBtns('10.4')}
-
- ${lhSectionHead('lh-10review','🏁','UNIT 10 REVIEW','Vocabulary + Grammar + Functional Language')}
+ ${speakBtns('10.4')}`],
+   ["Unit Review", () => `${lhSectionHead('lh-10review','🏁','UNIT 10 REVIEW','Vocabulary + Grammar + Functional Language')}
  ${lhExerciseBlock('🧪 MIXED REVIEW','Unit 10’un ana yapılarını karışık test et.',lhMC('10r1','This tablet is ___ than mine.',['lighter','the lightest','more lighter'],'lighter')+lhMC('10r2','My old phone is not as fast ___ my new one.',['as','than','that'],'as')+lhMC('10r3','Scientists need to ___ data.',['collect','do a collect','make collecting'],'collect')+lhMC('10r4','Which is correct?',['You’re breaking up.','You breaking signal.','You are break up phone.'],"You’re breaking up.")+lhMC('10r5','A receptionist can say:',['I’ll put you through.','I put you inside.','I send your phone.'],"I’ll put you through."))}
- <div class="card" style="background:var(--paper-dark)"><b>🌍 Final Mission — Technology in Real Life</b><ol style="line-height:1.8"><li>İki kişisel cihazını comparative ve superlative ile karşılaştır.</li><li>İnternet/teknolojinin iyi ve sinir bozucu taraflarını anlat.</li><li>Bir işin gereksinimlerini <i>need to</i> ile açıkla.</li><li>Bilim ve araştırmayla ilgili en az 4 collocation kullan.</li><li>Bağlantı sorunu olan bir telefon görüşmesi yap.</li><li>Resmi bir telefon görüşmesinde birini iste ve mesaj bırak.</li><li>Theresa’dan Unit 10 değerlendirmesi al.</li></ol>${speakBtns('10-review')}</div>`;
+ <div class="card" style="background:var(--paper-dark)"><b>🌍 Final Mission — Technology in Real Life</b><ol style="line-height:1.8"><li>İki kişisel cihazını comparative ve superlative ile karşılaştır.</li><li>İnternet/teknolojinin iyi ve sinir bozucu taraflarını anlat.</li><li>Bir işin gereksinimlerini <i>need to</i> ile açıkla.</li><li>Bilim ve araştırmayla ilgili en az 4 collocation kullan.</li><li>Bağlantı sorunu olan bir telefon görüşmesi yap.</li><li>Resmi bir telefon görüşmesinde birini iste ve mesaj bırak.</li><li>Theresa’dan Unit 10 değerlendirmesi al.</li></ol>${speakBtns('10-review')}</div>`]
+ ]);
 }
 
 
 function viewLanguageHubUnit11(){
  const speakBtns=(lesson)=>`<div class="card" id="lh-${lesson.replace('.','-')}-speak" style="background:var(--paper-dark)"><b>🗣️ SPEAKING</b><p class="hint">Bu dersin hedefini gerçek konuşmaya dönüştür.</p><div class="row"><button class="pill primary" onclick="lhFriendSpeak('${lesson}')">👥 Practice with Friends</button><button class="pill" onclick="lhTheresa('${lesson}')">🇲🇹 Check with Theresa</button></div></div>`;
- return `<div class="card" style="border-left:4px solid var(--accent);background:linear-gradient(135deg,var(--card),var(--paper-dark))"><div class="hint" style="font-weight:800;letter-spacing:.08em">LANGUAGE HUB B1 · UNIT 11</div><h3 style="font-family:var(--serif);font-size:28px;margin:6px 0">🌿 Natural World</h3><p class="hint">Doğa harikaları, vahşi yaşam, plastik kirliliği ve hikâye anlatma.</p><div class="row"><button class="pill" onclick="lhJump('lh-111')">11.1 Natural Wonders</button><button class="pill" onclick="lhJump('lh-112')">11.2 Animal Images</button><button class="pill" onclick="lhJump('lh-113')">11.3 Throw-away World</button><button class="pill" onclick="lhJump('lh-114')">11.4 Power Cut</button><button class="pill primary" onclick="lhJump('lh-11review')">Unit Review</button></div></div>
-
- ${lhSectionHead('lh-111','🏔️','11.1 NATURAL WONDERS','Talk about natural wonders.')}
+ return lhUnitLessons(11, [
+   ["11.1 NATURAL WONDERS", () => `${lhSectionHead('lh-111','🏔️','11.1 NATURAL WONDERS','Talk about natural wonders.')}
  <div class="card"><b>📚 Vocabulary · Natural features</b><p class="hint" style="line-height:1.9">canyon · harbour · lights · mountain · reef · volcano · waterfall</p><p>Örnek: <i>The Grand Canyon is a canyon. The Great Barrier Reef is a reef.</i></p></div>
  <div class="card"><b>🎧 Listening · Seven Natural Wonders</b><p class="hint">Ders; Great Barrier Reef, Grand Canyon, Northern Lights, Rio de Janeiro harbour, Mount Everest, Parícutin volcano ve Victoria Falls gibi doğal harikalar üzerinden konum, oluşum ve ziyaret bilgilerini konuşmaya odaklanıyor.</p></div>
  <div class="card"><b>🧠 Grammar · Passive — present & past simple</b><p><b>Present:</b> <i>It is visited by millions of people.</i><br><b>Past:</b> <i>The canyon was created by the river.</i></p><p class="hint">Yapı: <b>be + past participle</b>. Eylemi yapan kişi önemli değilse veya bilinmiyorsa passive kullanılır.</p></div>
  ${lhExerciseBlock('🏔️ NATURAL WONDERS CHECK','Doğa kelimeleri ve passive yapıyı uygula.',lhMC('111a','A large natural flow of water falling from a height is a ___.',['waterfall','harbour','reef'],'waterfall')+lhMC('111b','The area ___ by thousands of tourists every year.',['is visited','visits','was visit'],'is visited')+lhMC('111c','The canyon ___ by a river millions of years ago.',['was formed','is form','formed by'],'was formed'))}
  ${lhPersonal('111','🌍 SENİN DOĞA HARİKAN','Türkiye’den veya dünyadan bir doğal yer seç. Nerede olduğunu, neyle ünlü olduğunu ve nasıl oluştuğunu 5–6 İngilizce cümleyle anlat. En az iki passive cümle kullan.')}
- ${speakBtns('11.1')}
-
- ${lhSectionHead('lh-112','📷','11.2 ANIMAL IMAGES','Read and talk about wildlife photography.')}
+ ${speakBtns('11.1')}`],
+   ["11.2 ANIMAL IMAGES", () => `${lhSectionHead('lh-112','📷','11.2 ANIMAL IMAGES','Read and talk about wildlife photography.')}
  <div class="card"><b>🐾 Vocabulary · Animals & wildlife</b><p class="hint">wildlife · habitat · life cycle · make eye contact · facial expression. Sevdiğin hayvanları ve nedenlerini anlatırken görünüş, davranış ve yaşam alanı kelimelerini kullan.</p></div>
  <div class="card"><b>📖 Reading · Behind the Lens</b><p class="hint">Ders, bir vahşi yaşam fotoğrafçısının deneyimleri üzerinden iyi bir hayvan fotoğrafı çekmek için sabır, hayvan davranışını gözlemleme, doğal yaşam alanına saygı gösterme ve doğru anı bekleme gibi becerileri ele alıyor.</p></div>
  <div class="card"><b>🧠 Grammar · adjective + to + infinitive</b><p><i>It is difficult to get a good picture.</i><br><i>It is important to be patient.</i><br><i>Some habitats are hard to reach.</i></p><p class="hint">Kalıp: <b>adjective + to + verb</b>.</p></div>
  ${lhExerciseBlock('📷 WILDLIFE CHECK','Wildlife ve adjective + infinitive yapısını çalış.',lhMC('112a','A place where an animal naturally lives is its ___.',['habitat','life cycle','expression'],'habitat')+lhMC('112b','It is important ___ patient.',['to be','being','be to'],'to be')+lhMC('112c','Wildlife photography can be difficult ___ well.',['to do','doing','do'],'to do'))}
  ${lhPersonal('112','🦊 HAYVAN FOTOĞRAFI','Fotoğrafını çekmek istediğin bir hayvan seç. Nerede yaşadığını ve iyi bir fotoğraf çekmenin neden kolay/zor olacağını adjective + to + infinitive kullanarak anlat.')}
- ${speakBtns('11.2')}
-
- ${lhSectionHead('lh-113','♻️','11.3 THROW-AWAY WORLD','Talk about the causes and effects of plastic pollution.')}
+ ${speakBtns('11.2')}`],
+   ["11.3 THROW-AWAY WORLD", () => `${lhSectionHead('lh-113','♻️','11.3 THROW-AWAY WORLD','Talk about the causes and effects of plastic pollution.')}
  <div class="card"><b>📖 Reading · Plastic pollution</b><p class="hint">Ders, tek kullanımlık plastiklerin denizlere ulaşması, uzun süre doğada kalması, okyanus akıntılarıyla taşınması ve deniz canlıları ile besin zinciri üzerindeki etkilerini inceliyor. Çözüm olarak daha az plastik kullanma, yeniden kullanma ve geri dönüşüm üzerinde duruluyor.</p></div>
  <div class="card"><b>🔗 Cause & effect language</b><p class="hint" style="line-height:1.9"><b>because / because of</b> → neden · <b>so / as a result</b> → sonuç. Örnek: <i>Plastic reaches the ocean because people throw it away. As a result, wildlife can be harmed.</i></p></div>
  <div class="card"><b>🧠 Grammar · even</b><p><i>Plastic is found even in remote places.</i><br><i>Some products contain plastic even though we do not expect it.</i></p><p class="hint"><b>even</b>, şaşırtıcı veya beklenmedik bir bilgiyi vurgular.</p></div>
  <div class="card"><b>📚 Vocabulary · somewhere / nowhere / everywhere / anywhere</b><p class="hint"><i>Plastic is everywhere.</i> · <i>Is anywhere completely safe?</i> · <i>There is nowhere untouched.</i> · <i>I want to live somewhere quiet.</i></p></div>
  ${lhExerciseBlock('♻️ PLASTIC CHECK','Neden-sonuç ve belirsiz yer kelimelerini uygula.',lhMC('113a','Plastic can be found ___.',['everywhere','every place is','anywhere not'],'everywhere')+lhMC('113b','People use too much plastic. ___, more waste reaches the sea.',['As a result','Because of','Even though of'],'As a result')+lhMC('113c','I want to go ___ with clean beaches.',['somewhere','nowhere not','everywhere to'],'somewhere'))}
  ${lhPersonal('113','🌱 PLASTIC CHALLENGE','Bugün kullandığın plastikleri düşün. Hangilerini azaltabileceğini ve bunun neden önemli olduğunu because, so veya as a result ile 5 cümlede anlat.')}
- ${speakBtns('11.3')}
-
- ${lhSectionHead('lh-114','⚡','11.4 CAFÉ HUB — POWER CUT','Tell a story and show interest.')}
+ ${speakBtns('11.3')}`],
+   ["11.4 CAFÉ HUB — POWER CUT", () => `${lhSectionHead('lh-114','⚡','11.4 CAFÉ HUB — POWER CUT','Tell a story and show interest.')}
  <div class="card"><b>🗣️ Functional Language · Tell a story</b><p class="hint" style="line-height:1.9"><b>Background:</b> It was a stormy night…<br><b>Beginning:</b> At first… / To start with…<br><b>Middle:</b> Then… / After that… / So…<br><b>Ending:</b> In the end…<br><b>Feelings:</b> I was scared / surprised / relieved.<br><b>Keep it going:</b> So, what happened? · Go on. · Then what happened?</p></div>
  <div class="card"><b>🎙️ Showing interest</b><p class="hint" style="line-height:1.9">That’s awful! · How frightening! · How funny! · You poor thing! · You lucky thing! · Sure, go on. · So, tell us. What happened?</p></div>
  ${lhExerciseBlock('⚡ STORY CHECK','Hikâyeyi doğal şekilde ilerlet.',lhMC('114a','Which phrase moves a story forward?',['After that…','Waterfall.','Anywhere.'],'After that…')+lhMC('114b','Your friend tells you something frightening.',['How frightening!','I am waterfall.','No story.'],'How frightening!')+lhMC('114c','Which phrase asks the speaker to continue?',['So, what happened?','It is formed.','I need habitat.'],'So, what happened?'))}
  ${lhPersonal('114','🌩️ SENİN HİKÂYEN','Kaybolduğun, anahtarını unuttuğun, kötü hava yaşadığın veya beklenmedik bir olayla karşılaştığın bir anı anlat. Background → beginning → middle → ending → feeling sırasını kullan.')}
- ${speakBtns('11.4')}
-
- ${lhSectionHead('lh-11review','🏁','UNIT 11 REVIEW','Vocabulary + Grammar + Functional Language')}
+ ${speakBtns('11.4')}`],
+   ["Unit Review", () => `${lhSectionHead('lh-11review','🏁','UNIT 11 REVIEW','Vocabulary + Grammar + Functional Language')}
  ${lhExerciseBlock('🧪 MIXED REVIEW','Unit 11’in ana yapılarını karışık test et.',lhMC('11r1','The Grand Canyon ___ by the Colorado River.',['was formed','formed is','was form'],'was formed')+lhMC('11r2','It is important ___ wildlife habitats.',['to protect','protecting to','to protected'],'to protect')+lhMC('11r3','There is plastic almost ___.',['everywhere','nowhere always','some place all'],'everywhere')+lhMC('11r4','Which shows a result?',['As a result,','Because of','Even before'],'As a result,')+lhMC('11r5','Which response shows interest in a story?',['You poor thing!','It is a canyon.','I am recycle.'],'You poor thing!'))}
- <div class="card" style="background:var(--paper-dark)"><b>🌿 Final Mission — Natural World</b><ol style="line-height:1.8"><li>Bir doğal harikayı natural features kelimeleriyle tanıt.</li><li>Present/past passive ile en az 3 cümle kur.</li><li>Bir hayvan ve vahşi yaşam fotoğrafçılığı hakkında konuş.</li><li>adjective + to + infinitive ile 3 fikir söyle.</li><li>Plastik kirliliğinin bir nedenini ve iki sonucunu açıkla.</li><li>somewhere / nowhere / everywhere / anywhere kelimelerinden en az ikisini kullan.</li><li>Kısa bir olay hikâyesi anlat ve dinleyicinin ilgi ifadelerine cevap ver.</li><li>Theresa’dan Unit 11 değerlendirmesi al.</li></ol>${speakBtns('11-review')}</div>`;
+ <div class="card" style="background:var(--paper-dark)"><b>🌿 Final Mission — Natural World</b><ol style="line-height:1.8"><li>Bir doğal harikayı natural features kelimeleriyle tanıt.</li><li>Present/past passive ile en az 3 cümle kur.</li><li>Bir hayvan ve vahşi yaşam fotoğrafçılığı hakkında konuş.</li><li>adjective + to + infinitive ile 3 fikir söyle.</li><li>Plastik kirliliğinin bir nedenini ve iki sonucunu açıkla.</li><li>somewhere / nowhere / everywhere / anywhere kelimelerinden en az ikisini kullan.</li><li>Kısa bir olay hikâyesi anlat ve dinleyicinin ilgi ifadelerine cevap ver.</li><li>Theresa’dan Unit 11 değerlendirmesi al.</li></ol>${speakBtns('11-review')}</div>`]
+ ]);
 }
 
 function viewLanguageHubUnit12(){
  const speakBtns=(lesson)=>`<div class="card" id="lh-${lesson.replace('.','-')}-speak" style="background:var(--paper-dark)"><b>🗣️ SPEAKING</b><p class="hint">Bu dersin hedefini gerçek konuşmaya dönüştür.</p><div class="row"><button class="pill primary" onclick="lhFriendSpeak('${lesson}')">👥 Practice with Friends</button><button class="pill" onclick="lhTheresa('${lesson}')">🇲🇹 Check with Theresa</button></div></div>`;
- return `<div class="card" style="border-left:4px solid var(--accent);background:linear-gradient(135deg,var(--card),var(--paper-dark))"><div class="hint" style="font-weight:800;letter-spacing:.08em">LANGUAGE HUB B1 · UNIT 12</div><h3 style="font-family:var(--serif);font-size:28px;margin:6px 0">📰 Media</h3><p class="hint">Online news, TV viewing habits, advertising and expressing opinions.</p><div class="row"><button class="pill" onclick="lhJump('lh-121')">12.1 The News</button><button class="pill" onclick="lhJump('lh-122')">12.2 On the Box</button><button class="pill" onclick="lhJump('lh-123')">12.3 Advertising</button><button class="pill" onclick="lhJump('lh-124')">12.4 Watch This</button><button class="pill primary" onclick="lhJump('lh-12review')">Unit Review</button></div></div>
-
- ${lhSectionHead('lh-121','📰','12.1 THE NEWS','Talk about the pros and cons of online news.')}
+ return lhUnitLessons(12, [
+   ["12.1 THE NEWS", () => `${lhSectionHead('lh-121','📰','12.1 THE NEWS','Talk about the pros and cons of online news.')}
  <div class="card"><b>📚 Vocabulary · News expressions</b><p class="hint" style="line-height:1.9">breaking news · follow the news · get the news · news headlines · report the news · share news · pay attention to the news · news story · journalist · source</p></div>
  <div class="card"><b>📖 Reading · Online news: good or bad?</b><p class="hint">Ders, haber alma alışkanlıklarının gazete, radyo ve TV’den online haberlere kaymasını ele alıyor. Online haberlerin hızlı ve kolay erişilebilir olması avantaj; yanlış veya taraflı bilgi ve fake news ise önemli bir risk. Bir haberin kaynağını, yazarını ve başka güvenilir kuruluşların aynı olayı nasıl aktardığını kontrol etmek önemli.</p></div>
  <div class="card"><b>🧠 Grammar · Reported speech</b><p><b>Direct:</b> <i>“The news is unreliable.”</i><br><b>Reported:</b> <i>He said that the news was unreliable.</i></p><p class="hint">Birinin sözlerini aktarırken zaman ve zamirler çoğu zaman geriye kayar: <b>present simple → past simple</b>, <b>present continuous → past continuous</b>, <b>will → would</b>.</p></div>
  ${lhExerciseBlock('📰 NEWS CHECK','Haber dili ve reported speech çalış.',lhMC('121a','Very recent important information is ___.',['breaking news','a news breaked','headline breaking'],'breaking news')+lhMC('121b','“I read the news online.” → She said that she ___ the news online.',['read','reads','will read'],'read')+lhMC('121c','Before sharing a story, you should check the ___.',['source','episode','advert'],'source'))}
  ${lhPersonal('121','📱 HABER ALIŞKANLIĞIN','Haberleri en çok nereden aldığını, online haberlerin iki avantajını ve iki dezavantajını yaz. Sonra bir arkadaşının haberlerle ilgili söylediği iki cümleyi reported speech ile aktar.')}
- ${speakBtns('12.1')}
-
- ${lhSectionHead('lh-122','📺','12.2 ON THE BOX','Talk and debate about different TV viewing habits.')}
+ ${speakBtns('12.1')}`],
+   ["12.2 ON THE BOX", () => `${lhSectionHead('lh-122','📺','12.2 ON THE BOX','Talk and debate about different TV viewing habits.')}
  <div class="card"><b>📺 Vocabulary · Television</b><p class="hint" style="line-height:1.9">TV channel · programme · series · episode · season · season finale · on-demand TV · streaming service · binge-watch · box set · cliffhanger</p></div>
  <div class="card"><b>📖 Reading · How binge-watching changed TV</b><p class="hint">Ders, haftalık TV izleme alışkanlığından on-demand ve streaming dönemine geçişi inceliyor. Tüm sezonun aynı anda sunulması binge-watching alışkanlığını güçlendirirken, yapımcılar da hikâyeleri ve bölüm sonlarını buna göre tasarlıyor.</p></div>
  <div class="card"><b>🧠 Grammar · Past perfect</b><p><i>The film had started before we arrived.</i><br><i>I had already seen two episodes when my friend called.</i></p><p class="hint">Yapı: <b>had + past participle</b>. Geçmişteki iki olaydan daha önce gerçekleşeni göstermek için kullanılır. <b>already</b> ve <b>just</b> sık kullanılır.</p></div>
  <div class="card"><b>💬 Debating language</b><p class="hint" style="line-height:1.9"><b>Build:</b> First… · Also… · Furthermore… · On top of that…<br><b>Agree/disagree:</b> I agree. · I don’t agree. · Yes, but… · I see what you mean, but… · You have a point, but…</p></div>
  ${lhExerciseBlock('📺 TV CHECK','TV kelimeleri ve past perfect uygula.',lhMC('122a','Watching many episodes one after another is ___.',['binge-watching','breaking news','reporting'],'binge-watching')+lhMC('122b','When I arrived, the film ___.',['had already started','already starts','has starting'],'had already started')+lhMC('122c','Which phrase politely disagrees?',['I see what you mean, but…','You are wrong always.','No point.'],'I see what you mean, but…'))}
  ${lhPersonal('122','🍿 SENİN İZLEME ALIŞKANLIĞIN','Bir diziyi nasıl izlediğini anlat. Binge-watching’in iyi ve kötü yanlarını yaz. Geçmişte izlediğin bir diziyle ilgili en az iki past perfect cümlesi kur.')}
- ${speakBtns('12.2')}
-
- ${lhSectionHead('lh-123','📣','12.3 ADVERTISING','Talk about advertising and what makes a good advert.')}
+ ${speakBtns('12.2')}`],
+   ["12.3 ADVERTISING", () => `${lhSectionHead('lh-123','📣','12.3 ADVERTISING','Talk about advertising and what makes a good advert.')}
  <div class="card"><b>📣 Vocabulary · Advertising</b><p class="hint" style="line-height:1.9">advert · advertising campaign · billboard · brand · product · logo · slogan · message · target audience · grab your attention · connect with people</p></div>
  <div class="card"><b>🎧 Listening skill · Opinion & attitude</b><p class="hint">Konuşmacının yalnızca söylediği bilgiye değil, görüşünü nasıl ifade ettiğine de dikkat et: <i>I think… / In my opinion… / To be honest… / I agree… / I disagree… / I’m not sure…</i></p></div>
  <div class="card"><b>🧠 Grammar · shall</b><p><i>Shall I help you?</i> · <i>Shall we choose this advert?</i></p><p class="hint"><b>Shall I…?</b> teklif; <b>Shall we…?</b> öneri yapmak için kullanılır.</p></div>
  <div class="card"><b>✨ What makes a good advert?</b><p class="hint">İyi bir reklam özgün olmalı, dikkat çekmeli, açık ve basit bir mesaj vermeli, hedef kitleyle bağ kurmalı ve ürünün neden değerli olduğunu göstermeli.</p></div>
  ${lhExerciseBlock('📣 ADVERTISING CHECK','Reklam dili ve shall yapısını uygula.',lhMC('123a','A short memorable phrase used by a brand is a ___.',['slogan','source','season'],'slogan')+lhMC('123b','Make a suggestion.',['Shall we create a simple message?','We shall to creating?','Shall creating it?'],'Shall we create a simple message?')+lhMC('123c','A good advert should ___ your attention.',['grab','take up to','report'],'grab'))}
  ${lhPersonal('123','💡 KENDİ REKLAMIN','Günlük bir ürün seç. Ürünün hedef kitlesini, ana mesajını, sloganını ve reklam fikrini oluştur. Sonra neden iyi bir reklam olacağını 4–5 cümleyle açıkla.')}
- ${speakBtns('12.3')}
-
- ${lhSectionHead('lh-124','💬','12.4 CAFÉ HUB — WATCH THIS','Give and respond to opinions.')}
+ ${speakBtns('12.3')}`],
+   ["12.4 CAFÉ HUB — WATCH THIS", () => `${lhSectionHead('lh-124','💬','12.4 CAFÉ HUB — WATCH THIS','Give and respond to opinions.')}
  <div class="card"><b>🗣️ Functional Language · Opinions</b><p class="hint" style="line-height:1.9"><b>Give:</b> Personally, I think… · In my view… · It seems to me that… · Look, all I’m saying is that…<br><b>Agree:</b> I completely agree. · Exactly! · Yeah, that’s true. · That’s fair enough.<br><b>Neutral:</b> I don’t mind. · I’m not sure about that.<br><b>Disagree:</b> I totally disagree. · I see what you mean, but… · I see what you’re saying, but…</p></div>
  <div class="card"><b>🔊 Pronunciation · Agreeing & disagreeing</b><p class="hint">Aynı cümle tonlamaya göre güçlü, nazik veya isteksiz duyulabilir. Anahtar kelimeleri vurgula: <i>I COMPLETELY agree.</i> / <i>I see what you MEAN, but…</i></p></div>
  ${lhExerciseBlock('💬 OPINION CHECK','Görüş belirtme ve cevap verme.',lhMC('124a','Give a personal opinion.',['In my view, online news is useful.','I am view news.','My opinion is agree.'],'In my view, online news is useful.')+lhMC('124b','Strong agreement:',['I completely agree.','I don’t mind.','I’m not sure.'],'I completely agree.')+lhMC('124c','Polite disagreement:',['I see what you mean, but…','No, impossible.','You are false.'],'I see what you mean, but…'))}
  ${lhPersonal('124','⚽ FİKİR TARTIŞMASI','Şu konulardan üçü hakkında görüş yaz: en iyi müzik grubu, dünyanın en iyi yemeği, en güvenli ulaşım şekli, ünlüler, para ve mutluluk. Her görüşe bir agreement veya disagreement cevabı ekle.')}
- ${speakBtns('12.4')}
-
- ${lhSectionHead('lh-12review','🏁','UNIT 12 REVIEW','Vocabulary + Grammar + Functional Language')}
+ ${speakBtns('12.4')}`],
+   ["Unit Review", () => `${lhSectionHead('lh-12review','🏁','UNIT 12 REVIEW','Vocabulary + Grammar + Functional Language')}
  ${lhExerciseBlock('🧪 MIXED REVIEW','Unit 12’nin ana yapılarını karışık test et.',lhMC('12r1','She said that she ___ the news every morning.',['read','reads now','will reads'],'read')+lhMC('12r2','By the time we arrived, the programme ___.',['had started','has start','was start'],'had started')+lhMC('12r3','___ we make the slogan shorter?',['Shall','Do shall','Are shall'],'Shall')+lhMC('12r4','Which is a news expression?',['breaking news','breaking episode','advert season'],'breaking news')+lhMC('12r5','Which is polite disagreement?',['I see what you mean, but…','You are completely wrong.','No talking.'],'I see what you mean, but…'))}
- <div class="card" style="background:var(--paper-dark)"><b>🎯 Final Mission — Media</b><ol style="line-height:1.8"><li>Online haberlerin artı ve eksilerini anlat.</li><li>Birinin söylediği en az 3 şeyi reported speech ile aktar.</li><li>TV/streaming alışkanlıklarını anlat ve past perfect ile geçmiş bir izleme deneyimi ver.</li><li>Binge-watching hakkında kısa bir tartışma yap.</li><li>Bir ürün için reklam kampanyası, slogan ve ana mesaj oluştur.</li><li><i>Shall I…?</i> ve <i>Shall we…?</i> ile teklif/öneri yap.</li><li>Bir konuda görüş belirt, karşı tarafla nazikçe agree/disagree yap.</li><li>Theresa’dan Unit 12 değerlendirmesi al.</li></ol>${speakBtns('12-review')}</div>`;
+ <div class="card" style="background:var(--paper-dark)"><b>🎯 Final Mission — Media</b><ol style="line-height:1.8"><li>Online haberlerin artı ve eksilerini anlat.</li><li>Birinin söylediği en az 3 şeyi reported speech ile aktar.</li><li>TV/streaming alışkanlıklarını anlat ve past perfect ile geçmiş bir izleme deneyimi ver.</li><li>Binge-watching hakkında kısa bir tartışma yap.</li><li>Bir ürün için reklam kampanyası, slogan ve ana mesaj oluştur.</li><li><i>Shall I…?</i> ve <i>Shall we…?</i> ile teklif/öneri yap.</li><li>Bir konuda görüş belirt, karşı tarafla nazikçe agree/disagree yap.</li><li>Theresa’dan Unit 12 değerlendirmesi al.</li></ol>${speakBtns('12-review')}</div>`]
+ ]);
 }
 
 
@@ -3520,18 +3517,18 @@ function render(){
   if(currentView==='dashboard'){ crumbEl.textContent='Genel Bakış'; titleEl.textContent='Ana Sayfa'; c.innerHTML = viewDashboard(); }
   else if(currentView==='dailyplan'){ crumbEl.textContent='Günlük Akış'; titleEl.textContent='▶️ Today’s Study'; c.innerHTML = viewDailyPlan(); }
   else if(currentView==='languagehub'){ crumbEl.textContent='Coursebook'; titleEl.textContent='📘 Language Hub B1'; c.innerHTML = viewLanguageHub(); }
-  else if(currentView==='languagehubunit1'){ crumbEl.textContent='Language Hub B1 · Unit 1'; titleEl.textContent='Unit 1 — Relationships'; c.innerHTML = lhActivePanel(1) + viewLanguageHubUnit1(); }
-  else if(currentView==='languagehubunit2'){ crumbEl.textContent='Language Hub B1 · Unit 2'; titleEl.textContent='Unit 2 — Living'; c.innerHTML = lhActivePanel(2) + viewLanguageHubUnit2(); }
-  else if(currentView==='languagehubunit3'){ crumbEl.textContent='Language Hub B1 · Unit 3'; titleEl.textContent='Unit 3 — Travel'; c.innerHTML = lhActivePanel(3) + viewLanguageHubUnit3(); }
-  else if(currentView==='languagehubunit4'){ crumbEl.textContent='Language Hub B1 · Unit 4'; titleEl.textContent='Unit 4 — Socialising'; c.innerHTML = lhActivePanel(4) + viewLanguageHubUnit4(); }
-  else if(currentView==='languagehubunit5'){ crumbEl.textContent='Language Hub B1 · Unit 5'; titleEl.textContent='Unit 5 — Work'; c.innerHTML = lhActivePanel(5) + viewLanguageHubUnit5(); }
-  else if(currentView==='languagehubunit6'){ crumbEl.textContent='Language Hub B1 · Unit 6'; titleEl.textContent='Unit 6 — Health'; c.innerHTML = lhActivePanel(6) + viewLanguageHubUnit6(); }
-  else if(currentView==='languagehubunit7'){ crumbEl.textContent='Language Hub B1 · Unit 7'; titleEl.textContent='Unit 7 — Mind'; c.innerHTML = lhActivePanel(7) + viewLanguageHubUnit7(); }
-  else if(currentView==='languagehubunit8'){ crumbEl.textContent='Language Hub B1 · Unit 8'; titleEl.textContent='Unit 8 — Art'; c.innerHTML = lhActivePanel(8) + viewLanguageHubUnit8(); }
-  else if(currentView==='languagehubunit9'){ crumbEl.textContent='Language Hub B1 · Unit 9'; titleEl.textContent='Unit 9 — Money'; c.innerHTML = lhActivePanel(9) + viewLanguageHubUnit9(); }
-  else if(currentView==='languagehubunit10'){ crumbEl.textContent='Language Hub B1 · Unit 10'; titleEl.textContent='Unit 10 — Science & Technology'; c.innerHTML = lhActivePanel(10) + viewLanguageHubUnit10(); }
-  else if(currentView==='languagehubunit11'){ crumbEl.textContent='Language Hub B1 · Unit 11'; titleEl.textContent='Unit 11 — Natural World'; c.innerHTML = lhActivePanel(11) + viewLanguageHubUnit11(); }
-  else if(currentView==='languagehubunit12'){ crumbEl.textContent='Language Hub B1 · Unit 12'; titleEl.textContent='Unit 12 — Media'; c.innerHTML = lhActivePanel(12) + viewLanguageHubUnit12(); }
+  else if(currentView==='languagehubunit1'){ crumbEl.textContent='Language Hub B1 · Unit 1'; titleEl.textContent='Unit 1 — Relationships'; c.innerHTML = viewLanguageHubUnit1(); }
+  else if(currentView==='languagehubunit2'){ crumbEl.textContent='Language Hub B1 · Unit 2'; titleEl.textContent='Unit 2 — Living'; c.innerHTML = viewLanguageHubUnit2(); }
+  else if(currentView==='languagehubunit3'){ crumbEl.textContent='Language Hub B1 · Unit 3'; titleEl.textContent='Unit 3 — Travel'; c.innerHTML = viewLanguageHubUnit3(); }
+  else if(currentView==='languagehubunit4'){ crumbEl.textContent='Language Hub B1 · Unit 4'; titleEl.textContent='Unit 4 — Socialising'; c.innerHTML = viewLanguageHubUnit4(); }
+  else if(currentView==='languagehubunit5'){ crumbEl.textContent='Language Hub B1 · Unit 5'; titleEl.textContent='Unit 5 — Work'; c.innerHTML = viewLanguageHubUnit5(); }
+  else if(currentView==='languagehubunit6'){ crumbEl.textContent='Language Hub B1 · Unit 6'; titleEl.textContent='Unit 6 — Health'; c.innerHTML = viewLanguageHubUnit6(); }
+  else if(currentView==='languagehubunit7'){ crumbEl.textContent='Language Hub B1 · Unit 7'; titleEl.textContent='Unit 7 — Mind'; c.innerHTML = viewLanguageHubUnit7(); }
+  else if(currentView==='languagehubunit8'){ crumbEl.textContent='Language Hub B1 · Unit 8'; titleEl.textContent='Unit 8 — Art'; c.innerHTML = viewLanguageHubUnit8(); }
+  else if(currentView==='languagehubunit9'){ crumbEl.textContent='Language Hub B1 · Unit 9'; titleEl.textContent='Unit 9 — Money'; c.innerHTML = viewLanguageHubUnit9(); }
+  else if(currentView==='languagehubunit10'){ crumbEl.textContent='Language Hub B1 · Unit 10'; titleEl.textContent='Unit 10 — Science & Technology'; c.innerHTML = viewLanguageHubUnit10(); }
+  else if(currentView==='languagehubunit11'){ crumbEl.textContent='Language Hub B1 · Unit 11'; titleEl.textContent='Unit 11 — Natural World'; c.innerHTML = viewLanguageHubUnit11(); }
+  else if(currentView==='languagehubunit12'){ crumbEl.textContent='Language Hub B1 · Unit 12'; titleEl.textContent='Unit 12 — Media'; c.innerHTML = viewLanguageHubUnit12(); }
   else if(currentView==='learningbrain'){ crumbEl.textContent='Smart Learning'; titleEl.textContent='🧠 Learning Brain'; c.innerHTML=viewLearningBrain(); }
   else if(currentView==='errorclinic'){ crumbEl.textContent='Smart Learning'; titleEl.textContent='🩹 Error Clinic'; c.innerHTML=viewErrorClinic(); }
   else if(currentView==='fastenglish'){ crumbEl.textContent='Smart Learning'; titleEl.textContent='⚡ Fast English'; c.innerHTML=viewFastEnglish(); }
@@ -7970,7 +7967,9 @@ function startDailyPlan(){
       words: null,
       quiz: { questions:[], index:0, correct:0 }
     };
+    if(currentView !== 'dailyplan') rememberAppScreen();
     currentView = 'dailyplan';
+    currentHubSection = null;
     currentLesson = null;
     highlightSentenceIdx = null;
     document.querySelectorAll('.navitem[data-view]').forEach(el=>el.classList.toggle('active',el.dataset.view==='dailyplan'));
@@ -8357,11 +8356,11 @@ function phrasalPool(){
   const cat = PHRASAL_DATA.find(c=>c.key===phrasalState.category);
   return cat ? cat.verbs.map(v=>({pv:v[0], tr:v[1], sentence:v[2]})) : [];
 }
-function navigatePhrasalCategory(key){ phrasalState.category = key; navigate('phrasalcategory'); }
-function navigatePhrasalFill(key){ phrasalState.category = key; navigate('phrasalfill'); }
-function navigatePhrasalMC(key){ phrasalState.category = key; navigate('phrasalmc'); }
-function navigatePhrasalMixedFill(){ phrasalState.category = null; navigate('phrasalfill'); }
-function navigatePhrasalMixedMC(){ phrasalState.category = null; navigate('phrasalmc'); }
+function navigatePhrasalCategory(key){ rememberAppScreen(); phrasalState.category = key; navigate('phrasalcategory', null, null, false); }
+function navigatePhrasalFill(key){ rememberAppScreen(); phrasalState.category = key; navigate('phrasalfill', null, null, false); }
+function navigatePhrasalMC(key){ rememberAppScreen(); phrasalState.category = key; navigate('phrasalmc', null, null, false); }
+function navigatePhrasalMixedFill(){ rememberAppScreen(); phrasalState.category = null; navigate('phrasalfill', null, null, false); }
+function navigatePhrasalMixedMC(){ rememberAppScreen(); phrasalState.category = null; navigate('phrasalmc', null, null, false); }
 function viewPhrasalHome(){
   let html = `<div class="card"><p class="hint">Phrasal Verbs Pro: anlamı ezberlemekle kalma; yapıyı da öğren. 🔀 Ayrılabilir yapılarda zamirin nereye geldiğine, 🔗 ayrılmaz yapılarda edatın sabit kalmasına dikkat et.</p></div>`;
   html += `<div class="lesson-grid" style="grid-template-columns:repeat(auto-fill,minmax(170px,1fr));">`;
@@ -8521,8 +8520,13 @@ function handleGlobalSearchInput(q){
 }
 function doSearch(q){
   q = q.trim().toLowerCase();
-  if(!q){ render(); return; }
+  if(!q){ if(currentView === 'search') goBackInApp(); else render(); return; }
+  if(currentView !== 'search') rememberAppScreen();
   currentView='search';
+  currentHubSection = null;
+  currentLesson = null;
+  currentSearchQuery = q;
+  updateTopActionButton();
   document.getElementById('page-title').textContent = 'Arama: "'+q+'"';
   document.getElementById('crumb').textContent = 'Sonuçlar';
   const results = [];
@@ -8560,6 +8564,8 @@ function doSearch(q){
 
 // ---------- kapatma ----------
 function updateTopActionButton(){
+  const back = document.getElementById('app-back-btn');
+  if(back) back.hidden = appBackStack.length === 0;
   const btn=document.getElementById('close-app-btn');
   if(!btn) return;
   const isHome=(currentView==='dashboard');

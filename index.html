@@ -280,6 +280,7 @@
       <button id="offline-badge" class="pill" onclick="toggleOfflineMode()">🌐 Online</button>
       <span id="ares-cloud-sync" class="pill" title="Supabase progress sync">☁ Sync</span>
       <button id="voice-nav-btn" class="pill" onclick="voiceNavigate(this)" title="Sesli komutla gez (örn. &quot;quiz aç&quot;, &quot;5. derse git&quot;)">🎙️ Voice Command</button>
+      <button type="button" id="app-back-btn" class="pill" onclick="goBackInApp()" hidden>← Geri</button>
       <button id="close-app-btn" class="pill" onclick="handleTopAction()">💾 Save</button>
     </div>
     <div id="content"></div>
@@ -287,7 +288,7 @@
 </div>
 
 <script src="assets/ares-data.js?v=10"></script>
-<script src="./ares-app.js?v=20261118-language-hub"></script>
+<script src="./ares-app.js?v=20261123-hub-navigation"></script>
 <script id="ares-stage10-sync-hotfix">
 (function(){
   'use strict';
