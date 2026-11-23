@@ -1544,7 +1544,7 @@ function navigate(view, lessonNo, sentenceIdx, remember = true){
   if(window.innerWidth<=820) document.getElementById('sidebar').classList.remove('open');
   render();
   if(view === 'customtopic') renderCustomTopicsNav();
-  if(remember && (isHub || view === 'languagehub')) window.scrollTo(0, 0);
+  if(remember && (isHub || view === 'languagehub' || view === 'dashboard' || view.startsWith('study') || view === 'beginnerintro')) window.scrollTo(0, 0);
 }
 // Ders görünümü çizildikten sonra, aranan/işaretli cümleye kaydırıp kısa süreliğine vurgular.
 function scrollToHighlightedSentence(){
@@ -3496,6 +3496,106 @@ viewRepeatCenter = function(){
  return base+`<div class="card" style="border-left:4px solid var(--leaf);margin-top:16px"><div class="hint" style="font-weight:900;letter-spacing:.08em">LANGUAGE HUB TRANSFER QUEUE</div><h3 style="margin:5px 0">📘 → 🧠 → 🎙️ Active Review</h3><p class="hint">Language Hub’daki kişisel cümlelerin ve yanlışların burada konuşmaya taşınır. <b>${due.length}</b> due · <b>${active.length}</b> active.</p>${rows||empty}</div>`;
 };
 
+function studyLinks(items){
+  return '<div class="study-links">'+items.map(([label, action]) =>
+    `<button type="button" class="pill" onclick="${action}">${label}</button>`).join('')+'</div>';
+}
+
+function viewStudyHome(){
+  const beginner = progress.beginnerIntro;
+  const daily = progress.dailyPlan?.date === todayStr() ? progress.dailyPlan : null;
+  const firstVisit = !beginner && !daily && !progress.lessonsDone.length && !progress.placementTest;
+  let title = 'Ders '+(daily?.lessonNo || getTodayLessonNo());
+  let detail = 'Öğrenme, pratik ve tekrar için günlük oturum.';
+  let action = daily?.completed ? "navigate('studyroutes')" : 'startDailyPlan()';
+  let button = daily?.completed ? 'Derslere Göz At' : daily ? 'Kaldığım Yerden Devam Et' : 'Bugünkü Çalışmaya Başla';
+  if(firstVisit || (beginner && !beginner.completed)){
+    title = 'A1 · İlk tanışma';
+    detail = 'Yaklaşık 12 dakika · Dinle → Uygula → Kendin söyle';
+    action = 'openBeginnerIntro()';
+    button = beginner ? 'Kaldığım Yerden Devam Et' : 'Sıfırdan Başla';
+  } else if(daily){
+    detail = daily.completed ? 'Bugünkü oturumu tamamladın.' :
+      `Adım ${Math.max(1,daily.step || 1)} / 8 · ${dpStepLabels()[Math.max(0,(daily.step || 1)-1)] || 'Oturum özeti'}`;
+  }
+  return `<section class="study-hero">
+    <p class="study-kicker">Bugünkü çalışma</p>
+    <h2>${esc(title)}</h2><p>${esc(detail)}</p>
+    <button type="button" class="pill study-primary" onclick="${action}">${button}</button>
+    ${firstVisit ? '<button type="button" class="pill study-secondary" onclick="navigate(\'placementtest\')">Seviyemi Bul</button>' : ''}
+  </section>`;
+}
+
+function openBeginnerIntro(){
+  if(!progress.beginnerIntro){
+    progress.beginnerIntro = {step:1, answer:'', draft:'', completed:false};
+    saveProgress(progress);
+  }
+  navigate('beginnerintro');
+}
+
+function beginnerSet(field, value){
+  progress.beginnerIntro[field] = value;
+  saveProgress(progress);
+}
+
+function beginnerNext(){
+  beginnerSet('step', progress.beginnerIntro.step + 1);
+  render();
+  window.scrollTo(0, 0);
+}
+
+function beginnerCheck(choice){
+  beginnerSet('answer', choice);
+  render();
+  document.getElementById('beginner-answer-feedback').focus();
+}
+
+function finishBeginnerIntro(){
+  beginnerSet('completed', true);
+  render();
+  window.scrollTo(0, 0);
+}
+
+function viewBeginnerIntro(){
+  const state = progress.beginnerIntro;
+  if(state.completed) return `<section class="study-lesson"><h2>İlk tanışma tamamlandı</h2>
+    <p>Adını söylemeyi ve birine nereli olduğunu sormayı çalıştın.</p>
+    ${studyLinks([['42 Core Lessons · Ders '+getTodayLessonNo(), "navigate('lesson', "+getTodayLessonNo()+")"], ['Bugün', "navigate('dashboard')"]])}
+  </section>`;
+  const footer = '<button type="button" class="pill primary" onclick="beginnerNext()">Sonraki Adım →</button>';
+  const stepLabels = ['Dinle', 'Uygula', 'Kendin söyle'];
+  let body;
+  if(state.step===1){
+    const dialogue = [
+      ['Hi! I’m Alex. What’s your name?', 'Merhaba! Ben Alex. Adın ne?'],
+      ['I’m Sam. Nice to meet you!', 'Ben Sam. Tanıştığımıza memnun oldum!'],
+      ['Nice to meet you too. Where are you from?', 'Ben de memnun oldum. Nerelisin?'],
+      ['I’m from Türkiye.', 'Türkiye’denim.']
+    ];
+    body = `<p>Diyaloğu dinle. Sonra her cümleyi sesli tekrar et.</p>
+      <button type="button" class="pill" onclick="speak('Hi! I’m Alex. What’s your name? I’m Sam. Nice to meet you! Nice to meet you too. Where are you from? I’m from Türkiye.')">▶ Diyaloğu Dinle</button>
+      <ol class="study-dialogue">${dialogue.map(([en,tr])=>`<li>${spk(en)}<strong>${en}</strong><small>${tr}</small></li>`).join('')}</ol>${footer}`;
+  } else if(state.step===2){
+    const options = [['name','What’s your name?'],['from','Where are you from?'],['meet','Nice to meet you.']];
+    body = `<p>Birine nereli olduğunu sormak için hangi ifadeyi kullanırsın?</p>
+      ${studyLinks(options.map(([key,label])=>[label,`beginnerCheck('${key}')`]))}
+      <p id="beginner-answer-feedback" tabindex="-1" aria-live="polite">${state.answer==='from' ? '✓ Where are you from? = Nerelisin?' : state.answer ? 'Bu ifade başka bir anlama geliyor. Yer sormak için “Where” ile başlayan soruyu seç.' : ''}</p>
+      ${state.answer==='from' ? footer : ''}`;
+  } else {
+    body = `<p>Adını ve nereli olduğunu söyle. Sonra karşındaki kişiye nereli olduğunu sor.</p>
+      <p class="study-example">Hi, I’m … . I’m from … . Where are you from?</p>
+      <label for="beginner-draft">İstersen cevabını buraya yaz.</label>
+      <textarea id="beginner-draft" rows="3" oninput="beginnerSet('draft',this.value)">${esc(state.draft)}</textarea>
+      <button type="button" class="pill primary" onclick="finishBeginnerIntro()">Çalışmayı Tamamla</button>`;
+  }
+  return `<section class="study-lesson study-step-${state.step}">
+    <p class="study-kicker">A1 · İlk tanışma · Adım ${state.step} / 3</p>
+    <h2>${stepLabels[state.step-1]}</h2>${body}
+    ${state.step>1 ? '<button type="button" class="pill" onclick="beginnerSet(\'step\',progress.beginnerIntro.step-1);render();window.scrollTo(0,0)">‹ Önceki Adım</button>' : ''}
+  </section>`;
+}
+
 function render(){
   const c = document.getElementById('content');
   const titleEl = document.getElementById('page-title');
@@ -3514,7 +3614,20 @@ function render(){
   if(currentView==='quizcenter'){ crumbEl.textContent='Pratik'; titleEl.textContent='Quizler'; c.innerHTML=viewQuizCenter(); return; }
   updateDueBadge();
   updateMistakeBadge();
-  if(currentView==='dashboard'){ crumbEl.textContent='Genel Bakış'; titleEl.textContent='Ana Sayfa'; c.innerHTML = viewDashboard(); }
+  if(currentView==='dashboard'){ crumbEl.textContent='Ares English'; titleEl.textContent='Bugün'; c.innerHTML = viewStudyHome(); }
+  else if(currentView==='beginnerintro'){ crumbEl.textContent='A1'; titleEl.textContent='İlk tanışma'; c.innerHTML = viewBeginnerIntro(); }
+  else if(currentView==='studyroutes'){
+    crumbEl.textContent='Ares English'; titleEl.textContent='Dersler';
+    c.innerHTML = studyLinks([['A1 · İlk tanışma', 'openBeginnerIntro()'], ['42 Core Lessons · Devam Et', "navigate('lesson', "+getTodayLessonNo()+")"], ['Language Hub B1', "navigate('languagehub')"], ['Seviyemi Bul', "navigate('placementtest')"]]);
+  }
+  else if(currentView==='studypractice'){
+    crumbEl.textContent='Ares English'; titleEl.textContent='Pratik';
+    c.innerHTML = studyLinks([['Tekrar Et', "navigate('repeatcenter')"], ['Kelime Çalış', "navigate('vocabhub')"], ['Cümle Kur', "navigate('builder')"], ['Dinle ve Tekrar Et', "navigate('shadowing')"], ['Konuşma Pratiği', "location.href='./speaking.html'"], ['Test Çöz', "navigate('quizcenter')"]]);
+  }
+  else if(currentView==='studyprogress'){
+    crumbEl.textContent='Ares English'; titleEl.textContent='İlerleme';
+    c.innerHTML = studyLinks([['Öğrenme Analizi', "navigate('learningbrain')"], ['Genel Değerlendirme', "navigate('generalassessment')"]]) + viewWeeklySummary();
+  }
   else if(currentView==='dailyplan'){ crumbEl.textContent='Günlük Akış'; titleEl.textContent='▶️ Today’s Study'; c.innerHTML = viewDailyPlan(); }
   else if(currentView==='languagehub'){ crumbEl.textContent='Coursebook'; titleEl.textContent='📘 Language Hub B1'; c.innerHTML = viewLanguageHub(); }
   else if(currentView==='languagehubunit1'){ crumbEl.textContent='Language Hub B1 · Unit 1'; titleEl.textContent='Unit 1 — Relationships'; c.innerHTML = viewLanguageHubUnit1(); }
@@ -7950,51 +8063,21 @@ function dpActivityMeta(view){
   return DP_ACTIVITY_POOL.find(a=>a.view===view) || DP_ACTIVITY_POOL[0];
 }
 let dailyPlanState = null;
-// startDailyPlan is the explicit "start" action (nav item / Başla button) — every time
-// it's clicked it should reroll a fresh focus activity and restart the flow from step 0,
-// instead of always reusing whatever was picked earlier that day.
 function startDailyPlan(){
-  try{
-    const t = todayStr();
-    const lessonNo = getTodayLessonNo();
-    const activity = pickTodayActivity();
-    const enginePlan=aresBuildDailyPlan();
-    progress.dailyPlan = { date:t, lessonNo, step:1, activity, enginePlan };
+  dpEnsureState();
+  if(!progress.dailyPlan.step) {
+    progress.dailyPlan.step = 1;
     saveProgress(progress);
-    dailyPlanState = {
-      lessonNo,
-      prevLessonNo: getPrevLessonNo(lessonNo),
-      words: null,
-      quiz: { questions:[], index:0, correct:0 }
-    };
-    if(currentView !== 'dailyplan') rememberAppScreen();
-    currentView = 'dailyplan';
-    currentHubSection = null;
-    currentLesson = null;
-    highlightSentenceIdx = null;
-    document.querySelectorAll('.navitem[data-view]').forEach(el=>el.classList.toggle('active',el.dataset.view==='dailyplan'));
-    if(window.innerWidth<=820){ const sb=document.getElementById('sidebar'); if(sb) sb.classList.remove('open'); }
-    updateTopActionButton();
-    const c=document.getElementById('content');
-    const titleEl=document.getElementById('page-title');
-    const crumbEl=document.getElementById('crumb');
-    if(crumbEl) crumbEl.textContent='Günlük Akış';
-    if(titleEl) titleEl.textContent='▶️ Today’s Study';
-    if(!c) throw new Error('content container not found');
-    c.innerHTML = viewDailyPlan();
-    window.scrollTo({top:0,behavior:'smooth'});
-    return true;
-  }catch(err){
-    console.error('Daily session failed:',err);
-    const c=document.getElementById('content');
-    if(c) c.innerHTML=`<div class="card" style="border-left:5px solid var(--accent)"><h3>▶️ Today’s Study</h3><p>Günlük çalışma açılırken bir bileşen hata verdi.</p><button type="button" class="pill primary ares-start-daily">Tekrar Aç</button><pre style="white-space:pre-wrap;margin-top:12px;font-size:12px">${esc(String(err&&err.message||err))}</pre></div>`;
-    return false;
   }
+  navigate('dailyplan');
+  window.scrollTo(0, 0);
+  return true;
 }
 function dpEnsureState(){
   const t = todayStr();
   if(!progress.dailyPlan || progress.dailyPlan.date!==t){
     progress.dailyPlan = { date:t, lessonNo: getTodayLessonNo(), step:0, activity: pickTodayActivity() };
+    dailyPlanState = null;
     saveProgress(progress);
   }
   if(!progress.dailyPlan.activity){
@@ -8006,7 +8089,7 @@ function dpEnsureState(){
       lessonNo: progress.dailyPlan.lessonNo,
       prevLessonNo: getPrevLessonNo(progress.dailyPlan.lessonNo),
       words: null,
-      quiz: { questions:[], index:0, correct:0 }
+      quiz: progress.dailyPlan.quiz || { questions:[], index:0, correct:0 }
     };
   }
 }
@@ -8249,6 +8332,8 @@ function checkDpQuiz(el, chosen){
 }
 function nextDpQuiz(){
   dailyPlanState.quiz.index++;
+  progress.dailyPlan.quiz = dailyPlanState.quiz;
+  saveProgress(progress);
   document.getElementById('content').innerHTML = viewDailyPlan();
 }
 function dpOpenSpeaking(){

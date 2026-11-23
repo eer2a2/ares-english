@@ -50,7 +50,7 @@
 #sidebar .navgroup{margin-bottom:8px}
 .ares-more-inner>button.navitem{display:flex;width:100%;font:inherit;text-align:left;color:#b9c6d1;border:0;background:transparent;cursor:pointer;touch-action:manipulation}
 
-#sidebar:not(.ares20-expanded) .navgroup:not(:first-of-type):not(:nth-of-type(4)){display:none}
+#sidebar:not(.ares20-expanded) .navgroup:not(:first-of-type){display:none}
 #sidebar .ares20-all{margin:10px 12px;padding:12px;border-radius:12px;color:#fff;background:#24445c;cursor:pointer;font-weight:700;text-align:left;border:1px solid #3a5d73;width:calc(100% - 24px)}
 .ares20-welcome{padding:32px;border-radius:25px;background:linear-gradient(125deg,#102c45,#087c83);color:#fff;box-shadow:0 15px 35px #102c4526}
 .ares20-kicker{font-size:11px;font-weight:800;letter-spacing:2px;color:#9ee5dd}
@@ -106,6 +106,26 @@
     text-align: left;
   }
 }
+</style>
+<style>
+.study-nav{width:100%;text-align:left;font:inherit;border:0;background:transparent;color:inherit}
+.study-hero,.study-lesson{margin:12px 0 24px;padding:clamp(20px,5vw,44px);border-radius:22px}
+.study-hero{background:linear-gradient(120deg,#16394a,#146b69);color:#fff}
+.study-hero h2,.study-lesson h2{font-size:clamp(25px,5vw,40px);margin:8px 0 14px;line-height:1.1}
+.study-hero p,.study-lesson p{line-height:1.65}
+.study-kicker{font-weight:700;margin:0}
+.study-hero .study-primary{background:#ffe0af;color:#193a46;border:0}
+.study-hero .study-secondary{background:transparent;color:#fff;border:1px solid #a5d3cf}
+.study-hero .pill,.study-lesson .pill,.study-links .pill{margin:5px 6px 5px 0;min-height:44px;white-space:normal;text-align:left}
+.study-links{display:flex;flex-wrap:wrap;gap:6px}
+.study-lesson{background:var(--card);color:var(--ink);border-top:5px solid #75a9c8;max-width:760px}
+.study-step-2{border-color:#68a489}
+.study-step-3{border-color:#d69774}
+.study-dialogue{list-style:none;padding:0;margin:14px 0}
+.study-dialogue li{padding:10px 0;border-bottom:1px solid var(--line);line-height:1.55}
+.study-dialogue small{display:block;margin-left:30px}
+.study-example{padding:8px 0}
+#beginner-draft{display:block;width:100%;margin:8px 0;padding:12px;font:inherit;color:inherit;background:var(--paper);border:1px solid var(--line);border-radius:8px}
 </style>
 </head>
 <body data-ares-stage="10">
@@ -194,12 +214,10 @@
     <button type="button" class="navitem ares-mobile-tools" onclick="const sidebar = this.closest('nav'); if (!sidebar.classList.contains('ares20-expanded')) ares20ToggleMenu(); const tools = sidebar.querySelector('.ares-more-nav'); tools.open = true; tools.querySelector('summary').scrollIntoView({block:'start'});">🛠️ All tools &amp; settings</button>
     <input id="search-mini" placeholder="Search words / sentences…" oninput="handleGlobalSearchInput(this.value)">
     <div class="navgroup">
-      <div class="navgroup-title">Today</div>
-      <div class="navitem" data-view="dailyplan" onclick="startDailyPlan()">
-        <span class="dot"></span> 🎯 Today’s Study
-      </div>
-      <div class="navitem" data-view="dashboard" onclick="navigate('dashboard')"><span class="dot"></span> 🏠 Home</div>
-      <div class="navitem" data-view="weekly" onclick="navigate('weekly')"><span class="dot"></span> 📅 This Week</div>
+      <button type="button" class="navitem study-nav" data-view="dashboard" onclick="navigate('dashboard')">Bugün</button>
+      <button type="button" class="navitem study-nav" data-view="studyroutes" onclick="navigate('studyroutes')">Dersler</button>
+      <button type="button" class="navitem study-nav" data-view="studypractice" onclick="navigate('studypractice')">Pratik</button>
+      <button type="button" class="navitem study-nav" data-view="studyprogress" onclick="navigate('studyprogress')">İlerleme</button>
     </div>
 
     <div class="navgroup">
@@ -288,7 +306,7 @@
 </div>
 
 <script src="assets/ares-data.js?v=10"></script>
-<script src="./ares-app.js?v=20261123-hub-navigation"></script>
+<script src="./ares-app.js?v=20261123-study-home"></script>
 <script id="ares-stage10-sync-hotfix">
 (function(){
   'use strict';
