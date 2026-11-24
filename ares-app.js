@@ -2800,7 +2800,7 @@ function lhGlossaryKey(index){
 
 function lhGlossaryEntries(index){
  const saved = lhStoreGet('ares_lh_glossary_v1', {});
- return saved[lhGlossaryKey(index)] || (index >= 4 ? [LH_GLOSSARY_21, LH_GLOSSARY_22][index-4] : LH_UNIT1_PRACTICE[index].glossary);
+ return saved[lhGlossaryKey(index)] || (index >= 4 ? [LH_GLOSSARY_21, LH_GLOSSARY_22, LH_GLOSSARY_23][index-4] : LH_UNIT1_PRACTICE[index].glossary);
 }
 
 function lhGlossaryList(index){
@@ -3387,6 +3387,92 @@ function lhPractice22(){
    '<details><summary>Örnek sohbet</summary><p>A: Are you saving money for anything this year?<br>B: Yes, I’m saving for a flat.<br>A: Where are you looking for a flat?<br>B: Near my office. How about you?</p></details>');
 }
 
+const LH_GLOSSARY_23 = [
+ ['routine','günlük düzen','My daily routine changed when I left school.'],
+ ['stressful','stresli','Taking my first driving test was stressful.'],
+ ['theory','kuram, teori','Which theory explains why time seems to fly?'],
+ ['look forward to','dört gözle beklemek','I looked forward to my birthday.'],
+ ['rush','acele etmek','We often rush from one task to another.'],
+ ['time flies','zaman su gibi akıyor','Time flies when I’m having fun.']
+];
+
+function lhTimeReading(){
+ const headings = ['The race against time','From spring to winter','New experiences slow down time','It’s all about the numbers','Counting the days'];
+ const details = [
+  ['Time moved more quickly when the writer was a child.',false,'A year seemed much longer when he was a child.'],
+  ['As we grow old, every year becomes a smaller percentage of our life.',true,'The first theory compares one year at ages five and fifty.'],
+  ['Many adults feel they have too much free time.',false,'Many adults feel there isn’t enough time in the day.'],
+  ['Time slows down if we are looking forward to an event.',true,'Counting the days can make the wait feel longer.'],
+  ['New experiences can help to slow down time.',true,'Looking back, a period with many first experiences can feel longer.'],
+  ['All the theories agree that adults and children experience time differently.',true,'The final paragraph points out this common idea.']
+ ];
+ return `<article class="card" style="line-height:1.75">
+ <h4>When did the years get shorter?</h4><p>By Stefan Nyberg · 10th January 2019</p>
+ <p>When I was young, the school summer holidays were six weeks long – it felt like forever. A year was such a long time! Now I’m an adult, time passes so quickly. Why does time seem to fly as we get older? Psychologists have several theories about this. Here are the most popular ones:</p>
+ <h4>Theory 1</h4><p>The first theory is mathematical. When you were 5 years old, a year was 20 per cent of your life, so it seemed like a long time. When you are 50 years old, a year is only 2 per cent of your life, so it seems much shorter. Time can feel very different if you are a child or an adult.</p>
+ <h4>Theory 2</h4><p>As children, we didn’t have as much to worry about – we went to school and studied, then we came home and played with our friends. Adult life is fast, busy and stressful – it’s difficult to do everything we want to do. Days can be tiring. Many of us feel that there isn’t enough time in the day. Time seems to pass very quickly because as adults we tend to rush to do something and then move on to the next job with no time to stop and think.</p>
+ <h4>Theory 3</h4><p>As children we knew exactly how many days it was until our next birthday or holiday. All that counting and waiting made the days seem to pass much more slowly. Some psychologists suggest adults don’t notice time passing because they are focused on ‘boring adult stuff’, like shopping or housework. The days, weeks and months pass quickly. Suddenly, another year is over and a new one is beginning.</p>
+ <h4>Theory 4</h4><p>The routines of work and family life mean that, for many adults, the days all feel the same. This is different from our early lives, which were full of exciting first-time experiences. Back then, we started school and studied new things. Then we took exams, went on our first dates and learnt to drive. With all these exciting experiences, we feel that the years were much longer because so many new things happened.</p>
+ <p>All these theories have something in common: there is a clear difference between the way adults and children experience time. Perhaps we need to learn from children and slow down a bit more. Stop, look around, notice the blossom on the trees in spring and the leaves changing colour in autumn. The earth will keep spinning, but we are only here for a short time. Let’s enjoy it!</p>
+ </article>` +
+ lhExerciseBlock('Reading B · Skimming for key words','Her teori için bir başlık seç. Bir başlık kullanılmayacak.',
+   [3,0,4,2].map((answer,i)=>lhMC('23main'+(i+1),'Theory '+(i+1),headings,headings[answer])).join('')) +
+ lhExerciseBlock('Reading C · True or False','Cevabını seç. Yanlış ifadeyi düzeltmeyi dene, sonra açıklamayı aç.',
+   details.map(([prompt,answer,reason],i)=>lhMC('23detail'+(i+1),prompt,['True','False'],answer?'True':'False')+
+     `<details><summary>Açıklama</summary><p>${esc(reason)}</p></details>`).join('')) +
+ lhExerciseBlock('Reading D · Eşli tartışma','Hangi teori sana daha inandırıcı geliyor? Partnerinin cevabına bir takip sorusu sor, sonra rolleri değiştirin.',
+   lhPersonal('23p-theory','Which theory explains your own experience best? Give an example.'));
+}
+
+function lhPractice23(){
+ const forms = [
+  ['They ___ (go) to Amsterdam yesterday.','went'],
+  ['She ___ (not / visit) her parents at the weekend.','did not visit','didn’t visit'],
+  ['I ___ (buy) a new laptop.','bought'],
+  ['___ (you / bring) your bag with you?','Did you bring'],
+  ['Dan ___ (take) the train to work this morning.','took'],
+  ['I ___ (not / leave) work until 10 last night.','did not leave','didn’t leave'],
+  ['We ___ (not / be) worried when we took our exams.','were not','weren’t']
+ ];
+ const conversation = [
+  ['Will: ___ (you / enjoy) your childhood?','Did you enjoy'],
+  ['Rebecca: Yes, my friends and I ___ (go) to the cinema a lot, and we played on our bikes.','went'],
+  ['Rebecca: What sort of things ___ (you / do)?','did you do'],
+  ['Will: I ___ (not / have) a good time.','did not have','didn’t have'],
+  ['Will: My school ___ (be) terrible.','was'],
+  ['Will: I ___ (take) my exams three times before I passed.','took']
+ ];
+ const events = [
+  ['A parent welcomes a newborn.','have a baby','have children'],
+  ['A student starts a degree.','go to university'],
+  ['Someone is hired for their first position.','get a job'],
+  ['A couple has a wedding.','get married'],
+  ['A young person moves out of their parents’ home.','leave home'],
+  ['Two people develop romantic feelings for each other.','fall in love'],
+  ['Someone buys or rents a home of their own.','get your own place'],
+  ['Someone stops working at the end of their career.','retire'],
+  ['A child takes lessons in a pool and gains a new skill.','learn to swim'],
+  ['A teenager finishes their final year at school.','leave school']
+ ];
+ const words = ['ate','bought','fought','made','paid','said','sent','taught'];
+ const sounds = ['/ɔː/','/e/','/eɪ/'];
+ const key = [2,0,0,2,2,1,1,0];
+ const text = (group,rows)=>rows.map(([prompt,...answers],i)=>lhText('23'+group+(i+1),esc(prompt),answers)).join('');
+ const notes = i => lhPersonal('23p-first-'+i,'Deneyim '+i+' · Ne zaman, nerede, kiminle? Ne oldu ve nasıl hissettin?');
+ return lhExerciseBlock('Grammar Hub 2.3 · Past simple','Bitmiş eylemleri anlatırken olumlu cümlede fiilin ikinci hâlini kullan. Did ve didn’t sonrasında fiil yalın kalır.',
+   '<p><b>Düzenli:</b> ask → asked, decide → decided, play → played, study → studied, stop → stopped, travel → travelled.<br><b>Düzensiz:</b> go → went, buy → bought, take → took.<br><b>Kısa cevap:</b> Yes, I did. / No, I didn’t.</p>' +
+   '<h4>A · Fiili tamamla</h4>'+text('ga',forms)+'<h4>B · Will ve Rebecca’nın sohbeti</h4>'+text('gb',conversation)) +
+ lhExerciseBlock('Vocabulary Hub 2.3 · Life events','Fotoğraflardaki yaşam olaylarını açıklamalardan tanı. Kullanılacak kalıplar aşağıda.',
+   '<p>have a baby / children · go to university · get a job · get married · leave home · fall in love · get your own place · retire · learn to swim · leave school</p>' + text('life',events)) +
+ lhExerciseBlock('Pronunciation · Düzensiz fiillerin sesleri','Kelimeyi dinle ve vurgulu ünlü sesi seç. Bu alıştırmada kitapta kullanılan Britanya İngilizcesi ses grupları esas alındı.',
+   words.map((word,i)=>spk(word)+lhMC('23sound'+(i+1),word,sounds,sounds[key[i]])).join('')) +
+ lhExerciseBlock('Speaking Hub · İki doğru, bir yanlış','Üç ilk deneyim anlat. İkisi gerçek, biri uydurma olsun. Partnerin ne zaman, nerede ve kiminle olduğunu sorsun ve uydurma deneyimi tahmin etsin. Sonra rolleri değiştirin.',
+   '<p>Fikirler · first job, first holiday without your parents, learning to drive, starting university</p>' +
+   [1,2,3].map(notes).join('') +
+   lhPersonal('23p-first-follow','Partnerinin takip sorusu ve senin cevabın') +
+   '<details><summary>Örnek sohbet</summary><p>A: I got my first job when I was 18.<br>B: Where did you work?<br>A: I worked in a small café near my school.<br>B: What did you learn there?</p></details>');
+}
+
 function viewLanguageHubUnit2(){
  const phrase=(en,tr)=>`<div style="padding:10px 0;border-bottom:1px solid var(--paper-dark)"><button class="spk" onclick='lhSpeak(${JSON.stringify(en)})'>🔊</button><b>${en}</b><div class="hint" style="margin-left:30px">${tr}</div></div>`;
  const speakBtns=(lesson)=>`<div class="row" style="margin-top:14px"><button class="pill primary" onclick="lhFriendSpeak('${lesson}')">🗣️ Arkadaşlarla Pratik</button><button class="pill" onclick="lhTheresa('${lesson}')">👩‍🏫 Theresa ile Kontrol</button></div>`;
@@ -3418,12 +3504,12 @@ function viewLanguageHubUnit2(){
  <div class="cols"><div>${phrase('start school','okula başlamak')}${phrase('learn to swim','yüzmeyi öğrenmek')}${phrase('learn to drive','araba kullanmayı öğrenmek')}${phrase('leave home','evden ayrılmak')}</div><div>${phrase('get married','evlenmek')}${phrase('have a baby','çocuk sahibi olmak')}${phrase('get your first job','ilk işini almak')}${phrase('retire','emekli olmak')}</div></div>
  ${lhSectionHead('lh-23-grammar','🧠','GRAMMAR — Past simple','Geçmişte tamamlanmış olaylar. Regular: -ed; irregular: özel ikinci form. Negative: didn’t + infinitive. Question: Did + subject + infinitive?')}
  <div class="card" style="background:var(--paper-dark)">${phrase('I started school when I was six.','Altı yaşındayken okula başladım.')}${phrase('My parents taught me to swim.','Ailem bana yüzmeyi öğretti.')}${phrase("I didn't leave home at eighteen.",'On sekizimde evden ayrılmadım.')}${phrase('Where did you meet your best friend?','En iyi arkadaşınla nerede tanıştın?')}</div>
- ${lhSectionHead('lh-23-reading','📖','READING — Why does time feel faster?','Kitaptaki “Time flies” temasından hareketle ana fikir, teori ve ayrıntı okuması.')}
- <div class="card" style="background:var(--paper-dark)"><b>⏳ When the years feel shorter</b><p class="hint" style="line-height:1.75">Many adults feel that years pass faster than they did in childhood. One explanation is mathematical: one year is a much larger part of a five-year-old’s life than of a fifty-year-old’s. Another idea is that adult life is busy and repetitive. New experiences may make periods of life feel richer and longer in our memory, while routine can make months seem to disappear quickly.</p></div>
- ${lhExerciseBlock('📖 READING CHECK','Ana fikir ve teorileri anla.',lhMC('23r1','What is the text mainly about?',['Why time can seem faster as we get older','How clocks work','Why children sleep more'],'Why time can seem faster as we get older')+lhMC('23r2','Why can routine make time seem faster?',['Days can feel similar and less memorable','Adults stop using calendars','Children have more clocks'],'Days can feel similar and less memorable')+lhMC('23r3','What may make a period feel richer in memory?',['New experiences','Doing exactly the same thing','Avoiding all change'],'New experiences'))}
+ ${lhSectionHead('lh-23-reading','📖','READING — When did the years get shorter?','Language Hub B1 · 2.3 · Kitaptaki okuma metni, s. 16.')}
+ ${lhTimeReading()}
+ ${lhExerciseBlock('Glossary · Time Flies','Kelime ekle veya mevcut kaydı düzelt.',lhGlossary(6))}
  <div id="lh-23-ex" style="scroll-margin-top:90px"></div>${lhExerciseBlock('🧩 EXERCISES','Past simple + life events.',lhMC('23a','As a child, I ___ to school every day.',['went','goed','go'],'went')+lhMC('23b','My father ___ me how to drive.',['taught','teached','teach'],'taught')+lhMC('23c','___ you enjoy school?',['Did','Were','Do'],'Did')+lhMC('23d',"I ___ meet my partner at work.",["didn't",'wasn’t','don’t'],"didn't"))}
  <div id="lh-23-personal" style="scroll-margin-top:90px"></div>${lhExerciseBlock('✍️ PERSONAL — Your life events','Geçmişindeki gerçek olayları anlat.',lhPersonal('23p1','Write about three important first-time experiences in your life.')+lhPersonal('23p2','Where and when did you meet your best friend?')+lhPersonal('23p3','Do you feel time passes faster now than when you were a child? Explain.'))}
- <div id="lh-23-speak" style="scroll-margin-top:90px"></div>${lhSectionHead('lh-23-speaking-title','🗣️','SPEAKING HUB','Üç first-time experience anlat; konuşma partnerin hangilerinin doğru olduğunu tahmin etsin.')} ${speakBtns('2.3')}</div>`],
+ <div id="lh-23-speak" style="scroll-margin-top:90px"></div>${lhSectionHead('lh-23-speaking-title','🗣️','SPEAKING HUB','Üç first-time experience anlat; konuşma partnerin hangilerinin doğru olduğunu tahmin etsin.')} ${speakBtns('2.3')}</div>${lhPractice23()}`],
    ["2.4 · Café Hub — Noisy neighbours", () => `<div class="card"><h3 class="section-title" style="margin-top:0">2.4 · Café Hub — Noisy neighbours</h3><p class="hint"><b>Hedef:</b> Ask for and give advice · <b>Functional language:</b> advice · <b>Pronunciation:</b> disagreeing</p>${lhLessonNav('24').replace('🧠 Grammar','💬 Functional Language')}
  ${lhSectionHead('lh-24-vocab','📚','USEFUL PHRASES','Günlük sorunlarda doğal tepki ve destek ifadeleri.')}
  <div class="cols"><div>${phrase("What's wrong?",'Ne oldu? / Sorun ne?')}${phrase("What's the problem?",'Sorun ne?')}${phrase('You can rely on us.','Bize güvenebilirsin.')}</div><div>${phrase('Seriously?!','Cidden mi?!')}${phrase('Cool!','Harika!')}${phrase('Here you go.','Buyur.')}</div></div>
