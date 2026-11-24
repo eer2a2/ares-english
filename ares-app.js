@@ -2974,22 +2974,9 @@ function lhBookPractice12(){
    ['I’m a ___ person. I try not to worry or complain.','positive'],
    ['I’m a ___ fan. My favourite team is Manchester United.','football']
  ];
- const reading = [
-   ['Which blogger travels and photographs people from different places?', 'Mihaela'],
-   ['Which blogger is a mother of three?', 'Emma'],
-   ['Who writes about books, history and culture?', 'Maria'],
-   ['Whose blog attracts many readers?', 'Maria'],
-   ['Whose blog is about trying new experiences?', 'Emma'],
-   ['Who wants to show that beauty can be found everywhere?', 'Mihaela']
- ];
  const questions = (group, rows) => rows.map(([prompt, ...answers], i) =>
    lhText('12'+group+(i+1), esc((i+1)+'. '+prompt), answers)).join('');
- return lhExerciseBlock('Reading · Three of the best','Üç blogdan hangisini okumak istediğini ve nedenini düşün. Ardından ayrıntı sorularını çöz.',
-   '<p><b>Brain Pickings:</b> Maria writes about books, history and culture on a widely read blog.</p>' +
-   '<p><b>The Atlas of Beauty:</b> Mihaela travels and photographs women in different cultures to show that beauty is everywhere.</p>' +
-   '<p><b>Emma’s Bucket List:</b> Emma is a mother of three who shares new experiences and ideas for things to try.</p>' +
-   questions('br', reading)) +
-   lhExerciseBlock('Grammar Hub 1.2 · Frequency words and phrases','Sıklık zarfları ana fiilden önce, be ve can’den sonra gelir. Uzun sıklık ifadeleri çoğunlukla cümle başına veya sonuna gelir.',
+ return lhExerciseBlock('Grammar Hub 1.2 · Frequency words and phrases','Sıklık zarfları ana fiilden önce, be ve can’den sonra gelir. Uzun sıklık ifadeleri çoğunlukla cümle başına veya sonuna gelir.',
      '<p><i>I often read travel blogs. She is normally online. I can never read his handwriting.</i></p>' +
      '<h4>A · Eksik harfleri tamamla</h4><p>Kelimenin tamamını yaz.</p>' + questions('ga', missing) +
      '<h4>B · Sıklık ifadesini yerleştir</h4><p>Cümlenin tamamını yaz.</p>' + questions('gb', placement)) +
@@ -3124,14 +3111,26 @@ function viewLanguageHubUnit1(){
    ${lhSectionHead('lh-12-grammar','🧠','GRAMMAR — Frequency Words & Phrases','Bir şeyi ne sıklıkla yaptığını doğal biçimde anlat.')}
    <div class="cols"><div><h4>Frequency</h4><p class="hint"><b>always → usually → often → sometimes → hardly ever → never</b></p><p class="hint">Ana fiilden önce: <b>I usually study…</b><br><i>be</i>'den sonra: <b>I am often tired.</b></p></div><div><h4>🗓️ Frequency phrases</h4><p class="hint"><b>once/twice/three times a week</b>, <b>every day</b>, <b>now and again</b>, <b>most of the time</b>.</p></div></div>
    ${phrase('I usually study English in the evening.','Genellikle akşamları İngilizce çalışırım.')}${phrase('I go out with my friends once or twice a week.','Arkadaşlarımla haftada bir veya iki kez dışarı çıkarım.')}${phrase('I watch travel videos now and again.','Ara sıra seyahat videoları izlerim.')}
-   ${lhSectionHead('lh-12-reading','📖','READING — Three Different Bloggers','Kitaptaki blog-review temasının Ares uyarlaması: ana fikir, detay ve insan tiplerini birlikte çalış.')}
-   <div class="card" style="background:var(--paper-dark)"><b>🌐 Three blogs, three people</b><p class="hint" style="line-height:1.75"><b>Maya</b> is a book lover and writer. She usually spends several evenings a week reading and writing short posts about books, culture and ideas. <b>Leo</b> is a traveller and photographer. He often shares pictures of ordinary people and places from different countries because he is curious about everyday life. <b>Emma</b> is a foodie who keeps a long list of things she wants to try. She sometimes writes about restaurants, trips and new experiences, and her readers often send her suggestions.</p></div>
-   ${lhExerciseBlock('📖 READING CHECK — Main idea & detail','Önce ana fikri, sonra ayrıntıları bul.',
-     lhMC('12r1','Who is most interested in books and ideas?',['Maya','Leo','Emma'],'Maya')+
-     lhMC('12r2','Who often uses photography to show everyday life?',['Maya','Leo','Emma'],'Leo')+
-     lhMC('12r3','Who writes about food and new experiences?',['Maya','Leo','Emma'],'Emma')+
-     lhMC('12r4','Which frequency word describes something that happens on many occasions?',['often','never','once'],'often')
-   )}
+   ${lhSectionHead('lh-12-reading','📖','READING — Three of the best','Language Hub B1 · 1.2 Blogs and Bloggers · Kitaptaki okuma metni, s. 4–5.')}
+   <article class="card" style="line-height:1.75">
+     <h4>Blogs by Calvin Norton</h4>
+     <p>With over 150 million blogs online, there is something for every type of person from the <b>animal lover</b> to the <b>gamer</b> to the <b>sports fan</b>. But, if you are looking for something a bit different, here are my top three blogs.</p>
+     <h4>1 · Brain Pickings</h4>
+     <p>Maria Popova is a <b>book lover</b>, <b>music fan</b> and <b>writer</b>. Her blog <i>Brain Pickings</i> is a collection of articles about history, news, books and culture. Maria is keen on reading and spends hundreds of hours each month doing research for her blog. It’s an extremely popular blog and many people enjoy Maria’s interesting mix of articles.</p>
+     <h4>2 · The Atlas of Beauty</h4>
+     <p><i>The Atlas of Beauty</i> is a picture blog showing beauty in different cultures. Romanian photographer, <b>blogger</b> and <b>traveller</b> Mihaela Noroc takes pictures of women of all ages, races and nationalities living their everyday lives. It’s a wonderful collection which shows that beauty can be found everywhere.</p>
+     <h4>3 · Emma’s Bucket List</h4>
+     <p>After her father and step-father died, Emma Stewart Rigby decided to live a full and exciting life. Emma, a <b>mother of three</b>, made a list of 246 things to do before she dies and in her blog she writes about her experiences. Emma is a <b>people person</b> and gives lots of friendly advice on life. She’s also a <b>foodie</b>, and her bucket list includes unusual foods or interesting restaurants she plans to try. A great blog for ideas on how to live life to the max!</p>
+   </article>
+   ${lhExerciseBlock('Reading Check · Ana fikir ve ayrıntılar','Önce hangi blogu okumak istediğini ve nedenini söyle. Sonra her soruya Maria, Mihaela veya Emma yaz.',
+     [
+       ['Which blogger travels and photographs people from different places?', 'Mihaela'],
+       ['Which blogger is a mother of three?', 'Emma'],
+       ['Who writes about books, history and culture?', 'Maria'],
+       ['Whose blog attracts many readers?', 'Maria'],
+       ['Whose blog is about trying new experiences?', 'Emma'],
+       ['Who wants to show that beauty can be found everywhere?', 'Mihaela']
+     ].map(([question, answer], index) => lhText('12br'+(index+1), question, [answer])).join(''))}
    <div id="lh-12-ex" style="scroll-margin-top:90px"></div>${lhExerciseBlock('🧩 EXERCISES — Vocabulary & Frequency','İnsan tiplerini ve sıklık ifadelerini birlikte çalış.',
      lhMC('12a','Someone who really enjoys books is a…',['book lover','foodie','gamer'],'book lover')+
      lhMC('12b','Someone who loves trying and talking about food is a…',['writer','foodie','sports fan'],'foodie')+
