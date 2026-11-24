@@ -2761,11 +2761,58 @@ function lhLessonNav(n){
     <button class="pill" onclick="lhJump('lh-${n}-ex')">🧩 Exercises</button>
     <button class="pill" onclick="lhJump('lh-${n}-personal')">✍️ Personal</button>
     <button class="pill primary" onclick="lhJump('lh-${n}-speak')">🗣️ Speaking</button>
+    ${/^1[1-4]$/.test(n) ? `<button class="pill" onclick="lhJump('lh-${n}-extra')">Glossary · Eşli çalışma · Yazma</button>` : ''}
   </div></div>`;
 }
 function lhSectionHead(id,icon,title,sub=''){
  return `<div id="${id}" style="scroll-margin-top:90px;margin:20px 0 10px;padding:14px 16px;border-left:4px solid var(--accent);background:var(--paper-dark);border-radius:10px"><div style="font-weight:900;font-size:18px">${icon} ${title}</div>${sub?`<div class="hint" style="margin-top:4px">${sub}</div>`:''}</div>`;
 }
+const LH_UNIT1_PRACTICE = [
+  {
+    glossary: [['colleague','iş arkadaşı','A colleague helped me with the report.'],['relative','akraba','Several of my relatives live nearby.'],['stranger','tanımadığın kişi','A stranger asked me for directions.'],['break the ice','ilk gerginliği azaltmak, sohbeti başlatmak','I asked about the course to break the ice.']],
+    dialogue: 'A: Is this your first class here? B: Yes, it is. I’m Deniz, by the way. A: Nice to meet you. Why are you taking this course? B: I want to feel more confident when I travel. How about you?',
+    pairs: [['Who was your best friend when you were a child?','My best friend was a boy called Cem. We went to the same school.'],['What did you do together?','We usually played football after school.'],['What question would you ask a new classmate?','I’d ask, “What do you like doing in your free time?”']],
+    writing: ['Yeni bir sınıf arkadaşına 4–5 cümlelik bir mesaj yaz. Kendini kısaca tanıt ve iki farklı soru sor.','Hi, I’m Deniz. I’m from Ankara and I’m studying English for travel. What do you do in your free time? Have you ever studied abroad?']
+  },
+  {
+    glossary: [['book lover','kitap meraklısı','My sister is a book lover.'],['article','makale, yazı','I read an article about travel.'],['follow','takip etmek','I follow two travel blogs.'],['now and again','ara sıra','I watch travel videos now and again.']],
+    dialogue: 'A: What do you usually read online? B: I often read about travel and local food. A: Do you ever leave comments? B: Hardly ever, but I share useful articles with friends.',
+    pairs: [['What websites do you visit most often?','I usually visit news websites. I like to know what’s happening around the world.'],['How often do you watch videos in English?','I watch them two or three times a week.'],['Do you ever leave comments online?','Hardly ever. I usually just read what other people write.']],
+    writing: ['Dijital alışkanlıklarını 4–5 cümleyle anlat. Üç farklı sıklık ifadesi kullan.','I usually read the news in the morning. I watch travel videos now and again. I hardly ever post comments.']
+  },
+  {
+    glossary: [['reliable','güvenilir','She’s reliable and always keeps her promises.'],['considerate','düşünceli','It was considerate of him to call first.'],['interested in','ile ilgilenen','I’m interested in history.'],['good at','bir işte iyi','My friend is good at solving problems.']],
+    dialogue: 'A: Is there anyone you can always ask for advice? B: Yes, my friend Mia. She’s very reliable. A: What is she good at? B: She’s good at listening. I can tell her anything.',
+    pairs: [['What makes someone a good friend?','A good friend listens and keeps their promises.'],['Is there anyone you go to for advice?','Yes, I usually ask my sister because she listens carefully.']],
+    writing: ['Tanıdığın birini üç kişilik sıfatıyla anlat. Sıfatlardan birini bir örnekle açıkla.','My friend is reliable, patient and considerate. When I need advice, she always makes time to listen.']
+  },
+  {
+    glossary: [['long time no see','uzun zamandır görüşmedik','Long time no see! How have you been?'],['catch up','oturup son gelişmeleri konuşmak','Let’s catch up over coffee.'],['by the way','bu arada','By the way, this is my friend Leo.'],['see you around','görüşürüz','I have to go. See you around!']],
+    dialogue: 'A: Hi, Nina! Long time no see! B: I know! How have you been? A: Pretty good. By the way, this is my friend Leo. B: Nice to meet you, Leo.',
+    pairs: [['What would you say to a friend you haven’t seen for a year?','Long time no see! How have you been?'],['How would you introduce a friend?','By the way, this is my friend Deniz.']],
+    writing: ['Eski bir arkadaşınla tesadüfen karşılaştığını düşün. Bir selam, bir soru ve bir vedalaşma içeren kısa diyalog yaz.','A: Long time no see! How have you been? B: Pretty good. Let’s catch up soon. A: Sounds good. See you around!']
+  }
+];
+
+function lhLessonPractice(unit, index){
+ const material = unit === 1 ? LH_UNIT1_PRACTICE[index] : null;
+ if(!material) return '';
+ const key = `${unit}${index+1}`;
+ const sample = answer => `<details><summary>Örnek cevabı gör</summary><p>${spk(answer)} ${esc(answer)}</p></details>`;
+ return `<div id="lh-${key}-extra" style="scroll-margin-top:90px">
+   ${lhExerciseBlock('Glossary · Bilmediğim kelimeler','Kelimeyi dinle ve örnek cümlede incele.',
+     material.glossary.map(([word, meaning, example]) =>
+       `<p>${spk(word)} <strong>${esc(word)}</strong> · ${esc(meaning)}<br><em>${esc(example)}</em></p>`).join(''))}
+   ${lhExerciseBlock('Dinleme · Ares audioscript','İlk sefer metni açmadan dinle. İkinci sefer metinle birlikte takip et.',
+     spk(material.dialogue)+` <details><summary>Dinleme metnini aç</summary><p>${esc(material.dialogue)}</p></details>`)}
+   ${lhExerciseBlock('Work in Pairs · Eşli çalışma','Sırayla soruyu sor ve cevapla. Tek başınaysan önce kendi cevabını yaz veya sesli söyle.',
+     material.pairs.map(([question, answer], i) =>
+       lhPersonal(`${key}p-pair-${i+1}`, esc(question)) + sample(answer)).join(''))}
+   ${lhExerciseBlock('Writing · Yazma','Önce kendi metnini yaz ve kaydet. Sonra örneği aç.',
+     lhPersonal(`${key}p-writing`, esc(material.writing[0])) + sample(material.writing[1]))}
+ </div>`;
+}
+
 function lhUnitLessons(unit, lessons){
  const view = 'languagehubunit' + unit;
  const buttons = lessons.map(([title], index) => {
@@ -2776,7 +2823,10 @@ function lhUnitLessons(unit, lessons){
    <div class="row" style="flex-wrap:wrap;gap:8px">${buttons}</div>
  </nav>`;
  const section = lessons[currentHubSection];
- return menu + (section ? section[1]() : lhActivePanel(unit));
+ if(!section) return menu + lhActivePanel(unit);
+ const next = lessons[currentHubSection + 1];
+ const nextButton = next ? `<div class="row"><button type="button" class="pill primary" onclick="navigate('${view}', null, ${currentHubSection + 1})">Sonraki · ${esc(next[0])} →</button></div>` : '';
+ return menu + section[1]() + lhLessonPractice(unit, currentHubSection) + nextButton;
 }
 function viewLanguageHubUnit1(){
  const phrase=(en,tr)=>`<div style="padding:10px 0;border-bottom:1px solid var(--paper-dark)"><button class="spk" onclick='lhSpeak(${JSON.stringify(en)})'>🔊</button><b>${en}</b><div class="hint" style="margin-left:30px">${tr}</div></div>`;
@@ -3352,7 +3402,12 @@ function viewLanguageHubUnit12(){
 /* ===== ARES LANGUAGE HUB ACTIVE LEARNING UPGRADE ===== */
 function lhStoreGet(key, fallback={}){try{return JSON.parse(localStorage.getItem(key)||JSON.stringify(fallback));}catch(e){return fallback;}}
 function lhStoreSet(key,val){localStorage.setItem(key,JSON.stringify(val));}
-function lhUnitFromId(id){const m=String(id).match(/^(12|11|10|[1-9])/);return m?Number(m[1]):0;}
+function lhUnitFromId(id){
+  const match = String(id).match(/^(\d+)(r\d|r[a-z]|[a-z]|$)/i);
+  if(!match) return 0;
+  const [, digits, suffix] = match;
+  return Number(/^r\d/i.test(suffix) || digits.length === 1 ? digits : digits.slice(0, -1));
+}
 function lhRecordResult(id,ok,correct,chosen){
   const unit=lhUnitFromId(id); if(!unit)return;
   const stats=lhStoreGet('ares_lh_stats',{}); const k='u'+unit; stats[k]=stats[k]||{right:0,total:0,last:''};
@@ -3367,7 +3422,7 @@ lhCheckText=function(id,answers){const inp=document.getElementById('lh-input-'+i
 function lhUnitStats(unit){
  const stats=lhStoreGet('ares_lh_stats',{})['u'+unit]||{right:0,total:0};
  const personal=lhStoreGet('ares_lh_personal',{});
- const pCount=Object.keys(personal).filter(k=>String(k).startsWith(String(unit))).length;
+ const pCount=Object.keys(personal).filter(k=>lhUnitFromId(k)===unit && String(personal[k]).trim()).length;
  const mistakes=lhStoreGet('ares_lh_mistakes',[]).filter(x=>x.unit===unit);
  const quiz=stats.total?Math.round(stats.right/stats.total*100):0;
  const personalPct=Math.min(100,pCount*20);
