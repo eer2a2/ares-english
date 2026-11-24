@@ -2739,7 +2739,7 @@ function lhCheckText(id,answers){
 }
 function lhResetUnit1(){lhQuizState={score:0,total:0,answered:{}};render();}
 function lhMC(id,q,opts,correct){return `<div id="lhq-${id}" style="padding:14px 0;border-bottom:1px solid var(--paper-dark)"><b>${q}</b><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">${opts.map(o=>`<button class="pill" data-lh-answer="${o.replace(/"/g,'&quot;')}" onclick='lhCheck(${JSON.stringify(id)},${JSON.stringify(o)},${JSON.stringify(correct)})'>${o}</button>`).join('')}</div><div class="lh-feedback hint" style="margin-top:8px;font-weight:700"></div></div>`;}
-function lhText(id,q,answers,placeholder='Cevabını yaz…'){return `<div style="padding:14px 0;border-bottom:1px solid var(--paper-dark)"><b>${q}</b><input id="lh-input-${id}" class="quiz-input" style="margin-top:10px" placeholder="${placeholder}"><button class="pill primary" onclick='lhCheckText(${JSON.stringify(id)},${JSON.stringify(answers)})'>Kontrol Et</button><div id="lh-fb-${id}" class="hint" style="margin-top:8px;font-weight:700"></div></div>`;}
+function lhText(id,q,answers,placeholder='Cevabını yaz…'){return `<div style="padding:14px 0;border-bottom:1px solid var(--paper-dark)"><b>${q}</b><input id="lh-input-${id}" class="quiz-input" style="margin-top:10px" placeholder="${placeholder}"><button class="pill primary" onclick='lhCheckText(${JSON.stringify(id)},${esc(JSON.stringify(answers))})'>Kontrol Et</button><div id="lh-fb-${id}" class="hint" style="margin-top:8px;font-weight:700"></div></div>`;}
 function lhExerciseBlock(title,subtitle,html){return `<details class="card" style="margin-top:16px" open><summary style="cursor:pointer;font-weight:800;font-size:18px">${title}</summary><p class="hint">${subtitle}</p>${html}</details>`;}
 function lhSavePersonal(id){
   const el=document.getElementById('lh-personal-'+id); if(!el)return;
@@ -2769,10 +2769,10 @@ function lhSectionHead(id,icon,title,sub=''){
 }
 const LH_UNIT1_PRACTICE = [
   {
-    glossary: [['colleague','iş arkadaşı','A colleague helped me with the report.'],['relative','akraba','Several of my relatives live nearby.'],['stranger','tanımadığın kişi','A stranger asked me for directions.'],['break the ice','ilk gerginliği azaltmak, sohbeti başlatmak','I asked about the course to break the ice.']],
-    dialogue: 'A: Is this your first class here? B: Yes, it is. I’m Deniz, by the way. A: Nice to meet you. Why are you taking this course? B: I want to feel more confident when I travel. How about you?',
-    pairs: [['Who was your best friend when you were a child?','My best friend was a boy called Cem. We went to the same school.'],['What did you do together?','We usually played football after school.'],['What question would you ask a new classmate?','I’d ask, “What do you like doing in your free time?”']],
-    writing: ['Yeni bir sınıf arkadaşına 4–5 cümlelik bir mesaj yaz. Kendini kısaca tanıt ve iki farklı soru sor.','Hi, I’m Deniz. I’m from Ankara and I’m studying English for travel. What do you do in your free time? Have you ever studied abroad?']
+    glossary: [['break the ice','sohbetin başındaki gerginliği azaltmak','I asked about the course to break the ice.'],['politics','siyaset','They rarely discuss politics at work.'],['psychology','psikoloji','She studied psychology at university.'],['religion','din','Religion can be a personal topic.'],['social life','sosyal hayat','My social life is busier at weekends.'],['conversation','sohbet','We had a short conversation after class.'],['relationship','ilişki','They have a good working relationship.'],['successful','başarılı','The conversation was successful.'],['tip','ipucu, tavsiye','She gave me a useful tip.'],['topic','konu','Travel is an easy topic to start with.'],['colleague','iş arkadaşı','A colleague helped me with the report.'],['relative','akraba','Several of my relatives live nearby.'],['stranger','tanımadığın kişi','A stranger asked me for directions.']],
+    dialogue: 'Host: How can we start a conversation with a stranger? Guest: Start with a smile. Say something positive about the place or situation. Then ask a simple question. Host: What else can we ask about? Guest: Ask about other people, but don’t criticise them. You don’t know who they know. Interests and studies are safe topics. Give answers as well as asking questions. Host: When can we ask something personal? Guest: When both people feel more relaxed. At first, don’t discuss sensitive topics like religion or politics.',
+    pairs: [['Where do people often meet for the first time?', 'People often meet at work, in class or through friends.'],['How do you usually start a conversation with someone you have just met?', 'I smile and ask a simple question about the place.'],['What other topics are easy to talk about with new people?', 'I find it easy to talk about hobbies, food and travel.'],['How many relatives do you have? How often do you see them all?', 'I have quite a few relatives. I see most of them on holidays.'],['How many of your colleagues or other students in your class are also your friends?', 'Two of my colleagues are close friends. We sometimes have lunch together.'],['Do you find it easy to talk to strangers? Why or why not?', 'It depends. It’s easier when we have something in common.'],['Write six questions for a new classmate, then add two of your own.', 'Do you come from a large family? What do you do in your free time? Where did you study? What are you studying now? What’s your favourite place? Where did you go last weekend? Do you like travelling alone? Have you ever taken an English course abroad?']],
+    writing: ['Kısa bir About Me profili yaz. İşini veya eğitimini, sevdiğin ve sevmediğin şeyleri, kişiliğini anlat. Kaydetmeden önce grameri, kelime seçimini ve yazımı kontrol et.', 'I’m Deniz and I work in an office. I enjoy reading and taking photos, but I don’t like crowded places. I’m curious and a little quiet at first. I’m learning English so I can meet more people when I travel.']
   },
   {
     glossary: [['book lover','kitap meraklısı','My sister is a book lover.'],['article','makale, yazı','I read an article about travel.'],['follow','takip etmek','I follow two travel blogs.'],['now and again','ara sıra','I watch travel videos now and again.']],
@@ -2794,6 +2794,148 @@ const LH_UNIT1_PRACTICE = [
   }
 ];
 
+function lhGlossaryEntries(index){
+ const saved = lhStoreGet('ares_lh_glossary_v1', {});
+ return saved['1.'+(index+1)] || LH_UNIT1_PRACTICE[index].glossary;
+}
+
+function lhGlossaryList(index){
+ return lhGlossaryEntries(index).map(([word, meaning, example], row) =>
+   `<div style="padding-block:8px">
+     <button type="button" class="spk" aria-label="Dinle" onclick="lhSpeak(${esc(JSON.stringify(word))})">🔊</button> <strong>${esc(word)}</strong> · ${esc(meaning)}
+     <button type="button" class="pill" onclick="lhEditGlossary(${index},${row})">Düzelt</button>
+     ${example ? `<br><em>${esc(example)}</em>` : ''}
+   </div>`).join('');
+}
+
+function lhEditGlossary(index, row){
+ const form = document.getElementById('lh-glossary-form-'+index);
+ const entry = lhGlossaryEntries(index)[row] || ['', '', ''];
+ form.dataset.row = row;
+ for(const [i, field] of ['word','meaning','example'].entries()) form.elements[field].value = entry[i];
+ form.hidden = false;
+ form.elements.word.focus();
+}
+
+function lhSaveGlossary(event, index){
+ event.preventDefault();
+ const form = event.currentTarget;
+ const entries = lhGlossaryEntries(index).slice();
+ const row = Number(form.dataset.row);
+ const entry = ['word','meaning','example'].map(field => form.elements[field].value.trim());
+ const status = document.getElementById('lh-glossary-status-'+index);
+ if(!entry[0] || !entry[1]){
+   status.textContent = 'Kelimeyi ve Türkçe anlamını yaz.';
+   return;
+ }
+ if(row < 0) entries.push(entry);
+ else entries[row] = entry;
+ const saved = lhStoreGet('ares_lh_glossary_v1', {});
+ saved['1.'+(index+1)] = entries;
+ try { localStorage.setItem('ares_lh_glossary_v1', JSON.stringify(saved)); }
+ catch { status.textContent = 'Kayıt yapılamadı. Tekrar dene.'; return; }
+ document.getElementById('lh-glossary-list-'+index).innerHTML = lhGlossaryList(index);
+ form.hidden = true;
+ status.textContent = '✓ Kaydedildi';
+ document.getElementById('lh-glossary-add-'+index).focus();
+}
+
+function lhGlossary(index){
+ return `<div id="lh-glossary-list-${index}">${lhGlossaryList(index)}</div>
+   <button type="button" class="pill" id="lh-glossary-add-${index}" onclick="lhEditGlossary(${index},-1)">+ Kelime Ekle</button>
+   <form hidden id="lh-glossary-form-${index}" onsubmit="lhSaveGlossary(event,${index})">
+     <p><label>Kelime veya kalıp <input class="quiz-input" name="word" required></label></p>
+     <p><label>Türkçe anlam <input class="quiz-input" name="meaning" required></label></p>
+     <p><label>Örnek cümle <input class="quiz-input" name="example"></label></p>
+     <button type="submit" class="pill primary">Kaydet</button>
+     <button type="button" class="pill" onclick="this.form.hidden=true;document.getElementById('lh-glossary-add-${index}').focus()">Vazgeç</button>
+   </form>
+   <p role="status" id="lh-glossary-status-${index}"></p>`;
+}
+
+function lhBookPractice11(){
+ const grammar = [
+   ['Do / Does / Did + özne + fiilin yalın hâli', 'Does your colleague work here?'],
+   ['Soru sözcüğü + do / does / did + özne + yalın fiil', 'Where did you meet your friend?'],
+   ['Am / Is / Are + özne (+ fiil-ing)', 'Are you enjoying the course?'],
+   ['Was / Were + özne', 'Were you at the same school?'],
+   ['Have / Has + özne + fiilin üçüncü hâli', 'Have you ever started a conversation with a stranger?']
+ ];
+ const order = [
+   ['you / do / go / skiing / want / to','Do you want to go skiing?'],
+   ['does / what / do / he / weekends / at','What does he do at weekends?'],
+   ['did / you / meet / where / for coffee','Where did you meet for coffee?'],
+   ['you / tea / are / coffee / or / drinking','Are you drinking tea or coffee?'],
+   ['your / new colleagues / were / at the office','Were your new colleagues at the office?'],
+   ['you / been / have / ever / Mexico / to','Have you ever been to Mexico?'],
+   ['tried / that / she / has / new restaurant','Has she tried that new restaurant?']
+ ];
+ const correct = [
+   ['Why you did choose that topic?', 'Why did you choose that topic?'],
+   ['Have you ever meet a graphologist?', 'Have you ever met a graphologist?'],
+   ['What you are talking about?', 'What are you talking about?'],
+   ['Did they went to the cinema last night?', 'Did they go to the cinema last night?'],
+   ['Where you did put the new keyboard?', 'Where did you put the new keyboard?'],
+   ['What your best friend’s name is?', "What is your best friend’s name?"],
+   ['Did you anything nice last weekend?', 'Did you do anything nice last weekend?']
+ ];
+ const people = [
+   ['Mia and Eva know each other well and spend time together. They are ___.','friends','strangers'],
+   ['Tom gives photography lessons. He is a ___.','teacher','colleague'],
+   ['I’m visiting my mother’s parents this weekend. They are my ___.','grandparents','students'],
+   ['I don’t know the people at the next table. They are ___.','strangers','parents'],
+   ['We work in the same office. We’re ___.','colleagues','students'],
+   ['My aunts, uncles and cousins are my ___.','relatives','teachers']
+ ];
+ const listen = [
+   ['___ something positive about the situation.','say'],['___ about other people.','ask'],
+   ['You don’t know who they ___.','know'],['Ask questions and ___ answers too.','give'],
+   ['When you ___ more relaxed, try a personal question.','feel'],
+   ['Don’t ___ religion or politics with someone you’ve just met.','discuss']
+ ];
+ const textQuestions = (type, rows) => rows.map(([prompt, answer], i) =>
+   lhText('11'+type+(i+1), esc(prompt), [answer.replaceAll('’', "'"), answer])).join('');
+ return lhExerciseBlock('Grammar Hub 1.1 · Question forms','Kitaptaki A ve B alıştırmaları.',
+   grammar.map(([form, example]) => `<p><strong>${esc(form)}</strong><br>${esc(example)}</p>`).join('') +
+   '<h4>A · Kelimeleri sırala</h4>' + textQuestions('ga', order) +
+   '<h4>B · Sorudaki hatayı düzelt</h4>' + textQuestions('gb', correct)) +
+   lhExerciseBlock('Vocabulary Hub 1.1 · People','İnsanları ve aralarındaki ilişkiyi tanımla.',
+     people.map(([prompt, answer, other], i) => lhMC('11vh'+(i+1), esc(prompt), i%2 ? [other, answer] : [answer, other], answer)).join('')) +
+   lhExerciseBlock('Listening 1.1 · Ayrıntıları yakala','Kelimeler: ask · discuss · feel · give · know · say.',
+     textQuestions('ld', listen)) +
+   lhExerciseBlock('Pronunciation · The alphabet','Harfleri dinle, tekrar et ve partnerine adını harf harf söyle.',
+     Array.from('ABCDEFGHIJKLMNOPQRSTUVWXYZ', letter => `<span style="display:inline-flex;align-items:center;gap:3px;margin:4px">${spk(letter)}<b>${letter}</b></span>`).join(''));
+}
+
+const LH_UNIT1_CONVERSATIONS = [
+ ['What do you usually say when you meet someone new?', 'Where did you last meet someone new?', 'Ask your partner how they start a conversation.'],
+ ['What do you usually watch or read online?', 'How often do you share something you find online?', 'Ask your partner how often they watch videos in English.'],
+ ['What makes someone a good friend?', 'Can you give an example of something a good friend did?', 'Ask your partner which personality trait they value most.'],
+ ['Long time no see! How have you been?', 'What have you been doing lately?', 'Ask your partner when you can meet again.']
+];
+
+function lhConversationPractice(index){
+ const [opening, followUp, roleSwap] = LH_UNIT1_CONVERSATIONS[index];
+ const key = '1'+(index+1)+'p-dialogue';
+ const turn = (id, prompt) => lhPersonal(key+'-'+id, esc(prompt));
+ return lhExerciseBlock('Karşılıklı sohbet · Eşli ve grup çalışması',
+   'Sırayla konuşun. Cevabı dinleyip bir ayrıntı sorun, sonra rolleri değiştirin. İstersen cevapları burada sakla.',
+   `<details><summary>İki kişiyle çalış</summary>
+     <p>Öğrenci A sorar, B cevap verir. A takip sorusunu sorar. Son turda B kendi sorusunu sorar, A cevap verir.</p>
+     ${turn('pair-open', opening)}
+     ${turn('pair-follow', followUp)}
+     ${turn('pair-swap', roleSwap)}
+     ${turn('pair-reply', 'Partnerinin sorusuna verilen cevap')}
+   </details>
+   <details><summary>Üç kişiyle çalış</summary>
+     <p>A açılış sorusunu sorar. B cevap verir. C, B’nin cevabından bir ayrıntıyı seçip takip sorusu sorar. Sonra A → B → C şeklinde rolleri değiştirin.</p>
+     ${turn('group-open', opening)}
+     ${turn('group-follow', 'C’nin takip sorusu ve B’nin cevabı')}
+     ${turn('group-swap', 'Yeni turda sorulan soru ve verilen cevap')}
+   </details>
+   <button type="button" class="pill" onclick="lhFriendSpeak('1.${index+1}')">Ares Speaking’de pratik yap →</button>`);
+}
+
 function lhLessonPractice(unit, index){
  const material = unit === 1 ? LH_UNIT1_PRACTICE[index] : null;
  if(!material) return '';
@@ -2801,13 +2943,14 @@ function lhLessonPractice(unit, index){
  const sample = answer => `<details><summary>Örnek cevabı gör</summary><p>${spk(answer)} ${esc(answer)}</p></details>`;
  return `<div id="lh-${key}-extra" style="scroll-margin-top:90px">
    ${lhExerciseBlock('Glossary · Bilmediğim kelimeler','Kelimeyi dinle ve örnek cümlede incele.',
-     material.glossary.map(([word, meaning, example]) =>
-       `<p>${spk(word)} <strong>${esc(word)}</strong> · ${esc(meaning)}<br><em>${esc(example)}</em></p>`).join(''))}
+     lhGlossary(index))}
    ${lhExerciseBlock('Dinleme · Ares audioscript','İlk sefer metni açmadan dinle. İkinci sefer metinle birlikte takip et.',
      spk(material.dialogue)+` <details><summary>Dinleme metnini aç</summary><p>${esc(material.dialogue)}</p></details>`)}
+   ${index === 0 ? lhBookPractice11() : ''}
    ${lhExerciseBlock('Work in Pairs · Eşli çalışma','Sırayla soruyu sor ve cevapla. Tek başınaysan önce kendi cevabını yaz veya sesli söyle.',
      material.pairs.map(([question, answer], i) =>
        lhPersonal(`${key}p-pair-${i+1}`, esc(question)) + sample(answer)).join(''))}
+   ${lhConversationPractice(index)}
    ${lhExerciseBlock('Writing · Yazma','Önce kendi metnini yaz ve kaydet. Sonra örneği aç.',
      lhPersonal(`${key}p-writing`, esc(material.writing[0])) + sample(material.writing[1]))}
  </div>`;
