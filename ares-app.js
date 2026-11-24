@@ -2775,8 +2775,8 @@ const LH_UNIT1_PRACTICE = [
     writing: ['Kısa bir About Me profili yaz. İşini veya eğitimini, sevdiğin ve sevmediğin şeyleri, kişiliğini anlat. Kaydetmeden önce grameri, kelime seçimini ve yazımı kontrol et.', 'I’m Deniz and I work in an office. I enjoy reading and taking photos, but I don’t like crowded places. I’m curious and a little quiet at first. I’m learning English so I can meet more people when I travel.']
   },
   {
-    glossary: [['book lover','kitap meraklısı','My sister is a book lover.'],['article','makale, yazı','I read an article about travel.'],['follow','takip etmek','I follow two travel blogs.'],['now and again','ara sıra','I watch travel videos now and again.']],
-    dialogue: 'A: What do you usually read online? B: I often read about travel and local food. A: Do you ever leave comments? B: Hardly ever, but I share useful articles with friends.',
+    glossary: [['blog (isim)','düzenli yazı yayımlanan site','I read a travel blog every week.'],['blog (fiil)','blog yazmak','She blogs about local food.'],['culture','kültür','I like learning about different cultures.'],['subscriber','abone','The channel has thousands of subscribers.'],['keen on','bir şeye meraklı','I’m keen on travelling.'],['every so often','ara sıra','Every so often, I read a cooking blog.'],['book lover','kitap meraklısı','My sister is a book lover.'],['article','makale, yazı','I read an article about travel.'],['follow','takip etmek','I follow two travel blogs.'],['now and again','ara sıra','I watch travel videos now and again.']],
+    dialogue: 'Host: What is Humans of New York about? Guest: It shares portraits and stories from people in New York. Most of the time, Brandon photographs and interviews ordinary New Yorkers. Every so often, he includes someone well known. Host: Why do you think readers enjoy it? Guest: They can learn something unexpected about another person’s life.',
     pairs: [['What websites do you visit most often?','I usually visit news websites. I like to know what’s happening around the world.'],['How often do you watch videos in English?','I watch them two or three times a week.'],['Do you ever leave comments online?','Hardly ever. I usually just read what other people write.']],
     writing: ['Dijital alışkanlıklarını 4–5 cümleyle anlat. Üç farklı sıklık ifadesi kullan.','I usually read the news in the morning. I watch travel videos now and again. I hardly ever post comments.']
   },
@@ -2936,6 +2936,116 @@ function lhConversationPractice(index){
    <button type="button" class="pill" onclick="lhFriendSpeak('1.${index+1}')">Ares Speaking’de pratik yap →</button>`);
 }
 
+function lhBookPractice12(){
+ const missing = [
+   ['I n___ get bored writing my blog.','never'],
+   ['She’s s_______s late for work.','sometimes'],
+   ['They a_____ watch vlogs in their free time.','always'],
+   ['We’re n______y home before 11.','normally'],
+   ['He o__________y checks his social media accounts at work.','occasionally'],
+   ['I r_____ go online before starting work.','rarely'],
+   ['He o____ visits his relatives in Italy.','often']
+ ];
+ const placement = [
+   ['We go on holiday. (once a year)','We go on holiday once a year','Once a year, we go on holiday'],
+   ['They comment on online articles. (now and again)','They comment on online articles now and again','Now and again, they comment on online articles'],
+   ['I read online tips. (every so often)','I read online tips every so often','Every so often, I read online tips'],
+   ['She writes for popular magazines. (most of the time)','She writes for popular magazines most of the time','Most of the time, she writes for popular magazines'],
+   ['He takes his dog to the park. (three times a week)','He takes his dog to the park three times a week','Three times a week, he takes his dog to the park'],
+   ['We play computer games on Saturdays. (always)','We always play computer games on Saturdays','On Saturdays, we always play computer games'],
+   ['We meet up for a coffee on Sunday. (usually)','We usually meet up for a coffee on Sunday','Usually, we meet up for a coffee on Sunday','On Sunday, we usually meet up for a coffee','We meet up for a coffee on Sunday, usually']
+ ];
+ const types = [
+   ['Someone who likes animals','animal lover'],
+   ['A woman who has three children','mother of three'],
+   ['Someone who is very interested in food','foodie'],
+   ['Someone who enjoys seeing other places','traveller','traveler'],
+   ['Someone who follows or takes part in sports','sports fan'],
+   ['Someone who plays computer games','gamer'],
+   ['Someone who enjoys spending time with others','people person'],
+   ['Someone who loves reading','book lover'],
+   ['Someone who writes online regularly','blogger'],
+   ['Someone who listens to music regularly','music fan']
+ ];
+ const phrases = [
+   ['I’m a ___ owner. I take it for a walk twice a day.','dog'],
+   ['I’m a big ___ drinker. Cappuccino is my favourite.','coffee'],
+   ['I’m a ___ of two. My wife and I have two daughters.','father'],
+   ['I’m a ___ person. I try not to worry or complain.','positive'],
+   ['I’m a ___ fan. My favourite team is Manchester United.','football']
+ ];
+ const reading = [
+   ['Which blogger travels and photographs people from different places?', 'Mihaela'],
+   ['Which blogger is a mother of three?', 'Emma'],
+   ['Who writes about books, history and culture?', 'Maria'],
+   ['Whose blog attracts many readers?', 'Maria'],
+   ['Whose blog is about trying new experiences?', 'Emma'],
+   ['Who wants to show that beauty can be found everywhere?', 'Mihaela']
+ ];
+ const questions = (group, rows) => rows.map(([prompt, ...answers], i) =>
+   lhText('12'+group+(i+1), esc((i+1)+'. '+prompt), answers)).join('');
+ return lhExerciseBlock('Reading · Three of the best','Üç blogdan hangisini okumak istediğini ve nedenini düşün. Ardından ayrıntı sorularını çöz.',
+   '<p><b>Brain Pickings:</b> Maria writes about books, history and culture on a widely read blog.</p>' +
+   '<p><b>The Atlas of Beauty:</b> Mihaela travels and photographs women in different cultures to show that beauty is everywhere.</p>' +
+   '<p><b>Emma’s Bucket List:</b> Emma is a mother of three who shares new experiences and ideas for things to try.</p>' +
+   questions('br', reading)) +
+   lhExerciseBlock('Grammar Hub 1.2 · Frequency words and phrases','Sıklık zarfları ana fiilden önce, be ve can’den sonra gelir. Uzun sıklık ifadeleri çoğunlukla cümle başına veya sonuna gelir.',
+     '<p><i>I often read travel blogs. She is normally online. I can never read his handwriting.</i></p>' +
+     '<h4>A · Eksik harfleri tamamla</h4><p>Kelimenin tamamını yaz.</p>' + questions('ga', missing) +
+     '<h4>B · Sıklık ifadesini yerleştir</h4><p>Cümlenin tamamını yaz.</p>' + questions('gb', placement)) +
+   lhExerciseBlock('Vocabulary Hub 1.2 · Types of people','Tanımları kişi tipleriyle eşleştir ve kalıpları tamamla.',
+     '<h4>A · Kişi tipini yaz</h4>' + questions('va', types) +
+     '<h4>B · Boşluğu doldur</h4><p>coffee · dog · father · football · positive</p>' + questions('vb', phrases) +
+     '<p><b>Keen on + isim veya -ing:</b> I’m keen on tennis. I’m keen on travelling.<br><b>A keen + isim:</b> I’m a keen traveller.</p>') +
+   lhExerciseBlock('Pronunciation · Using a dictionary','Sözlükte okunuşu, vurguyu, kelime türünü ve anlamı bul.',
+     [['cloud','noun','bulut'],['expedition','noun','keşif gezisi'],['positive','adjective','olumlu'],['rare','adjective','nadir']].map(([word, type, meaning]) =>
+       `<p>${spk(word)} <b>${word}</b> · ${type} · ${meaning}</p>`).join('') +
+     '<p><b>Vurgu:</b> expedition kelimesinde <b>DI</b>, positive kelimesinde <b>POS</b> hecesi vurgulanır.</p>');
+}
+
+function lhBookPractice14(){
+ const greetings = [
+   ['___! My name’s Gaby.','Hello'],
+   ['Nice to ___ you.','meet'],
+   ['Good to meet ___, too.','you'],
+   ['How’s it ___?','going'],
+   ['How are you ___?','doing'],
+   ['___ a nice surprise!','What'],
+   ['___ time, no see.','Long'],
+   ['___ do something soon.','Let’s','Let\'s','Lets']
+ ];
+ const situations = [
+   ['Your friend has a job interview tomorrow.','Good luck!','What else?'],
+   ['You have just arrived home with a visitor.','Here we are. This is home.','Come over this weekend.'],
+   ['A friend invites you to visit and you agree.','Will do.','Dream job!'],
+   ['You want your friend to follow you.','Come with me.','I love it here!'],
+   ['You want to hear another detail.','What else?','Good luck!'],
+   ['Your friend describes the job they have always wanted.','Dream job!','Here we are. This is home.']
+ ];
+ const dialogue = 'Alex: Hey, Sam! It’s great to see you. What a nice surprise! Sam: Long time no see! How’s it going? Alex: Pretty good. Do you want a coffee? Sam: Sure. How about you? Did you have a nice holiday? Alex: Yes, thanks. It was good to see my family.';
+ const profiles = [
+   ['Who owns a café?','Sam','Gaby','Neena'],
+   ['Who makes games?','Zac','Sam','Milly'],
+   ['Who is a lawyer?','Neena','Milly','Zac'],
+   ['Who has a clothes shop?','Milly','Gaby','Sam']
+ ];
+ return lhExerciseBlock('Comprehension · Meet the Café Hub characters','Fotoğraflardaki karakterlerden uyarlanan profilleri oku.',
+   '<p><b>Gaby</b> lives in London and likes travelling. <b>Zac</b> makes games. <b>Sam</b> runs a café. <b>Milly</b> has a clothes shop. <b>Neena</b> is a lawyer.</p>' +
+   profiles.map(([prompt, answer, ...others], i) =>
+     lhMC('14cc'+(i+1), prompt, i%2 ? [...others, answer] : [answer, ...others], answer)).join('')) +
+   lhExerciseBlock('Functional language · Selamlaşma ve tanışma','Her cümleyi tamamla.',
+     greetings.map(([prompt, ...answers], i) => lhText('14fl'+(i+1), esc(prompt), answers)).join('')) +
+   lhExerciseBlock('Useful phrases · Duruma uygun kalıp','Durumu oku ve uygun ifadeyi seç.',
+     situations.map(([prompt, answer, alternative], i) =>
+       lhMC('14up'+(i+1), prompt, i%2 ? [alternative, answer] : [answer, alternative], answer)).join('')) +
+   lhExerciseBlock('Pronunciation · Word stress and intonation','Ares diyaloğunu dinle. Ardından metni açıp iki rolü sırayla oku.',
+     spk(dialogue) + `<details><summary>Diyaloğu aç</summary><p>${esc(dialogue)}</p></details>
+     <p>Şaşkınlığı göstermek için <b>GREAT</b> ve <b>SURPRISE</b> kelimelerini belirgin söyle. <i>Do you want a coffee?</i> sorusuyla <i>How’s it going?</i> sorusunun tonunu karşılaştır.</p>`) +
+   lhExerciseBlock('Speaking · Selfie presentation','Kendini 30–45 saniyede tanıt. Nereli olduğunu, işini veya okulunu ve neleri sevdiğini söyle. Bu dersten en az iki kalıp kullan.',
+     lhPersonal('14p-selfie','Sunum notlarım') +
+     '<details><summary>Örnek sunum</summary><p>Hi, I’m Deniz. Nice to meet you! I’m originally from İzmir, but I live in Ankara now. I work in an office. I like taking photos and I often listen to podcasts. See you around!</p></details>');
+}
+
 function lhLessonPractice(unit, index){
  const material = unit === 1 ? LH_UNIT1_PRACTICE[index] : null;
  if(!material) return '';
@@ -2946,7 +3056,10 @@ function lhLessonPractice(unit, index){
      lhGlossary(index))}
    ${lhExerciseBlock('Dinleme · Ares audioscript','İlk sefer metni açmadan dinle. İkinci sefer metinle birlikte takip et.',
      spk(material.dialogue)+` <details><summary>Dinleme metnini aç</summary><p>${esc(material.dialogue)}</p></details>`)}
-   ${index === 0 ? lhBookPractice11() : ''}
+   ${[lhBookPractice11, lhBookPractice12, null, lhBookPractice14][index]?.() || ''}
+   ${index === 1 ? lhExerciseBlock('Listening Check · Humans of New York','Dinleme metni Ares uyarlamasıdır.',
+     lhMC('12hy1','What does the blog share?',['Portraits and personal stories','Restaurant reviews','Sports news'],'Portraits and personal stories') +
+     lhMC('12hy2','Who does Brandon usually interview?',['Only famous people','Ordinary New Yorkers','Only tourists'],'Ordinary New Yorkers')) : ''}
    ${lhExerciseBlock('Work in Pairs · Eşli çalışma','Sırayla soruyu sor ve cevapla. Tek başınaysan önce kendi cevabını yaz veya sesli söyle.',
      material.pairs.map(([question, answer], i) =>
        lhPersonal(`${key}p-pair-${i+1}`, esc(question)) + sample(answer)).join(''))}
