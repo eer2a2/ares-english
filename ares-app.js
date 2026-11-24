@@ -2800,7 +2800,7 @@ function lhGlossaryKey(index){
 
 function lhGlossaryEntries(index){
  const saved = lhStoreGet('ares_lh_glossary_v1', {});
- return saved[lhGlossaryKey(index)] || (index >= 4 ? [LH_GLOSSARY_21, LH_GLOSSARY_22, LH_GLOSSARY_23][index-4] : LH_UNIT1_PRACTICE[index].glossary);
+ return saved[lhGlossaryKey(index)] || (index >= 4 ? [LH_GLOSSARY_21, LH_GLOSSARY_22, LH_GLOSSARY_23, LH_GLOSSARY_24][index-4] : LH_UNIT1_PRACTICE[index].glossary);
 }
 
 function lhGlossaryList(index){
@@ -3287,7 +3287,19 @@ function lhPractice21(){
  lhExerciseBlock('Pronunciation · İki heceli sıfatlarda vurgu','Dinle, ilk heceyi vurgula ve tekrar et.',
    [['DIR','ty'],['QUI','et'],['MOD','ern'],['PEACE','ful'],['NOI','sy']].map(([first,last])=>
      `<p>${spk((first+last).toLowerCase())}<b>${first}</b>-${last}</p>`).join('')) +
- lhExerciseBlock('Writing · Şikâyet e-postası (s. 159)','Emma’nın şikâyeti, apartmanının dışındaki hızlı trafik ve güvenli geçiş olmamasıyla ilgili. Oyun alanına ulaşmak için iki yaya geçidi öneriyor.',
+ '<div id="lh-21-complaint" style="scroll-margin-top:90px"></div>' +
+ lhExerciseBlock('Writing · Şikâyet e-postası (s. 159)','Kitaptaki e-postayı oku ve Emma’nın neyi değiştirmek istediğini bul.',
+   `<details><summary>Emma’nın kitaptaki e-postasını oku</summary>
+   <p><b>To:</b> Mr Black<br><b>Re:</b> Road safety complaint</p>
+   <p>Dear Mr Black,</p>
+   <p>I’m writing to complain about the dangerous roads outside my block of flats.</p>
+   <p>My main complaint is that the roads are dangerous <b>because</b> there are no crossing points or traffic lights outside my block of flats. This is a problem for a number of reasons.</p>
+   <p>First of all, the traffic is very fast on the main road <b>and</b> this makes crossing difficult for older people and mothers with young children. The second problem is that there is a popular children’s play area opposite the main road, <b>but</b> the children have no way to cross the road to use the play area. The last problem is that the supermarket car park entrance is on the corner of two busy roads, <b>so</b> it makes it more difficult to cross the road.</p>
+   <p>I would like to offer you two solutions for this problem. First of all, I think you should make a crossing point on the busy road between the supermarket and the children’s play area. I also think you need to make a second crossing point across the main road from the block of flats to the play area. You could put traffic lights on this crossing to make it safe for children to use.</p>
+   <p>I hope you will make this dangerous road safer for the older people and children in our neighbourhood.<br>I’m looking forward to hearing from you.<br>Yours sincerely,<br>Emma Lopez</p>
+   </details>` +
+   lhPersonal('21p-complaint-reading','How many problems and solutions does Emma mention? What would you do if you were Mr Black?') +
+   '<details><summary>Örnek cevap</summary><p>Emma explains three problems and suggests two crossings. I would put traffic lights on the crossing near the play area.</p></details>' +
    '<p><b>Bağlaçlar</b> · and (ekleme), but (karşıtlık), or (alternatif), so (sonuç), because (neden)</p>' +
    text('wl',linkers) +
    lhPersonal('21p-complaint','Mahallendeki bir sorunu anlatan kibar bir e-posta yaz. Sorunun etkisini açıkla ve en az iki çözüm öner.') +
@@ -3473,6 +3485,109 @@ function lhPractice23(){
    '<details><summary>Örnek sohbet</summary><p>A: I got my first job when I was 18.<br>B: Where did you work?<br>A: I worked in a small café near my school.<br>B: What did you learn there?</p></details>');
 }
 
+const LH_GLOSSARY_24 = [
+ ['turn the volume down','sesi kısmak','Could you turn the volume down, please?'],
+ ['earplugs','kulak tıkacı','I sometimes use earplugs to sleep.'],
+ ['upstairs','üst katta, üst kata','The people upstairs are playing loud music.'],
+ ['washing up','bulaşık yıkama','We take turns doing the washing up.'],
+ ['I’m not sure it’s a good idea','iyi bir fikir olduğundan emin değilim','I’m not sure it’s a good idea to go upstairs right now.']
+];
+
+function lhUnit2Text(prefix, rows){
+ return rows.map(([prompt,...answers],i)=>lhText(prefix+(i+1),esc(prompt),answers)).join('');
+}
+
+function lhPractice24(){
+ const forms = [
+ ['What do you think I should ___?','do','to do'],['You could ___ them to turn the volume down.','ask','to ask'],
+ ['How about ___ some earplugs?','using','to use'],['Let me ___ you out here.','help','to help'],
+ ['What ___ you suggest?','do','are'],['Why don’t you ___ upstairs and talk to them?','go','to go'],
+ ['I think you should ___ and talk to them.','go','to go'],['And why don’t we ___ with you?','come','coming']
+ ];
+ const interview = [
+ ['You ___ leave plenty of time to get there.','should','could','must'],
+ ['I ___ you should read about the company before the interview.','think'],
+ ['Here’s one idea: you ___ practise a few typical interview questions with a friend.','could','should'],
+ ['Nervous? ___ don’t you do some breathing exercises to relax?','Why'],
+ ['I think you ___ dress for success.','should'],
+ ['You ___ have your phone on during the interview.','shouldn’t','mustn’t'],
+ ['I ___ think you should ask about salary first.','don’t']
+ ];
+ const phrases = [
+ ['What’s wrong?','Örnek eşleşme: Someone’s playing dance music in the flat above my bedroom.'],
+ ['You can rely on us.','Bize güvenebilirsin.'],
+ ['Here you go.','Buyur.'],
+ ['Seriously?!','Cidden mi?!'],
+ ['Cool!','Harika!'],
+ ['What’s the problem?','Sorun ne?']
+ ];
+ const scenarios = ['I often forget my door keys.','My neighbour’s dog barks all day.',
+ 'The children in the apartment upstairs are very noisy.','My flatmate spends too much time in the bathroom.',
+ 'I’m the only person who does the washing up.','My flatmate’s always hot and I’m always cold.'];
+ return lhExerciseBlock('Functional Language · Ask for and give advice','Tavsiye iste: What should I do? Tavsiye ver: You could … / Why don’t you …? / How about -ing?',
+   forms.map(([p,a,b],i)=>lhMC('24fl'+(i+1),esc(p),i%2?[b,a]:[a,b],a)).join('') +
+   '<h4>C · Neena’nın iş görüşmesi</h4>'+lhUnit2Text('24interview',interview)) +
+ lhExerciseBlock('Useful phrases · Günlük ifadeler','İfadeyi dinle ve ardından gelecek uygun cevabı düşün.',
+   phrases.map(([en,tr])=>`<p>${spk(en)} <b>${esc(en)}</b> · ${esc(tr)}</p>`).join('')) +
+ lhExerciseBlock('Pronunciation · Disagreeing','Cümlede zıtlık yaratan sözcüklere vurgu yap.',
+   spk('No, it’s not cool. I need to get to sleep.')+
+   '<p>No, it’s <strong>NOT</strong> cool. I <strong>NEED</strong> to get to sleep.</p><p>Partnerinle değiştir: cheap / expensive, fair / unfair, funny / serious.</p>') +
+ lhExerciseBlock('Speaking · Tavsiye iste, cevap ver','Bir durum seç. A tavsiye ister, B iki öneri verir. A bir öneriye katılır veya nazikçe itiraz edip nedenini söyler. Sonra rolleri değiştirin.',
+   '<ul>'+scenarios.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>'+
+   lhPersonal('24p-roleplay','Seçtiğin problem ve iki kişinin diyaloğu')+
+   '<details><summary>Örnek sohbet</summary><p>A: My neighbour’s dog barks all day. What should I do?<br>B: Why don’t you talk to your neighbour?<br>A: I’m not sure it’s a good idea to go now. It’s quite late.<br>B: Then you could speak to them tomorrow.</p></details>') +
+ lhExerciseBlock('Writing · Şikâyet e-postası (s. 159)','Emma’nın mektubunu oku. Sonra kendi e-postanda bir sorunu ve en az iki çözümü anlat.',
+   `<button type="button" class="pill" onclick="navigate('languagehubunit2',null,0); requestAnimationFrame(() => lhJump('lh-21-complaint'))">Emma’nın e-postasını ve yazma çalışmasını aç</button>`);
+}
+
+function lhBookReview2(){
+ const prep = [
+ ['Samaritans helps ___ personal problems.','with'],['Someone calls looking ___ support.','for'],
+ ['Callers can talk ___ volunteers.','to','with'],['They can rely ___ them to listen.','on'],
+ ['Many callers don’t want to talk ___ their problems.','about'],['They live ___ people they know well.','with']
+ ];
+ const life = [
+ ['1945: He ___ school. (leave)','left'],['He ___ Cambridge University. (go to)','went to'],
+ ['1946: He met and ___ in love with Jane. (fall)','fell'],['1950: He ___ married to Jane. (get)','got'],
+ ['They later ___ two children. (have)','had'],['1973: He ___ jobs. (change)','changed']
+ ];
+ const degree = [
+ ['A vertical forest sounds ___ interesting. (strong)','really','quite'],['It’s ___ impossible to add trees to every high-rise. (weak)','almost','totally'],
+ ['The builders worked ___ quickly. (strong)','extremely','a bit'],['These buildings can be ___ expensive. (weak)','quite','very'],
+ ['The trees are ___ healthy because of rainwater. (strong)','so','almost']
+ ];
+ const tokyo = [
+ ['Tatsuo ___ French. (speak)','speaks'],['He ___ as a tour guide for the summer. (work)','is working','’s working'],
+ ['Apartments ___ a lot in Tokyo. (cost)','cost'],['At the moment, Daisuki ___ with his parents. (live)','is living','’s living'],
+ ['Daisuki ___ the two-hour journey. (not like)','doesn’t like','does not like'],
+ ['More of his friends ___ the city these days. (leave)','are leaving'],
+ ['Every morning, the train Daisuki ___ is full. (catch)','catches']
+ ];
+ const past = [
+ ['I falled in love when I was 18.','I fell in love when I was 18'],
+ ['I weren’t good at sports when I was a teenager.','I wasn’t good at sports when I was a teenager','I was not good at sports when I was a teenager'],
+ ['I didn’t thought money was important when I was a child.','I didn’t think money was important when I was a child','I did not think money was important when I was a child'],
+ ['When I was young, my parents always knowed when I wasn’t telling the truth.','When I was young, my parents always knew when I wasn’t telling the truth','When I was young, my parents always knew when I was not telling the truth'],
+ ['I leaved home when I was 19.','I left home when I was 19'],
+ ['My father teached me how to drive.','My father taught me how to drive'],
+ ['I wasn’t meet my partner at work.','I didn’t meet my partner at work','I did not meet my partner at work']
+ ];
+ const advice = [
+ ['Sophie: ___? (Ask for advice.)','What do you think I should do'],
+ ['Peter: ___ wait and see if things improve.','Maybe you should'],
+ ['Sophie: ___, but I’m pretty sure the course is not for me.','I suppose so'],
+ ['Peter: ___ talk to your tutor about it?','Why don’t you','Why do you not'],
+ ['Sophie: ___ . (Accept the suggestion.)','That’s a good idea','That is a good idea'],
+ ['Peter: ___ go with you? (Offer help.)','Do you want me to']
+ ];
+ return lhExerciseBlock('Vocabulary Review · Prepositions and life events','Edatları tamamla ve David Attenborough’nun yaşamındaki olayları past simple ile yaz.',
+   lhUnit2Text('2r1pre',prep)+lhUnit2Text('2r2life',life)) +
+ lhExerciseBlock('Grammar Review · Degree adverbs and tenses','Uygun zarfı seç, Dreaming of Tokyo örneklerindeki fiilleri tamamla ve past simple hatalarını düzelt.',
+   degree.map(([p,a,b],i)=>lhMC('2r3degree'+(i+1),esc(p),i%2?[b,a]:[a,b],a)).join('')+
+   lhUnit2Text('2r4tokyo',tokyo)+lhUnit2Text('2r5past',past)) +
+ lhExerciseBlock('Functional Language Review · Advice','Sophie ile Peter’ın sohbetini tamamla.',lhUnit2Text('2r6advice',advice));
+}
+
 function viewLanguageHubUnit2(){
  const phrase=(en,tr)=>`<div style="padding:10px 0;border-bottom:1px solid var(--paper-dark)"><button class="spk" onclick='lhSpeak(${JSON.stringify(en)})'>🔊</button><b>${en}</b><div class="hint" style="margin-left:30px">${tr}</div></div>`;
  const speakBtns=(lesson)=>`<div class="row" style="margin-top:14px"><button class="pill primary" onclick="lhFriendSpeak('${lesson}')">🗣️ Arkadaşlarla Pratik</button><button class="pill" onclick="lhTheresa('${lesson}')">👩‍🏫 Theresa ile Kontrol</button></div>`;
@@ -3520,9 +3635,9 @@ function viewLanguageHubUnit2(){
  ${lhExerciseBlock('🎬 COMPREHENSION CHECK','Problem → advice → response.',lhMC('24r1','What is the main problem?',['Loud music from a neighbour','A broken phone','No public transport'],'Loud music from a neighbour')+lhMC('24r2','Which is a natural way to give advice?',["Why don't you talk to them?",'Why you not talk them?','You talking them.'],"Why don't you talk to them?")+lhMC('24r3','Which reply politely disagrees?', ["I'm not sure it's a good idea.",'No. Bad.','Never speak.'],"I'm not sure it's a good idea."))}
  <div id="lh-24-ex" style="scroll-margin-top:90px"></div>${lhExerciseBlock('🧩 EXERCISES — Advice','Doğru yapıyı seç.',lhMC('24a','How about ___ some earplugs?',['using','use','to use'],'using')+lhMC('24b','I think you should ___ to them.',['talk','to talk','talking'],'talk')+lhMC('24c','You could ___ them to turn it down.',['ask','asking','to asking'],'ask')+lhMC('24d',"Why don't you ___ upstairs?",['go','to go','going'],'go'))}
  <div id="lh-24-personal" style="scroll-margin-top:90px"></div>${lhExerciseBlock('✍️ PERSONAL — Give real advice','Kendi günlük hayatından sorunlarla çalış.',lhPersonal('24p1','Your neighbour is very noisy. What would you do?')+lhPersonal('24p2','Write one real problem you have and give yourself two pieces of advice.')+lhPersonal('24p3','Write one polite sentence for disagreeing with advice.'))}
- <div id="lh-24-speak" style="scroll-margin-top:90px"></div>${lhSectionHead('lh-24-speaking-title','🗣️','SPEAKING','Bir problem seç, arkadaşından tavsiye iste ve tavsiyeye doğal cevap ver.')} ${speakBtns('2.4')}</div>`],
+ <div id="lh-24-speak" style="scroll-margin-top:90px"></div>${lhSectionHead('lh-24-speaking-title','🗣️','SPEAKING','Bir problem seç, arkadaşından tavsiye iste ve tavsiyeye doğal cevap ver.')} ${speakBtns('2.4')}</div>${lhExerciseBlock('Glossary · Noisy Neighbours','Kelime ekle veya mevcut kaydı düzelt.',lhGlossary(7))}${lhPractice24()}`],
    ["Unit Review", () => `<div class="card"><h3 class="section-title" style="margin-top:0">🏆 Unit 2 · Review & Real-Life Challenge</h3><p class="hint">Describing places + adverbs of degree + present simple/continuous + past simple + advice.</p>
- ${lhExerciseBlock('✅ Unit 2 Review','Kitaptaki Unit Review hedeflerini interaktif tekrar et.',lhMC('2ra','The building is ___ expensive. (strong)',['extremely','a bit','hardly'],'extremely')+lhMC('2rb','I ___ with my parents at the moment.',['am living','live always','lived'],'am living')+lhMC('2rc','When I was a child, my parents ___ me to swim.',['taught','teach','teached'],'taught')+lhMC('2rd','You can rely ___ me.',['on','with','about'],'on')+lhMC('2re','How about ___ to your neighbour?',['talking','talk','to talk'],'talking'))}
+ ${lhBookReview2()}
  <div class="card" style="background:var(--paper-dark)"><b>🌍 Final Mission</b><ol style="line-height:1.8"><li>Mahalleni en az 6 sıfat ve 2 degree adverb ile anlat.</li><li>Normal rutininle şu sıralar yaptığın şeyleri karşılaştır.</li><li>Geçmişinden üç önemli life event anlat.</li><li>Bir komşuluk problemi için tavsiye iste, tavsiye ver ve bir öneriye nazikçe katılma.</li></ol></div>
  <div class="row"><button class="pill primary" onclick="lhFriendSpeak('2-review')">🗣️ Unit 2 Speaking Challenge</button><button class="pill" onclick="lhTheresa('2-review')">👩‍🏫 Theresa's Unit Check</button><button class="pill" onclick="navigate('languagehub')">← Tüm Ünitelere Dön</button></div></div>`]
  ]);
