@@ -2731,7 +2731,7 @@ function lhCheck(id,chosen,correct){
 function lhCheckText(id,answers){
   if(lhQuizState.answered[id]) return;
   const inp=document.getElementById('lh-input-'+id); if(!inp)return;
-  const norm=x=>x.toLowerCase().replace(/[?.!,']/g,'').replace(/\\s+/g,' ').trim();
+  const norm=x=>x.toLowerCase().replace(/[?.!,’']/g,'').replace(/\\s+/g,' ').trim();
   const val=norm(inp.value), ok=answers.some(a=>norm(a)===val);
   lhQuizState.answered[id]=true;lhQuizState.total++;if(ok)lhQuizState.score++;
   const fb=document.getElementById('lh-fb-'+id);fb.textContent=ok?'✓ Doğru':'✗ Örnek cevap: '+answers[0];fb.style.color=ok?'var(--leaf)':'var(--accent)';
@@ -2795,12 +2795,12 @@ const LH_UNIT1_PRACTICE = [
 ];
 
 function lhGlossaryKey(index){
- return index === 4 ? '2.1' : '1.'+(index+1);
+ return index >= 4 ? '2.'+(index-3) : '1.'+(index+1);
 }
 
 function lhGlossaryEntries(index){
  const saved = lhStoreGet('ares_lh_glossary_v1', {});
- return saved[lhGlossaryKey(index)] || (index === 4 ? LH_GLOSSARY_21 : LH_UNIT1_PRACTICE[index].glossary);
+ return saved[lhGlossaryKey(index)] || (index >= 4 ? [LH_GLOSSARY_21, LH_GLOSSARY_22][index-4] : LH_UNIT1_PRACTICE[index].glossary);
 }
 
 function lhGlossaryList(index){
@@ -3299,6 +3299,94 @@ function lhPractice21(){
    '<details><summary>Örnek sohbet</summary><p>A: My neighbourhood is quite peaceful, but it’s a bit far from the centre.<br>B: Is it convenient for public transport?<br>A: Yes, there’s a bus stop near my flat.</p></details>');
 }
 
+const LH_GLOSSARY_22 = [
+ ['boomerang generation','evden ayrıldıktan sonra ailesinin yanına dönen kuşak','Some graduates are part of the boomerang generation.'],
+ ['permanent','kalıcı','Richard is looking for a permanent job.'],
+ ['rely on','güvenmek, bel bağlamak','You can always rely on us.'],
+ ['argue with someone about something','biriyle bir konuda tartışmak','They argue with each other about the rules.'],
+ ['get your own place','kendine ait bir eve çıkmak','Alice is saving money to get her own place.'],
+ ['on your own','tek başına','Carla doesn’t like being on her own.']
+];
+
+function lhBoomerangListening(){
+ const partB = [
+  ['Presenter','More and more of the world’s young people are going home to live with their parents after college or university. Why? And what is it like living at home again as an adult? How do parents feel about the situation? Today, we talk to members of the boomerang generation and their parents about the advantages and disadvantages of living together again. Let’s start with Richard …'],
+  ['Richard','I’m Richard Woodman, from the UK. I’m 25 years old and at the moment, I’m living at home with my mum and dad. I … er … graduated two years ago, but I’m still looking for a permanent job. I love my parents, but we … em … well, they are difficult to live with. We argue about the rules all the time. I’m sleeping in my old room and living with the people who took me to the park when I was little! I know I’m lucky to be here, but it’s … you know … it isn’t easy.']
+ ];
+ const partC = [...partB,
+  ['Gordon','My name is Gordon Woodman. I’m Richard’s dad. Of course, Richard’s mum and I are, well, happy he is staying with us … most of the time. We’re his parents and he can always rely on us, but we er … we hope he finds the right job and, well, moves out as soon as possible. I want to make his bedroom into my home office. And his music, it’s … well, you know, thump, thump, thump all day and night. It drives me crazy! Anyway, we think he needs to be more independent. We love him, but he’s unhappy, and he isn’t learning about adult life living here with us.'],
+  ['Alice','Hi, I’m Alice Melo from Portsmouth, in England. I’m 28 years old and I graduated last year. I work as a dentist and, at the moment, I’m living with my parents to save money for my own place. Well, I’m trying to save money anyway, ha ha! I studied in Scotland, but I … er … couldn’t find a job there, so, you know, I came back home. More and more of my friends are moving back home. It’s great! Mum cooks and does all my washing. She won’t take any money from me … I tried, but … er … so I’m not paying any bills. Of course, I help … sometimes … I help with the housework and the garden, I mean, now and again, you know. One day, I will do something special to thank them.'],
+  ['Carla','I’m Carla Melo, Alice’s mum. We’re very happy our daughter is home again. She’s working hard and she wants to get her own place, but I always tell her she can live here with us forever! She’s a real adult now, I know, but she’s still my baby! This year, my husband is travelling a lot for work, for his job, you know, so I’m very happy Alice is here with me. I don’t like being on my own. I can talk to her, and she can save money and enjoy her mum’s cooking.']
+ ];
+ const script = rows => {
+   const audio = rows.map(([name,line])=>name+'. '+line).join(' ');
+   return `<button type="button" class="pill" onclick="lhSpeak(${esc(JSON.stringify(audio))})">Metni sesli oku</button>
+     <details><summary>Kitaptaki metni aç</summary>${rows.map(([name,line])=>`<p><b>${name}</b> · ${esc(line)}</p>`).join('')}</details>`;
+ };
+ const gist = [
+  ['What does the boomerang generation refer to?','Young adults who move back in with their parents','People who travel regularly','Parents moving out'],
+  ['How old is Richard?','25','28','30'],
+  ['Why is Richard living with his parents?','He is still looking for a permanent job','He wants to study dentistry','He is caring for his brother'],
+  ['How does Richard feel about living at home?','He feels lucky, but finds it difficult','He loves everything about it','He dislikes his parents']
+ ];
+ const detail = [
+  ['Says their child can stay for a long time','Carla'],['Seems worried about their child','Gordon'],
+  ['Isn’t working at the moment','Richard'],['Plans to thank their parents with something special','Alice'],
+  ['Wants to make a change to their house','Gordon'],['Likes living with their parents','Alice'],
+  ['Is glad they are not alone','Carla'],['Is unhappy with the house rules','Richard']
+ ];
+ return lhExerciseBlock('Listening B · Ana fikri yakala (2.2)','Uygulama, kitaptan aktarılan metni cihazın sesiyle okur.',
+   script(partB)+gist.map(([p,a,...b],i)=>lhMC('22listenb'+(i+1),p,i%2?[...b,a]:[a,...b],a)).join('')) +
+ lhExerciseBlock('Listening C · Konuşanı eşleştir (2.3)','Her ifade için Richard, Gordon, Alice veya Carla’yı seç.',
+   script(partC)+detail.map(([p,a],i)=>lhMC('22listenc'+(i+1),p,['Richard','Gordon','Alice','Carla'],a)).join(''));
+}
+
+function lhPractice22(){
+ const fix = [
+  ['We be living in Rome at the moment.','We’re living in Rome at the moment','We are living in Rome at the moment'],
+  ['I stay at my parents’ house this week.','I’m staying at my parents’ house this week','I am staying at my parents’ house this week'],
+  ['She’s liking doing the washing very much.','She likes doing the washing very much'],
+  ['They’re usually helping with the housework on Sundays.','They usually help with the housework on Sundays'],
+  ['Paul’s doing the cooking most of the time.','Paul does the cooking most of the time'],
+  ['I travel a lot for work at the moment.','I’m travelling a lot for work at the moment','I am travelling a lot for work at the moment','I’m traveling a lot for work at the moment'],
+  ['We both look for a permanent job right now.','We’re both looking for a permanent job right now','We are both looking for a permanent job right now','We’re both looking for permanent jobs right now']
+ ];
+ const forms = [
+  ['I ___ (study) French history this year.','am studying','m studying','I’m studying'],
+  ['My mum still ___ (do) all my washing.','does'],
+  ['I ___ (not / need) you to help me look for a new place.','don’t need','do not need','don\'t need'],
+  ['What ___ (you / argue) about now?','are you arguing'],
+  ['They ___ (save) money to buy a house.','are saving'],
+  ['She ___ (not / always / cook) for herself.','doesn’t always cook','does not always cook','doesn\'t always cook'],
+  ['He ___ (talk) to his cousin right now.','is talking','s talking']
+ ];
+ const vocabulary = [
+  ['I’m still looking ___ a permanent job.','for'],['We argue ___ the rules.','about'],
+  ['He can always rely ___ us.','on'],['I help ___ the housework.','with'],['I can talk ___ her.','to','with']
+ ];
+ const stella = [
+  ['We’re happy you decided to talk ___ us about it.','to','with'],['You can always rely ___ us.','on'],
+  ['We’d like to help ___ your rent this month.','with'],['Let’s not argue ___ it this time.','about'],
+  ['You’d like to look ___ somewhere cheaper to live.','for'],['How about coming back to live ___ us for a while?','with'],
+  ['We’d like you to think ___ it.','about'],['Give us a call and let’s talk ___ it.','about']
+ ];
+ const text = (group,items)=>items.map(([prompt,...answers],i)=>
+   lhText('22'+group+(i+1),esc(prompt),[...new Set(answers.flatMap(a=>[a.replaceAll('’',"'"),a]))])).join('');
+ return lhExerciseBlock('Grammar Hub 2.2 · Present simple & present continuous','Present simple rutinler, genel doğrular ve love, know, need gibi durum fiilleriyle kullanılır. Present continuous şu an süren veya geçici durumları ve değişen eğilimleri anlatır.',
+   '<p><i>I live with my parents.</i> · <i>I’m staying with my parents this week.</i><br><i>Does he cook?</i> → <i>Yes, he does.</i><br><i>Are they working?</i> → <i>No, they aren’t.</i></p>' +
+   '<h4>A · Hataları düzelt</h4>'+text('ga',fix)+'<h4>B · Fiili tamamla</h4>'+text('gb',forms)) +
+ lhExerciseBlock('Vocabulary · Verb + preposition','Bir kişiyle tartışmak için argue with, tartışılan konuyu söylemek için argue about kullan.',
+   '<h4>A · Doğru edatı yaz</h4>'+text('va',vocabulary)+'<h4>B · Stella’ya e-posta</h4>'+text('vb',stella)) +
+ lhExerciseBlock('Pronunciation · Başta gelen ünsüz çiftleri','Ares örneklerini dinle, sesleri birbirine ekleyerek söyle ve her gruba bir kelime daha bul.',
+   ['sleep','small','snow','speak','stay','swim'].map(w=>`<p>${spk(w)} <b>${w.slice(0,2)}</b>${w.slice(2)}</p>`).join('')) +
+ lhExerciseBlock('Work in pairs · Yaşam ve rutin','A sorar, B cevaplar. A cevaptan bir ayrıntı seçip takip sorusu sorar. Sonra rolleri değiştirin. Üçüncü kişi varsa iki cevabı özetlesin.',
+   lhPersonal('22p-pair-home','What are the advantages and disadvantages of living with your parents as an adult?') +
+   lhPersonal('22p-pair-stella','Should Stella move back home or find somewhere else to live? Why?') +
+   lhPersonal('22p-pair-routine','Are you saving money for anything this year? Do you like cooking for yourself? Do you know your neighbours?') +
+   lhPersonal('22p-pair-follow','Kendi sorunu, takip sorunu ve partnerinin cevabını yaz.') +
+   '<details><summary>Örnek sohbet</summary><p>A: Are you saving money for anything this year?<br>B: Yes, I’m saving for a flat.<br>A: Where are you looking for a flat?<br>B: Near my office. How about you?</p></details>');
+}
+
 function viewLanguageHubUnit2(){
  const phrase=(en,tr)=>`<div style="padding:10px 0;border-bottom:1px solid var(--paper-dark)"><button class="spk" onclick='lhSpeak(${JSON.stringify(en)})'>🔊</button><b>${en}</b><div class="hint" style="margin-left:30px">${tr}</div></div>`;
  const speakBtns=(lesson)=>`<div class="row" style="margin-top:14px"><button class="pill primary" onclick="lhFriendSpeak('${lesson}')">🗣️ Arkadaşlarla Pratik</button><button class="pill" onclick="lhTheresa('${lesson}')">👩‍🏫 Theresa ile Kontrol</button></div>`;
@@ -3319,12 +3407,12 @@ function viewLanguageHubUnit2(){
  <div class="cols"><div>${phrase('look for a job','iş aramak')}${phrase('argue about the rules','kurallar hakkında tartışmak')}${phrase('argue with someone','biriyle tartışmak')}${phrase('rely on someone','birine güvenmek / dayanmak')}</div><div>${phrase('help with the housework','ev işlerine yardım etmek')}${phrase('talk to someone','biriyle konuşmak')}${phrase('pay for something','bir şeyin parasını ödemek')}${phrase('think about something','bir şeyi düşünmek')}</div></div>
  ${lhSectionHead('lh-22-grammar','🧠','GRAMMAR — Present simple vs present continuous','Rutin ve genel gerçekler için present simple; şu an olanlar ve geçici/trend durumlar için present continuous.')}
  <div class="card" style="background:var(--paper-dark)">${phrase('I live with my parents.','Ailemle yaşarım / yaşıyorum — genel durum.')}${phrase("I'm sleeping in my old room.",'Eski odamda kalıyorum — geçici durum.')}${phrase('My mum cooks and does all my washing.','Annem yemek yapar ve çamaşırlarımı yıkar — rutin.')}${phrase('More young adults are moving back home.','Daha fazla genç yetişkin eve geri dönüyor — trend.')}</div>
- ${lhSectionHead('lh-22-reading','🎧','LISTENING LOGIC — The boomerang generation','Dinleme temasını interaktif anlam çalışmasına dönüştür: yetişkin çocukların tekrar aile evine dönmesi.')}
- <div class="card" style="background:var(--paper-dark)"><b>🎧 Situation</b><p class="hint" style="line-height:1.75">Richard has moved back to his parents’ home while he looks for a more permanent situation. Living together can save money and provide support, but adults and parents may disagree about housework, privacy and house rules. Different family members can feel very differently about the arrangement.</p><button class="pill" onclick='lhSpeak("Richard has moved back to his parents home while he looks for a more permanent situation. Living together can save money and provide support, but adults and parents may disagree about housework, privacy and house rules.")'>🔊 Dinle</button></div>
- ${lhExerciseBlock('🎧 LISTENING CHECK','Gist + detail.',lhMC('22r1','What does “boomerang generation” refer to here?',['Adults who return to live with their parents','People who travel every week','Parents who change jobs'],'Adults who return to live with their parents')+lhMC('22r2','What can be an advantage of moving home?',['Saving money and getting support','Having no responsibilities','Never needing a job'],'Saving money and getting support')+lhMC('22r3','What can cause problems?',['Housework and house rules','Learning languages','Public transport'],'Housework and house rules'))}
+ ${lhSectionHead('lh-22-reading','🎧','LISTENING — The Boomerang Generation','Language Hub B1 · 2.2 · Kitaptaki B ve C dinleme metinleri.')}
+ ${lhBoomerangListening()}
+ ${lhExerciseBlock('Glossary · The Boomerang Generation','Kelime ekle veya mevcut kaydı düzelt.',lhGlossary(5))}
  <div id="lh-22-ex" style="scroll-margin-top:90px"></div>${lhExerciseBlock('🧩 EXERCISES','Present simple/continuous + prepositions.',lhMC('22a','I ___ for a permanent job at the moment.',['am looking','look','looked'],'am looking')+lhMC('22b','My parents usually ___ dinner at home.',['cook','are cooking','cooked'],'cook')+lhMC('22c','You can rely ___ me.',['on','at','for'],'on')+lhMC('22d','We sometimes argue ___ the rules.',['about','to','for'],'about'))}
  <div id="lh-22-personal" style="scroll-margin-top:90px"></div>${lhExerciseBlock('✍️ PERSONAL — Your life & routine','Kendi hayatına bağla.',lhPersonal('22p1','Describe three things you usually do in your daily routine.')+lhPersonal('22p2','What are you doing differently these days?')+lhPersonal('22p3','What are the advantages and disadvantages of living with parents as an adult?'))}
- <div id="lh-22-speak" style="scroll-margin-top:90px"></div>${lhSectionHead('lh-22-speaking-title','🗣️','SPEAKING','Rutinlerin ve şu sıralar hayatında değişen şeyler hakkında konuş.')} ${speakBtns('2.2')}</div>`],
+ <div id="lh-22-speak" style="scroll-margin-top:90px"></div>${lhSectionHead('lh-22-speaking-title','🗣️','SPEAKING','Rutinlerin ve şu sıralar hayatında değişen şeyler hakkında konuş.')} ${speakBtns('2.2')}</div>${lhPractice22()}`],
    ["2.3 · Time flies", () => `<div class="card"><h3 class="section-title" style="margin-top:0">2.3 · Time flies</h3><p class="hint"><b>Hedef:</b> Talk about life events · <b>Grammar:</b> past simple regular & irregular verbs · <b>Vocabulary:</b> life events</p>${lhLessonNav('23')}
  ${lhSectionHead('lh-23-vocab','📚','VOCABULARY — Life events','Hayattaki önemli ilkleri ve dönüm noktalarını anlat.')}
  <div class="cols"><div>${phrase('start school','okula başlamak')}${phrase('learn to swim','yüzmeyi öğrenmek')}${phrase('learn to drive','araba kullanmayı öğrenmek')}${phrase('leave home','evden ayrılmak')}</div><div>${phrase('get married','evlenmek')}${phrase('have a baby','çocuk sahibi olmak')}${phrase('get your first job','ilk işini almak')}${phrase('retire','emekli olmak')}</div></div>
@@ -3763,7 +3851,7 @@ function lhRecordResult(id,ok,correct,chosen){
 const _lhCheckBase=lhCheck;
 lhCheck=function(id,chosen,correct){const fresh=!lhQuizState.answered[id];_lhCheckBase(id,chosen,correct);if(fresh)lhRecordResult(id,chosen===correct,correct,chosen);};
 const _lhCheckTextBase=lhCheckText;
-lhCheckText=function(id,answers){const inp=document.getElementById('lh-input-'+id);const fresh=!lhQuizState.answered[id];let ok=false,val='';if(inp){val=inp.value;const norm=x=>String(x).toLowerCase().replace(/[?.!,']/g,'').replace(/\s+/g,' ').trim();ok=answers.some(a=>norm(a)===norm(val));}_lhCheckTextBase(id,answers);if(fresh)lhRecordResult(id,ok,answers[0],val);};
+lhCheckText=function(id,answers){const inp=document.getElementById('lh-input-'+id);const fresh=!lhQuizState.answered[id];let ok=false,val='';if(inp){val=inp.value;const norm=x=>String(x).toLowerCase().replace(/[?.!,’']/g,'').replace(/\s+/g,' ').trim();ok=answers.some(a=>norm(a)===norm(val));}_lhCheckTextBase(id,answers);if(fresh)lhRecordResult(id,ok,answers[0],val);};
 
 function lhUnitStats(unit){
  const stats=lhStoreGet('ares_lh_stats',{})['u'+unit]||{right:0,total:0};
