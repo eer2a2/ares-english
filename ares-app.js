@@ -2794,9 +2794,13 @@ const LH_UNIT1_PRACTICE = [
   }
 ];
 
+function lhGlossaryKey(index){
+ return index === 4 ? '2.1' : '1.'+(index+1);
+}
+
 function lhGlossaryEntries(index){
  const saved = lhStoreGet('ares_lh_glossary_v1', {});
- return saved['1.'+(index+1)] || LH_UNIT1_PRACTICE[index].glossary;
+ return saved[lhGlossaryKey(index)] || (index === 4 ? LH_GLOSSARY_21 : LH_UNIT1_PRACTICE[index].glossary);
 }
 
 function lhGlossaryList(index){
@@ -2831,7 +2835,7 @@ function lhSaveGlossary(event, index){
  if(row < 0) entries.push(entry);
  else entries[row] = entry;
  const saved = lhStoreGet('ares_lh_glossary_v1', {});
- saved['1.'+(index+1)] = entries;
+ saved[lhGlossaryKey(index)] = entries;
  try { localStorage.setItem('ares_lh_glossary_v1', JSON.stringify(saved)); }
  catch { status.textContent = 'Kayıt yapılamadı. Tekrar dene.'; return; }
  document.getElementById('lh-glossary-list-'+index).innerHTML = lhGlossaryList(index);
@@ -3208,6 +3212,93 @@ function viewLanguageHubUnit1(){
 }
 
 
+const LH_GLOSSARY_21 = [
+ ['architect','mimar','The architect designed a garden for the roof.'],
+ ['environmentally friendly','çevre dostu','The building is environmentally friendly.'],
+ ['vertical','dikey','The plants grow on a vertical wall.'],
+ ['high-rise','çok katlı bina','We live in a high-rise near the station.'],
+ ['crowded','kalabalık','The city centre is quite crowded on Saturdays.']
+];
+
+function lhForestReading(){
+ const scan = [
+ ['Bosco Verticale means vertical ___.',['forest']],
+ ['The buildings are in ___, Italy.',['Milan','Milano']],
+ ['Nearly ___ trees grow on the balconies.',['900','nine hundred']],
+ ['The plants reduce noise from ___ and people in the street.',['traffic','the traffic']],
+ ['The buildings are near the city’s services and ___.',['transport']],
+ ['The architects want to build another forest city in China and ___.',['the Netherlands','Netherlands']]
+ ];
+ const detail = [
+ ['Which four problems does the writer mention?','Noise, pollution, summer heat and crowded green spaces.'],
+ ['How do the buildings help with those problems?','Trees cool the flats in summer, help keep the air clean and reduce street noise. The balconies add green space.'],
+ ['What is the main drawback?','They are extremely expensive to build.'],
+ ['Does the writer think forest cities are a good idea?','Yes. The writer thinks cleaner, cooler and quieter cities will be worth the cost.']
+ ];
+ return `<article class="card" style="line-height:1.75">
+ <p>Where in the world can you live on the top floor of a 111-metre high-rise building, near the centre of a lively city, but still have breakfast under a tree on your balcony? Sounds almost impossible! Well, not if you live in the Bosco Verticale (vertical forest) buildings in Milan, Italy. Architect Stefano Boeri has created a completely new approach to designing buildings.</p>
+ <p>Like many big cities, Milan is noisy and polluted. It’s hot in the summer and in the city centre the green spaces are often quite crowded. But Boeri’s team have found a very green answer to these problems.</p>
+ <p>Nearly 900 trees grow high above Milan on the balconies of modern buildings. The trees keep the apartments cool in summer and warm in winter. They also produce oxygen, which keeps the air clean. The buildings are so quiet because the trees and plants stop the noise from the people and traffic in the streets below.</p>
+ <p>Bosco Verticale is really convenient for the city’s shops, services and transport, it’s attractive, and it’s environmentally friendly. So, will there be more buildings like this in the future? Well, possibly. The architects want to build a new forest city in China and the Netherlands, but there is one more problem to solve. Buildings like this are extremely expensive. At 65 million euros, Bosco Verticale cost 5 per cent more to build than a normal high-rise building. But if we want to live in cool, quiet cities with clean air, it will be worth the cost.</p></article>` +
+ lhExerciseBlock('Reading B · Scan','Metinden doğru kelimeyi veya sayıyı bul.',
+   scan.map(([prompt, answers], i)=>lhText('21scan'+(i+1),esc(prompt),answers)).join('')) +
+ lhExerciseBlock('Reading C · Detail','Kendi cevabını kaydet, ardından örneği aç.',
+   detail.map(([question,answer],i)=>lhPersonal('21p-detail-'+i,question)+
+     `<details><summary>Örnek cevap</summary><p>${esc(answer)}</p></details>`).join(''));
+}
+
+function lhPractice21(){
+ const order = [
+ ['have / they / completely / new / a / designed / building / apartment','They have designed a completely new apartment building'],
+ ['this / extremely / area / expensive / an / is','This is an extremely expensive area'],
+ ['is / park / on / Sundays / crowded / so / the','The park is so crowded on Sundays','On Sundays, the park is so crowded'],
+ ['cars / move / slowly / city / the / in / very','Cars move very slowly in the city','In the city, cars move very slowly'],
+ ['polluted / is / in / it / places / some / quite','It is quite polluted in some places','In some places, it is quite polluted'],
+ ['ready / am / move / to / I / almost','I am almost ready to move'],
+ ['is / really / there / beautiful / park / a / here / near','There is a really beautiful park near here','Near here, there is a really beautiful park']
+ ];
+ const choices = [
+ ['I’m ___ happy to be living in London!','so','almost'],
+ ['Cleaning up the city is ___ expensive.','extremely','almost'],
+ ['Our new apartment is ___ nice. I love it!','really','almost'],
+ ['Architects used a ___ new design.','completely','so'],
+ ['In the summer, it gets ___ hot here.','extremely','completely'],
+ ['It is ___ impossible to get to know everyone.','almost','very'],
+ ['My last house was ___ big, but I didn’t have enough space.','quite','quite a']
+ ];
+ const opposites = [
+ ['clean','dirty'],['loud','quiet'],['inconvenient','convenient'],
+ ['old-fashioned','modern'],['ugly','attractive','beautiful'],['dirty','clean'],['peaceful','noisy','loud']
+ ];
+ const linkers = [
+ ['The air is dirty ___ there are too many cars.','because'],
+ ['There should be more green spaces for children ___ teenagers.','and'],
+ ['We shouldn’t drop litter ___ play loud music.','or'],
+ ['We like the play area, ___ it’s too small.','but'],
+ ['More children are living here, ___ the neighbourhood should be safer.','so']
+ ];
+ const text = (group,rows)=>rows.map(([prompt,...answers],i)=>lhText('21'+group+(i+1),esc(prompt),answers)).join('');
+ return lhExerciseBlock('Grammar Hub 2.1 · Adverbs of degree','almost = neredeyse · completely = tamamen · extremely = son derece · very / so / really = çok · quite = oldukça',
+   '<p>Zarf genellikle sıfattan önce gelir: <i>extremely expensive</i>. İsimle birlikte <i>quite a noisy area</i>, <i>a really noisy area</i> veya <i>an extremely noisy area</i> kullan.</p>' +
+   '<h4>A · Kelimeleri sırala</h4>' + text('ga',order) + '<h4>B · Doğru seçeneği seç</h4>' +
+   choices.map(([prompt,answer,other],i)=>lhMC('21gb'+(i+1),esc(prompt),i%2?[other,answer]:[answer,other],answer)).join('')) +
+ lhExerciseBlock('Vocabulary · Describing places','Zıt sıfatı yaz. Sonra bunlarla mahalleni anlatan beş cümle kur.',
+   text('vo',opposites) + lhPersonal('21p-five','Mahallem hakkında beş cümle')) +
+ lhExerciseBlock('Pronunciation · İki heceli sıfatlarda vurgu','Dinle, ilk heceyi vurgula ve tekrar et.',
+   [['DIR','ty'],['QUI','et'],['MOD','ern'],['PEACE','ful'],['NOI','sy']].map(([first,last])=>
+     `<p>${spk((first+last).toLowerCase())}<b>${first}</b>-${last}</p>`).join('')) +
+ lhExerciseBlock('Writing · Şikâyet e-postası (s. 159)','Emma’nın şikâyeti, apartmanının dışındaki hızlı trafik ve güvenli geçiş olmamasıyla ilgili. Oyun alanına ulaşmak için iki yaya geçidi öneriyor.',
+   '<p><b>Bağlaçlar</b> · and (ekleme), but (karşıtlık), or (alternatif), so (sonuç), because (neden)</p>' +
+   text('wl',linkers) +
+   lhPersonal('21p-complaint','Mahallendeki bir sorunu anlatan kibar bir e-posta yaz. Sorunun etkisini açıkla ve en az iki çözüm öner.') +
+   '<details><summary>Ares örneği</summary><p>Dear Sir or Madam,</p><p>I’m writing to complain about the lack of safe crossings near our park. Many children use the park, but the road is very busy. Please add a crossing near the entrance and consider lowering the speed limit.</p><p>I look forward to hearing from you.<br>Yours faithfully,<br>Deniz</p></details>') +
+ lhExerciseBlock('Work in pairs · Mahalleni anlat','A mahallesini anlatır. B konum, görünüm veya parklarla ilgili bir takip sorusu sorar. Sonra rolleri değiştirin. Üç kişiyseniz C, iki anlatımı karşılaştırsın.',
+   lhPersonal('21p-pair-open','What is your neighbourhood like?') +
+   lhPersonal('21p-pair-follow','Takip sorun ve partnerinin cevabı') +
+   lhPersonal('21p-pair-swap','Rol değişimi veya üçüncü kişinin karşılaştırması') +
+   '<details><summary>Örnek sohbet</summary><p>A: My neighbourhood is quite peaceful, but it’s a bit far from the centre.<br>B: Is it convenient for public transport?<br>A: Yes, there’s a bus stop near my flat.</p></details>');
+}
+
 function viewLanguageHubUnit2(){
  const phrase=(en,tr)=>`<div style="padding:10px 0;border-bottom:1px solid var(--paper-dark)"><button class="spk" onclick='lhSpeak(${JSON.stringify(en)})'>🔊</button><b>${en}</b><div class="hint" style="margin-left:30px">${tr}</div></div>`;
  const speakBtns=(lesson)=>`<div class="row" style="margin-top:14px"><button class="pill primary" onclick="lhFriendSpeak('${lesson}')">🗣️ Arkadaşlarla Pratik</button><button class="pill" onclick="lhTheresa('${lesson}')">👩‍🏫 Theresa ile Kontrol</button></div>`;
@@ -3217,12 +3308,12 @@ function viewLanguageHubUnit2(){
  <div class="cols"><div>${phrase('clean','temiz')}${phrase('quiet','sessiz')}${phrase('convenient','elverişli / ulaşımı kolay')}${phrase('modern','modern')}${phrase('attractive','çekici / hoş')}</div><div>${phrase('dirty','kirli')}${phrase('noisy','gürültülü')}${phrase('inconvenient','elverişsiz')}${phrase('old-fashioned','eski moda')}${phrase('ugly','çirkin')}</div></div>
  ${lhSectionHead('lh-21-grammar','🧠','GRAMMAR — Adverbs of degree','Sıfatın gücünü artırır veya azaltır: really / extremely / totally / quite / a bit / almost.')}
  <div class="card" style="background:var(--paper-dark)">${phrase('It is really interesting.','Gerçekten ilginç.')}${phrase('The building is extremely expensive.','Bina son derece pahalı.')}${phrase('It is quite clean.','Oldukça temiz.')}${phrase('It is a bit noisy.','Biraz gürültülü.')}${phrase('It is almost impossible.','Neredeyse imkânsız.')}</div>
- ${lhSectionHead('lh-21-reading','📖','READING — A greener way to live','Kitaptaki Milano’daki dikey orman fikrinden hareketle ana fikir ve ayrıntı okuması.')}
- <div class="card" style="background:var(--paper-dark)"><b>🌳 Green high-rise living</b><p class="hint" style="line-height:1.75">Imagine a high-rise home in a busy city where trees and plants grow on balconies. This kind of design can make apartments cooler in summer, reduce street noise and help improve the air. It can also put residents close to shops and public transport. The challenge is cost: unusual green buildings can be much more expensive than ordinary ones.</p></div>
- ${lhExerciseBlock('📖 READING CHECK','Ana fikir ve ayrıntıları kontrol et.',lhMC('21r1','What is one benefit of plants on high-rise buildings?',['They can reduce noise','They make traffic faster','They remove all costs'],'They can reduce noise')+lhMC('21r2','What is the main disadvantage mentioned?',['They are expensive','They are too small','They have no balconies'],'They are expensive')+lhMC('21r3','Which idea best summarizes the text?',['Green buildings can improve city living but cost more','All cities should remove high-rises','Living outside cities is always better'],'Green buildings can improve city living but cost more'))}
+ ${lhSectionHead('lh-21-reading','📖','READING — The Forest in the Sky','Language Hub B1 · 2.1 · Kitaptaki okuma metni, s. 12.')}
+ ${lhForestReading()}
+ ${lhExerciseBlock('Glossary · The Forest in the Sky','Kelime ekleyebilir veya mevcut kaydı düzeltebilirsin.',lhGlossary(4))}
  <div id="lh-21-ex" style="scroll-margin-top:90px"></div>${lhExerciseBlock('🧩 EXERCISES','Adverbs of degree + describing places.',lhMC('21a','The area is ___ peaceful. I hardly hear traffic.',['really','a bit','almost'],'really')+lhMC('21b','My flat is far from transport. It is quite ___.',['inconvenient','modern','clean'],'inconvenient')+lhMC('21c','Choose the natural phrase.',['extremely expensive','extremely a bit','very impossible'],'extremely expensive'))}
  <div id="lh-21-personal" style="scroll-margin-top:90px"></div>${lhExerciseBlock('✍️ PERSONAL — Your neighbourhood','Kendi yaşadığın yeri anlat.',lhPersonal('21p1','Describe your neighbourhood with at least five adjectives.')+lhPersonal('21p2','Is your area convenient for transport, shopping and daily life? Why?')+lhPersonal('21p3','Would you like to live in a green high-rise building? Why / why not?'))}
- <div id="lh-21-speak" style="scroll-margin-top:90px"></div>${lhSectionHead('lh-21-speaking-title','🗣️','SPEAKING','Mahalleni bir arkadaşına anlat ve sorulara cevap ver.')} ${speakBtns('2.1')}</div>`],
+ <div id="lh-21-speak" style="scroll-margin-top:90px"></div>${lhSectionHead('lh-21-speaking-title','🗣️','SPEAKING','Mahalleni bir arkadaşına anlat ve sorulara cevap ver.')} ${speakBtns('2.1')}</div>${lhPractice21()}`],
    ["2.2 · The boomerang generation", () => `<div class="card"><h3 class="section-title" style="margin-top:0">2.2 · The boomerang generation</h3><p class="hint"><b>Hedef:</b> Talk about your life and routine · <b>Grammar:</b> present simple vs present continuous · <b>Vocabulary:</b> verb + preposition</p>${lhLessonNav('22')}
  ${lhSectionHead('lh-22-vocab','📚','VOCABULARY — Verb + preposition','Fiille birlikte kullanılan doğru edatı öğren.')}
  <div class="cols"><div>${phrase('look for a job','iş aramak')}${phrase('argue about the rules','kurallar hakkında tartışmak')}${phrase('argue with someone','biriyle tartışmak')}${phrase('rely on someone','birine güvenmek / dayanmak')}</div><div>${phrase('help with the housework','ev işlerine yardım etmek')}${phrase('talk to someone','biriyle konuşmak')}${phrase('pay for something','bir şeyin parasını ödemek')}${phrase('think about something','bir şeyi düşünmek')}</div></div>
